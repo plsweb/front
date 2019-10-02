@@ -1,0 +1,72 @@
+<moldura titulo="Log">
+    <moldura>
+        <label>Filtros Log:</label>
+        <div class="row">
+            <div class="col-sm-4 col-md-4">
+                <entrada
+                    nome="Campo"
+                    (getValor)="objParamsLog['campo'] = $event['valor']" 
+                    semTitulo="true"
+                ></entrada>
+            </div>
+            <div class="col-sm-4 col-md-4">
+                <entrada
+                    nome="Tabela"
+                    (getValor)="objParamsLog['tabela'] = $event['valor']" 
+                    semTitulo="true"
+                ></entrada>
+            </div>
+            <div class="col-sm-4 col-md-4">
+                <entrada
+                    nome="Chave"
+                    (getValor)="objParamsLog['chave'] = $event['valor']" 
+                    semTitulo="true"
+                ></entrada>
+            </div>
+        </div>
+        <botao icone="search" tamanho="pequeno" (click)="buscaLogPaginado({ paginaAtual : 1 })"></botao>
+    </moldura>
+
+    <br clear="all">
+    <div *ngIf="logs && logs.length > 0">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>CODIGO</th>
+                    <th>TABELA</th>
+                    <th>CHAVE</th>
+                    <th>CAMPO</th>
+                    <th>ESQUEMA</th>
+                    <th>ANTERIOR</th>
+                    <th>ATUAL</th>
+                    <th>AÇÃO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let log of logs" (click)="abrir(log)" class="link">
+                    <td>{{log.id}}</td>
+                    <td>{{log.tabela}}</td>
+                    <td>{{log.chave}}</td>
+                    <td>{{log.campo}}</td>
+                    <td>{{log.esquema}}</td>
+                    <td>{{log.anterior}}</td>
+                    <td>{{log.atual}}</td>
+                    <td>{{log.acao}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- [params]="[ 'id', 'tabela',  'chave', 'campo', 'esquema', 'anterior', 'atual', 'acao' ]" -->
+
+        <br class="all">
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscaLogPaginado($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                paginaAtual="{{paginaAtual}}"
+                itensPorPagina="{{itensPorPagina}}"
+            ></paginacao>
+        </div>
+    </div>
+</moldura>

@@ -1,0 +1,33 @@
+<ng-container *ngIf="!carregando; else carregandoAcoes">
+
+    <ng-container *ngIf="total">
+
+        <div class="row informacoesCoacher" >
+            <div class="col-md-12">
+                Ações: <b title="{{vencidas}} Ações vencidas">{{vencidas}}</b> / <b title="{{total}} Ações no total">{{total}}</b>
+            </div>
+        </div>
+
+        <progressBar 
+            *ngIf="total"
+            labelTitle="de ações vencidas"
+            [maior]="total"
+            [menor]="vencidas"
+            [classe]="{
+                'bg-danger' :  (((vencidas || 0) / (total) ) * 100) > 66,
+                'bg-warning':  ((((vencidas || 0) / (total) ) * 100) <= 66) && (((vencidas || 0) / (total)) * 100 > 33),
+                'bg-success':  (((vencidas || 0) / (total) ) * 100) <= 33
+            }"
+        ></progressBar>
+
+    </ng-container>
+    
+</ng-container>
+
+<ng-template #carregandoAcoes>
+    <icone 
+        tamanho="grande" 
+        nome="cached" 
+        [loading]="true" 
+    ></icone> Carregando ações...
+</ng-template>

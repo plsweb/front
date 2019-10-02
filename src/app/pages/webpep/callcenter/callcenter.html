@@ -1,0 +1,487 @@
+        <br>
+
+        <div [ngInit]="startRefreshList.bind(this)">
+            <div 
+                *ngIf="atendimentoSelecionado && atendimentoSelecionado.iniciado" 
+                class="card-header clearfix"
+            >
+            <span *ngIf="atendimentoSelecionado.paciente"> Em Atendimento: {{ atendimentoSelecionado.paciente ? atendimentoSelecionado.paciente.nome : '' }} </span>
+            <span *ngIf="!atendimentoSelecionado.paciente && atendimentoSelecionado.atendimento"> Em Atendimento: {{ atendimentoSelecionado.atendimento.nome }} </span>
+            </div>
+            <div class="card-body">
+                <ng-template [ngTemplateOutlet]="tabelaListaCallCenter"></ng-template>
+            </div>
+        </div>
+
+        <!-- <div *ngIf="atual === 'tipocontato'">
+            <moldura titulo="Adicionar à Lista" podeOcultar="true" oculto="true">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <entrada 
+                            nome="Descrição"
+                            [valor]="novoTipoContato"
+                            (getValor)="( $event['valor'] ) ? novoTipoContato = $event.valor : novoTipoContato = undefined"
+                        ></entrada>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <botao nome="Adicionar" (click)="adicionarTipoContato()"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <moldura
+                titulo="&nbsp;"
+                [pesquisar]="pesquisarTiposContato.bind(this)"
+            >
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th [style.width.px]="100">ID</th>
+                            <th>DESCRIÇÃO</th>
+                            <th class="coluna_acoes"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tipo of tiposContato; let pos = index" class="link" [attr.data_edit]="'false'" [attr.data-index]="pos">
+                            <td>{{tipo.id}}</td>
+                            <td class="edit">
+                                <p>{{tipo.descricao}}</p>
+                                <div id="edit-desc" class="col-sm-12 col-md-12 hide" >
+                                    <div class="form-group">
+                                        <input
+                                            type="text" 
+                                            name="descricao" 
+                                            class="form-control" 
+                                            placeholder="Informe a Descrição"
+                                            [(ngModel)]="tipo.descricao"
+                                            (change)="editarTipo(tipo.descricao, tipo.id, pos, true)"
+                                        />
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="coluna_acoes">
+                                <botao icone="edit" (click)="editarTipo(tipo.descricao, tipo.id, pos, false)"></botao>
+                                <botao icone="delete" (click)="removeTipoContato(tipo.id)"></botao>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br class="all">
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscaTiposContato($event)"
+                        qtdItensTotal="{{qtdItensTotalTpC}}"
+                        paginaAtual="{{paginaAtualTpC}}"
+                        itensPorPagina="{{itensPorPaginaTpC}}"
+                    ></paginacao>
+                </div>
+            </moldura>
+        </div> -->
+
+
+
+<ng-template #tabelaListaCallCenter let-c="close" let-d="dismiss">
+    <tabela
+        [titulo]="'Lista de atividades Call Center'"
+        [colunas]="colunasTabela"
+        [linhas]="lista"
+        [ordenacao]="ordenacao"
+        [atualizaDados]="atualizaDados.bind(this)"
+        [registros]="qtdItensTotal"
+        [elementoAcoesMoldura]="elementoNovaLigacao"
+        [qtdItensTotal]="qtdItensTotal"
+        [scrollPagination]="false"
+    >
+        
+        <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+            <botao 
+                nome="Limpar" 
+                classe="btn-danger"
+                debounceClick 
+                [debounceTime]="200"
+                (debounceClick)="limparFiltros()" 
+            ></botao>
+        </div>
+
+        <form class="filtro">
+            <div class="row">                
+                <!-- <div class="col">
+                    <entrada 
+                        nome="Inclusão Inicio" 
+                        [incluirMascara]="true"
+                        tipo="data"
+                        [valor]="(filtro && filtro['inclusaoInicio']) ? filtro['inclusaoInicio'].valor : ''"
+                        (getValor)="getValor($event, 'inclusaoInicio')" 
+                    ></entrada>
+                </div> -->
+
+                <div class="col">
+                    <label>Inclusão Inicio</label>
+                    <datepicker
+                        [inputForm]='true'
+                        [semData]='true'
+                        [fnOnChange]="getValor.bind(this, 'inclusaoInicio')"
+                        (setInstancia)="getDataInclusaoInicioInstancia($event)"
+                        [(datas)]='inclusaoInicio'
+                    > </datepicker>
+                </div>
+    
+                <!-- <div class="col">
+                    <entrada 
+                        nome="Inclusão Final" 
+                        [incluirMascara]="true"
+                        tipo="data"
+                        [valor]="(filtro && filtro['inclusaoFim']) ? filtro['inclusaoFim'].valor : ''"
+                        (getValor)="getValor($event, 'inclusaoFim')" 
+                    ></entrada>
+                </div> -->
+
+                <div class="col">
+                    <label>Inclusão Final</label>
+                    <datepicker
+                        [inputForm]='true'
+                        [semData]='true'
+                        [fnOnChange]="getValor.bind(this, 'inclusaoFim')"
+                        (setInstancia)="getDataInclusaoFimInstancia($event)"
+                        [(datas)]='inclusaoFim'
+                    > </datepicker>
+                </div>
+    
+            </div>
+
+            <div class="row">                
+                <div class="col">
+                    <entrada 
+                        nome="Agendado Inicio" 
+                        [incluirMascara]="true"
+                        tipo="data"
+                        [valor]="(filtro && filtro['agendadoInicio']) ? filtro['agendadoInicio'].valor : ''"
+                        (getValor)="getValor($event, 'agendadoInicio')" 
+                    ></entrada>
+                </div>
+    
+                <div class="col">
+                    <entrada 
+                        nome="Agendado Final" 
+                        [incluirMascara]="true"
+                        tipo="data"
+                        [valor]="(filtro && filtro['agendadoFim']) ? filtro['agendadoFim'].valor : ''"
+                        (getValor)="getValor($event, 'agendadoFim')" 
+                    ></entrada>
+                </div>
+    
+            </div>
+
+            <div class="row">
+
+                <div class="col">
+                    <entrada 
+                        nome="Tipo Contato" 
+                        tipo="multiselect"
+                        [noLabels]="false"
+                        posicaoIconeObjeto=""
+                        [objMultiselect]="['id', 'descricao']"
+                        [itemList]="tiposContato"
+                        [selectedItems]="filtro['tipo.id'] ? filtro['tipo.id']['valor'] : []"
+                        (getValor)="getValor($event, 'tipo.id')"
+                    ></entrada>
+                </div>
+
+                <div class="col">
+                    <entrada 
+                        nome="Status Atividade" 
+                        tipo="multiselect"
+                        [noLabels]="false"
+                        posicaoIconeObjeto=""
+                        [objMultiselect]="['id', 'descricao']"
+                        [itemList]="statusAtividades"
+                        [selectedItems]="filtro['status'] ? filtro['status']['valor'] : ['PENDENTE']"
+                        (getValor)="getValor($event, 'status')"
+                    ></entrada>
+                </div>
+            </div>
+        </form>
+
+    </tabela>
+</ng-template>
+
+<!--    
+##################################################################################
+                        Frm Modal Atendimento
+##################################################################################     
+-->
+<ng-template #bodyModalAtendimento let-c="close" let-d="dismiss">
+    <botao 
+        *ngIf="!atendimentoSelecionado || !atendimentoSelecionado.iniciado" 
+        nome="Iniciar o atendimento" 
+        classe="btn-primary" 
+        (click)="iniciaAtividade()"
+    ></botao>
+    <br>
+
+    <div *ngIf="listaModal && listaModal.length" baCardBlur class="animated fadeIn card" zoom-in>
+        <div class="card-header clearfix">
+            <div class="cabecalho">
+                <div class="dados">
+                    <span *ngIf="atendimentoSelecionado && atendimentoSelecionado.paciente">
+                        PACIENTE:   {{ atendimentoSelecionado.paciente.nome       }} <br>
+                        CPF:        {{ atendimentoSelecionado.paciente.cpf        }} <br>
+                        IDADE:      {{ atendimentoSelecionado.paciente.idade      }} <br>
+                        NASCIMENTO: {{ atendimentoSelecionado.paciente.nascimento }} <br>
+                    </span>
+                    <span *ngIf="atendimentoSelecionado && !atendimentoSelecionado.paciente">
+                        PACIENTE:   {{ atendimentoSelecionado.atendimento.nome       }} <br>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+
+            <moldura 
+                *ngFor="let callAtividade of listaModal" 
+                podeOcultar="true" 
+                [titulo]="getStatusAtividade(callAtividade.status, callAtividade.tipo.descricao)" 
+                [oculto]="callAtividade.status == 'CONCLUIDO'" 
+            >
+                <moldura 
+                    titulo="Contato realizado em {{contato.dataContato}}" 
+                    *ngFor="let contato of callAtividade.contatos" 
+                    podeOcultar="true" 
+                    [oculto]="true" >
+                    <div class="row">
+                        <div *ngIf="callAtividade.status == 'FINALIZADO'" class="col-sm-3 col-md-3 col-lg-3">
+                            <label>Horário</label>
+                            <input class="form-control" type="text" name="horario" [(ngModel)]="callAtividade.horario" [disabled]="true">
+                        </div>
+
+                        <div class="col">
+                            <input class="form-control" type="text" name="nome" [(ngModel)]="usuario.nome" [disabled]="true">
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <textarea
+                                name="Observacao" 
+                                class="form-control" 
+                                placeholder="Observação"
+                                [(ngModel)]="contato.observacao"
+                                [disabled]="true"
+                            ></textarea>
+                        </div>
+                    </div>
+                </moldura>
+
+                <div>
+                    
+                    <div class="row">
+                        <div class="col">
+                            <input
+                                name="Motivo do Contato" 
+                                class="form-control" 
+                                placeholder="Motivo do Contato"
+                                [(ngModel)]="callAtividade.observacao"
+                                [disabled]="true"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col">
+                            <textarea
+                                #novaObservacaoTextArea
+                                name="Observação do Atendente" 
+                                class="form-control" 
+                                placeholder="Observação do Atendente"
+                                [disabled]="!callAtividade || callAtividade.status != 'EMATENDIMENTO'"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Reagendar atividade para:</label>
+                                <input 
+                                    #inputDataAgendamento 
+                                    type="datetime-local" 
+                                    name="inicio" 
+                                    class="form-control" 
+                                    [(ngModel)]="dataAgendamento"
+                                    [disabled]="!callAtividade || callAtividade.status != 'EMATENDIMENTO'"
+                                >
+                            </div>
+                        </div>
+
+                        <div *ngIf="validaTipoContato(callAtividade, 'avaliar')" class="col">
+                            <label>Confirmou o atendimento?</label>
+                            <input-checkbox
+                                classe="check_principal"
+                                [estado]="(contato) ? contato.confirmado : false"
+                                (trocaEstado)="callAtividade['confirmado'] = $event"
+                            ></input-checkbox>
+                        </div>
+
+                        <div *ngIf="validaTipoContato(callAtividade, 'cancelar')" class="col">
+                            <label>Cancelar o atendimento?</label>
+                            <input-checkbox
+                                classe="check_principal"
+                                [estado]="(contato) ? contato.cancelado : false"
+                                (trocaEstado)="callAtividade['cancelado'] = $event"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <button 
+                                (click)="trocaStatus(status)" 
+                                *ngFor="let status of contatoStatus" 
+                                type="button" 
+                                class="btn"
+                                [ngClass]="{'btn-light': !status.checked, 'btn-primary': status.checked}"
+                            >
+                                {{status.nome}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row" *ngIf="callAtividade.status != 'FINALIZADO'">
+                    <div class="col-md-3">
+                        <botao *ngIf="callAtividade && callAtividade.status == 'EMATENDIMENTO'" nome="Finalizar atividade" classe="btn-primary" (click)="finalizarContato(novaObservacaoTextArea, inputDataAgendamento, callAtividade)"></botao>
+                    </div>
+                    <div class="col-md-3">
+                        <botao *ngIf="callAtividade && callAtividade.status == 'EMATENDIMENTO'" nome="Pausar atividade" classe="btn-warning" (click)="finalizarContato(novaObservacaoTextArea, inputDataAgendamento, callAtividade, 'PAUSADO')"></botao>
+                    </div>
+                </div>
+            </moldura>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesModalAtendimento let-c="close" let-d="dismiss">
+    <!--botao nome="Finalizar Contato" classe="btn-primary" (click)="adicionarAoGrupo()"></botao>
+    <botao nome="Pausar Contato" classe="btn-warning" (click)="adicionarAoGrupo()"></botao-->
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Frm Nova Ligação
+##################################################################################     
+-->
+
+<ng-template #bodyModalNovaLigacao let-c="close" let-d="dismiss">
+
+    
+        <div class="row">
+            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                <autocomplete
+                    [titulo]="'Paciente'"
+                    [placeholder]="'Digite para buscar Paciente'"
+                    [minimo]="3"
+                    [valor]="objPaciente"
+                    [camposFiltro]="['nome']"
+                    [valorSelecionado]="pacienteSelecionado"
+                    [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                    (fnOnSelected)="getPaciente($event)"
+                ></autocomplete>
+            </div>
+
+            <div class="col">
+                <entrada 
+                    nome="Protocolo"
+                    [valor]="protocolo"
+                    (getValor)="$event && $event.valor ? objParamAddNovaLigacao['protocolo'] = $event.valor : null"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row" *ngIf="contatos">
+            <div class="col">
+
+                <moldura titulo="Informações de Contato" oculto="true">
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let contato of contatos">
+                                <td> {{contato.tipo}} </td>
+                                <td> {{contato.descricao}} </td>
+                                <td> {{contato.titulo}} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </moldura>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Prioridade" 
+                    tipo="seleciona" 
+                    objId="codigo"
+                    [opcoes]="atendimentoEsperaPrioridades" 
+                    (getValor)="$event && $event.valor ? objParamAddNovaLigacao['prioridade'] = $event.valor : null"
+                ></entrada>
+            </div>
+
+            <div class="col">
+                <entrada 
+                    nome="Assunto" 
+                    tipo="seleciona" 
+                    objId="id"
+                    [opcoes]="tiposContato" 
+                    (getValor)="$event && $event.valor ? objParamAddNovaLigacao['tipo'] = $event.valor : null"
+                ></entrada>
+            </div>
+
+            <div class="col">
+                <entrada 
+                    nome="Status" 
+                    tipo="seleciona" 
+                    objId="codigo"
+                    [opcoes]="contatoStatus" 
+                    (getValor)="$event && $event.valor ? objParamAddNovaLigacao['status'] = $event.valor : null"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Observação do Contato" 
+                    tipo="area" 
+                    (getValor)="$event && $event.valor ? objParamAddNovaLigacao['observacao'] = $event.valor : null"
+                ></entrada>
+            </div>
+        </div>
+    
+
+</ng-template>
+
+<ng-template #elementoNovaLigacao>
+    <div class="row" style="float: left;margin-right: 20px;">
+        <div class="col">
+            <button class="btn btn-primary" (click)="abreModalNovaLigacao();" >Nova Ligação</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesModalNovaLigacao let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="salvarLigacao()"></botao>
+</ng-template>

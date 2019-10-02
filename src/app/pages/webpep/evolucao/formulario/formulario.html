@@ -1,0 +1,365 @@
+<div *ngIf="!componentePronto">
+    <icone tamanho="grande" nome="cached" [loading]="true" ></icone>
+</div>
+
+<ng-container *ngIf="!tipoDocumento; else tipoDocumentoTmpl">
+    <div class="row" *ngIf="evolucao && componentePronto">
+        <ng-container *ngIf="!evolucao.status || evolucao.status == 'ATIVO'">
+            <div 
+                class="{{ (formularioFilho || this.evolucao.formulario.formularioGrupo.length === 1) ? 'col-sm-12' : 'col-sm-6' }} {{ eDependente ? 'formulario_evolucao'+id : 'formulario_evolucao' }} " 
+                *ngFor="let grupo of evolucao.formulario.formularioGrupo; let pos = index"
+            >
+                <div *ngFor="let ordemgrupo of ordems[grupo.id]; let pos = index;">
+                    <moldura somenteTitulo="true" [titulo]="grupo.descricao" *ngIf="grupo.repetir">
+                        <ng-template [ngTemplateOutlet]="tmplGrupo" [ngTemplateOutletContext]="{ordem: ordemgrupo}"></ng-template>
+                        <botao nome="Repetir" (click)="repeteGrupo(grupo)" *ngIf="pos == (ordems[grupo.id].length - 1)"></botao>
+                    </moldura>
+                </div>
+
+                <moldura somenteTitulo="true" [titulo]="grupo.descricao" *ngIf="!grupo.repetir">
+                    <ng-template [ngTemplateOutlet]="tmplGrupo" [ngTemplateOutletContext]="{ordem: (pos+1) + '.' + 1}"></ng-template>
+                </moldura>
+
+                <ng-template #tmplGrupo let-c="close" let-d="dismiss" let-ordem="ordem">
+                    <div 
+                        *ngFor="let grupoPergunta of grupo.grupoPergunta"
+                    >
+                        <!-- DEPENDENCIA DA PERGUNTA 'SEXO' -->
+                        <ng-container *ngIf="grupoPergunta?.pergunta?.id != 158 && perguntaCabecalho(grupoPergunta)">
+                            <div class="campos_form">
+
+                                <entrada 
+                                    #inputsForm
+                                    *ngIf="mostraPrincipal(grupo, grupoPergunta.pergunta)"
+                                    [id]="replace(grupoPergunta.pergunta.descricao)"
+                                    identificador="{{id}}{{grupoPergunta.pergunta.id}}{{ordem}}"
+                                    [tipo]="grupoPergunta.pergunta.tipo"
+                                    [opcoes]="grupoPergunta.pergunta.opcoes"
+                                    [nome]="grupoPergunta.pergunta.descricao"
+                                    [mascara]="grupoPergunta.pergunta.mascara"
+                                    [tabela]="grupoPergunta.pergunta.tabela"
+                                    [grupoPergunta]="grupoPergunta"
+                                    [ordemPergunta]="ordem"
+                                    [tabelaCampos]="grupoPergunta.pergunta.tabelaCampos"
+                                    [opcoesBoolean]="false"
+                                    [fnOnChange]="salvaEvolucao.bind(this, grupoPergunta, ordem)"
+                                    [fnRemoveCheckbox]="removePerguntaOpcao.bind(this)"
+                                    [tamanhoMaximo]="4000"
+                                    (getValor)="getResposta.bind(this)($event, grupoPergunta.pergunta, ordem, evolucao.formularioResposta)" 
+                                    [valor]="getValor(grupoPergunta.pergunta.id, ordem, grupoPergunta.pergunta.tipo)"
+                                    [bloqueado]="bloqueiaPerguta(grupoPergunta)"
+                                    [requerido]="grupoPergunta.obrigatorio"
+                                ></entrada>
+
+                                <div *ngIf="false" class="row"> <!-- USAR PARA VALIDAR PERGUNTAS DEPENDENTES -->
+                                    <div class="col-md-12">
+                                        <span>Pergunta Principal: {{ grupoPergunta?.pergunta?.descricao }}</span>
+                                        <div *ngFor="let condicao of grupoPergunta?.condicoes" class="col-md-12">
+                                            <ng-container *ngIf="!condicao?.grupoPerguntaFilho || ( condicao?.grupoPerguntaFilho && condicao?.grupoPerguntaFilho?.formularioGrupo?.id == grupo?.id )" >
+                                                <span> Tipo: {{ validaTipoCondicao(condicao) }} QUANDO RESP {{ condicao?.resposta }} MOSTRA: {{ validaDependente(condicao) }} </span>                                    
+                                            </ng-container>
+                                        </div>
+
+                                        <hr>
+                                    </div>
+                                </div>
+
+                                <div *ngFor="let condicao of grupoPergunta.condicoes">
+                                    <div *ngIf="condicao.perguntaFilho && mostraDependente(grupoPergunta, condicao, ordem, false, 'perguntaFilho');"
+                                        [ngExit]="excluiRespostaDependente.bind(this, grupoPergunta, condicao, ordem, 'perguntaFilho')"
+                                    >
+                                        <entrada 
+                                            #inputsForm
+                                            [id]="replace(grupoPergunta.pergunta.descricao)"
+                                            identificador="{{id}}{{condicao.perguntaFilho.id}}{{ordem}}"
+                                            [tipo]="condicao.perguntaFilho.tipo"
+                                            [opcoes]="condicao.perguntaFilho.opcoes"
+                                            [nome]="condicao.perguntaFilho.descricao"
+                                            [mascara]="condicao.perguntaFilho.mascara"
+                                            [tabela]="condicao.perguntaFilho.tabela"
+                                            [grupoPergunta]="grupoPergunta"
+                                            [ordemPergunta]="ordem"
+                                            [tabelaCampos]="condicao.perguntaFilho.tabelaCampos"
+                                            [opcoesBoolean]="false"
+                                            [fnOnChange]="salvaEvolucao.bind(this, {pergunta: condicao.perguntaFilho}, ordem)"
+                                            [tamanhoMaximo]="4000"
+                                            (getValor)="getResposta.bind(this)($event, condicao.perguntaFilho, ordem, condicao.perguntaFilho.id, grupo)" 
+                                            [valor]="getValor(condicao.perguntaFilho.id, ordem, grupoPergunta.pergunta.tipo)"
+                                            [bloqueado]="bloqueiaPerguta(condicao)"
+                                            [requerido]="condicao.obrigatorio"
+                                        ></entrada>
+                                    </div>
+
+                                    <div *ngIf="condicao.formularioFilho && mostraDependente(grupoPergunta, condicao, ordem, false, 'formularioFilho')" 
+                                        class="formulario_evolucao formulario_dependente"
+                                        [ngInit]="abreFormularioDependente.bind(this, grupoPergunta, condicao)"
+                                        [ngExit]="excluiFormularioDependente.bind(this, grupoPergunta, condicao, ordem)"
+                                    >
+                                        <div *ngIf="formulariosDependentes[condicao.formularioFilho.id]">                                        
+                                            <paciente-formulario
+                                                *ngIf="formulariosDependentes[condicao.formularioFilho.id]"
+                                                [id]="formulariosDependentes[condicao.formularioFilho.id].id"
+                                                [formularioFilho]="true"
+                                                [eDependente]="true"
+                                                [pacienteId]="pacienteId"
+                                                [atendimento]="atendimento"
+                                                [ordemPrincipal]="pegaOrdemPrincipalFormulario( grupoPergunta, ordem )"
+                                                [respostasCabecalho]="respostasCabecalho"
+                                                [semBotoes]="true"
+                                                [bloqueiaRequisicoes]="false"
+                                            ></paciente-formulario>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </ng-container>
+                    </div>
+                </ng-template>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="evolucao.status == 'FINALIZADO' || evolucao.status == 'EXCLUIDO'">
+            <ng-container 
+                *ngFor="let resposta of evolucao.formularioResposta; let pos = index"
+            >
+                <div class="col-sm-12">
+                    <entrada 
+                        *ngIf="resposta?.anexos?.length; else perguntaValor"
+                        [readonly]="true"
+                        [grupoPergunta]="resposta"
+                        [tipo]="resposta?.pergunta?.tipo"
+                        nome="{{ (pos + 1) }}. {{ (resposta?.perguntaDescricao || resposta?.pergunta?.descricao) }}"
+                        [valor]="getValor(resposta?.pergunta?.id, resposta?.ordem, resposta?.pergunta?.tipo)"
+                    ></entrada>
+
+                    <ng-template #perguntaValor>
+                        <entrada 
+                            [id]="replace(resposta?.perguntaDescricao || resposta?.pergunta?.descricao)"
+                            [tipo]="resposta?.valor ? 'area' : resposta?.pergunta?.tipo"
+                            [readonly]="true"
+                            [opcoes]="resposta?.pergunta?.opcoes"
+                            nome="{{ (pos + 1) }}. {{ (resposta?.perguntaDescricao || resposta?.pergunta?.descricao) }}"
+                            [mascara]="resposta?.pergunta?.mascara"
+                            [grupoPergunta]="resposta"
+                            [opcoesBoolean]="false"
+                            [valor]="resposta.valor || getValor(resposta?.pergunta?.id, resposta?.ordem, resposta?.pergunta?.tipo)"
+                        ></entrada>
+                    </ng-template>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+
+    <div 
+        *ngIf="mostraPrescricoes && evolucao && (evolucao.status != 'FINALIZADO' && evolucao.status != 'EXCLUIDO')"
+        class="container-fluid"
+    >
+    <!-- evolucao.status != 'FINALIZADO' && evolucao.status != 'EXCLUIDO' -->
+        <gridAdicionarPrescricoes
+            [pacienteId]="pacienteId"
+            [atendimentoId]="atendimento ? atendimento.id : undefined"
+            [respostas]="respostas"
+            (onSave)="retornoPrescricao($event)"
+        ></gridAdicionarPrescricoes>
+    </div>
+
+    <br>
+
+    <div class="row">
+        <ng-container *ngIf="mostraPrescricoes ">
+
+            <div class="col-md-12">
+                <moldura titulo="Medicação de Uso Crônico" sub="true" [oculto]="true">
+
+                    <listaPrescricoesFiltro
+                        [adicionaPrescricao]="false"
+                        [filtros]="filtroMedicacao"
+                        [pacienteId]="atendimento ? atendimento.paciente.id : idPaciente"
+                        [atendimentoId]="atendimento ? atendimento.id : undefined"
+                        [mostraModelo]="pos == 0 && prescricaoItem.length > 0"
+                        [novaPrescricaoSalva]="prescricoesUsoContinuo"
+                        [validaEspecialidade]="false"
+                        [itensModeloSelecionado]="prescricaoItem"
+                        [visaoPaciente]="false"
+                        [paginacaoScroll]="false"
+                        [tamanhoVw]="11.3"
+                    ></listaPrescricoesFiltro>
+
+                </moldura>
+            </div>
+
+            <div class="col-md-12">
+                <moldura titulo="Prescrições" sub="true" [oculto]="true">
+
+                    <listaPrescricoesFiltro
+                        [adicionaPrescricao]="false"
+                        [filtros]="filtroPrescricaoMedica"
+                        [pacienteId]="atendimento ? atendimento.paciente.id : idPaciente"
+                        [atendimentoId]="atendimento ? atendimento.id : undefined"
+                        [mostraModelo]="pos == 0 && prescricaoItem.length > 0"
+                        [novaPrescricaoSalva]="novasPrescricoes"
+                        [validaEspecialidade]="false"
+                        [itensModeloSelecionado]="prescricaoItem"
+                        [visaoPaciente]="false"
+                        [paginacaoScroll]="false"
+                        [tamanhoVw]="11.3"
+                    ></listaPrescricoesFiltro>
+
+                </moldura>
+            </div>
+
+        </ng-container>
+    </div>
+
+    <div class="row" *ngIf="evolucao && evolucao.status == 'ATIVO'">
+        <div class="col-md-3">
+            <botao nome="Finalizar" *ngIf="botaoSalvarFormulario"  submit="true" (click)="finalizar()"></botao>   
+        </div>
+        <ng-container *ngIf="botoesSolicitacao">
+            <div class="col-md-2">
+                <botao nome="Exame" submit="true" classe="btn-default" (click)="solicitacaoMedica()"></botao>   
+            </div>
+            <div class="col-md-2">
+                <botao nome="Internação" submit="true" classe="btn-default" (click)="solicitacaoMedica(true)"></botao>   
+            </div>
+            <div class="col-md-2">
+                <botao nome="Encaminhamento" submit="true" classe="btn-default" (click)="realizarEncaminhamento()"></botao>   
+            </div>
+        </ng-container>
+    </div>
+</ng-container>
+
+<ng-template #tipoDocumentoTmpl>
+
+    <div *ngIf="!modelo; else ModeloTmpl" class="row">
+        <ng-container *ngFor="let documento of modelos; let pos = index;">
+            <div class="col-md-10 documento" style="cursor: pointer;">
+
+                <entrada 
+                    nome="Evoluções" 
+                    [bloqueado]="bloqueiaPerguta(documento)" 
+                    [valor]="documento.modelo" 
+                    tipo="area" 
+                    [qtdRows]="20"
+                    [fnOnChange]="alteraDocumento.bind(this, documento, documento.modelo)" 
+                    (getValor)="$event ? documento.modelo = $event.valor : null"
+                ></entrada>
+
+            </div>
+            <div class="col coluna_acoes">
+                <botao icone="check" (click)="selecionarModelo(documento, pos)"></botao>
+            </div>
+        </ng-container>
+    </div>
+
+</ng-template>
+
+<ng-template #ModeloTmpl>
+    <div class="row documento">
+        <div class="col-md-12">
+            <entrada 
+                nome="Documento"
+                tipo="edicao"
+                [valor]="modelo"
+                [fnOnChange]="alteraDocumento.bind(this, modelo)"
+                (getValor)="($event && $event.valor) ? modelo = $event.valor : modelo = ''"
+            ></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<div *ngIf="!semBotoes" class="row">
+    <div class="col-sm-4 botoes">
+        <botao nome="Salvar"   submit="true" (click)="submit()" *ngIf="podeSalvar"></botao>
+        <botao nome="Voltar"   submit="true" (click)="voltar()" classe="btn-default"></botao>
+        <botao nome="Imprimir" submit="true" (click)="imprimir()" classe="btn-info"></botao>
+    </div>
+</div>
+
+<ng-template #bodyModalEncaminhamento>
+    <!-- <moldura titulo="" sub="true" [oculto]="false"> -->
+
+        <moldura *ngFor="let encaminhamento of arrayEncaminhamentos; let pos = index">
+            <div 
+                class="row"
+            >
+                <div class="col-md-12">
+                    <autocomplete
+                        [titulo]="'Especialidade'"
+                        [placeholder]="'Digite para buscar Especialidade'"
+                        [minimo]="3"
+                        [valor]="objEspecialidades"
+                        [camposFiltro]="['descricao']"
+                        [valorSelecionado]="encaminhamento.especialidadeSelecionada || ''"
+                        [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                        (fnOnSelected)="getEspecialidade($event, encaminhamento)"
+                    ></autocomplete>
+                </div>
+                <div class="col-md-12">
+                    <entrada
+                        nome="Observação"
+                        [valor]="encaminhamento.observacao || ''"
+                        [tamanhoMaximo]="255"
+                        tipo="area"
+                        (getValor)="getObservacao($event.valor, encaminhamento)"
+                    ></entrada>
+                </div>
+            </div>
+
+            <div 
+                *ngIf="pos == arrayEncaminhamentos.length - 1"
+                class="row"
+            >
+                <div class="col-md-3">
+                    <botao nome="Novo" [desabilitado]="validaDesabilitar(encaminhamento)" (click)="novoEncaminhamento()"></botao>
+                </div>
+            </div>
+
+        </moldura>
+
+    <!-- </moldura> -->
+</ng-template>
+
+<ng-template #botoesModalEncaminhamento>
+
+</ng-template>
+
+
+<!-- ######################################## MODAL PERGUNTAS OBRIGATORIAS NAO RESPONDIDAS ############################# -->
+<ng-template #bodyPerguntasNaoRespondidas>
+    <div *ngFor="let pergunta of perguntasObrigatoriasNaoRespondidas" class="animated fadeIn card link" zoom-in id="{{pergunta.id}}" style="cursor: pointer !important;">
+        <div class="card-header clearfix locais" (click)="abrirAbaPergunta(pergunta.id)">
+            <div class="titulo link">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td style="border-top: none;">{{pergunta.formulario}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fa {{idAbaAbertaPergunta === pergunta.id ? 'fa-angle-up' : 'fa-angle-down'}} seta-dropdown"></div>
+        </div>
+        <div class="card-body" [hidden]="idAbaAbertaPergunta !== pergunta.id">
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Pergunta</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let tipo of pergunta.pergunta">
+                        <td>{{tipo.descricao}}</td>
+                        <td>{{ (tipo.tipo == 'BOOLEAN') ? 'SIM OU NAO' : tipo.tipo}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</ng-template>

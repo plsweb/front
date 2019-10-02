@@ -1,0 +1,45 @@
+{
+  "index": "/index.html",
+  "assetGroups": [{
+    "name": "app",
+    "installMode": "prefetch",
+    "resources": {
+      "files": [
+        "/manifest.json",
+        "/ngsw-worker.js",
+        "/index.html",
+        "/favicon.ico",
+        "/*.html",
+        "/*.js",
+        "/assets/**/*.*",
+        "/*.css"
+      ],
+      "urls": [
+        "https://fonts.googleapis.com/icon?family=Material+Icons",
+        "https://www.gstatic.com/charts/loader.js"
+      ]
+    }
+  }, {
+    "name": "assets",
+    "installMode": "lazy",
+    "updateMode": "prefetch",
+    "resources": {
+      "files": [
+        "/assets/**"
+      ]
+    }
+  }],
+  "dataGroups": [
+    {
+      "name": "apis",
+      "urls": [
+        "/**"
+      ],
+      "cacheConfig": {
+        "maxAge": "1h",
+        "timeout": "15s",
+        "strategy": "freshness"
+      }
+    }
+  ]
+}

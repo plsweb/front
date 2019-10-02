@@ -1,0 +1,184 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-body">
+        <moldura [titulo]="(( idTipoConsulta ) ? 'Editar' : 'Novo') + ' Tipo de Consulta'">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input 
+                            type="text" 
+                            name="descricao" 
+                            class="form-control" 
+                            placeholder="Informe a Descrição"
+                            [(ngModel)]="novoAtendimento['descricao']"
+                        />
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                    <div class="form-group">
+                        <label>Duração (minutos)</label>
+                        <input
+                            type="number"
+                            name="tempo"
+                            class="form-control"
+                            placeholder="Duração (minutos)"
+                            [(ngModel)]="novoAtendimento['tempo']"/>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                    <entrada
+                        nome="Ativo"
+                        [valor]="novoAtendimento['ativo']"
+                        (getValor)="$event ? novoAtendimento['ativo'] = $event.valor : novoAtendimento['ativo'] = true"
+                        tipo="simnao"
+                    ></entrada>
+                </div>
+
+                <div class="col-sm-3 col-md-3" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="label_check">Telefone Obrigatório?</label>
+                        <input-checkbox 
+                            classe="check_principal"
+                            [estado]="novoAtendimento['obrigaTelefone']"
+                            (trocaEstado)="novoAtendimento['obrigaTelefone'] = $event"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="label_check">Envia SMS?</label>
+                        <input-checkbox 
+                            classe="check_principal"
+                            [estado]="novoAtendimento['enviaSms']"
+                            (trocaEstado)="novoAtendimento['enviaSms'] = $event"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="label_check">Recepciona Automático?</label>
+                        <input-checkbox 
+                            classe="check_principal"
+                            [estado]="novoAtendimento['recepciona']"
+                            (trocaEstado)="novoAtendimento['recepciona'] = $event"
+                        ></input-checkbox>
+                    </div>
+                </div>
+                
+                <div class="col-sm-3 col-md-3" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="label_check">Faturar?</label>
+                        <input-checkbox 
+                            classe="check_principal"
+                            [estado]="novoAtendimento['faturar']"
+                            (trocaEstado)="novoAtendimento['faturar'] = $event"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row mb-2">
+                <div *ngIf="novoAtendimento['descricao'] || !idTipoConsulta" class="col-sm-12 col-md-12">
+                    <div class="form-group">
+                        <label>Selecione uma cor:</label>
+                        <div>
+                            <colorPicker
+                                [(default)]="novoAtendimento['cor']"
+                                direcao="right" 
+                                (setObjColorPicker)="setObjColorPicker($event)"
+                                [onColorChange]="trocaCor.bind(this)"
+                            ></colorPicker>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row col-sm-12 col-md-12">
+                    <div class="col-sm-12 col-md-12">
+                        <div class="form-group">
+                            <label class="label_check">Mensagem para solicitar confirmação de agendamento</label>
+                            <textarea 
+                                class="form-control"
+                                [maxlength]="tamanhoMaximo"
+                                [placeholder]="'Mensagem de Confirmação de Horário'"
+                                [(ngModel)]="novoAtendimento['mensagemSms']"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-12">
+                        <div class="form-group">
+                            <label class="label_check">Mensagem para agradecer confirmação</label>
+                            <textarea 
+                                class="form-control"
+                                [maxlength]="tamanhoMaximo"
+                                [placeholder]="'Mensagem Confirmando Horário'"
+                                [(ngModel)]="novoAtendimento['mensagemConfimando']"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row col-sm-12 col-md-12" style="margin-bottom: 25px;">
+                    <div class="col-sm-12 col-md-12">
+                        <label class="label_check">Mensagem para lembrar agendamento</label>
+                        <textarea 
+                            class="form-control"
+                            [maxlength]="tamanhoMaximo"
+                            [placeholder]="'Lembrete de Consulta'"
+                            [(ngModel)]="novoAtendimento['mensagemLembrando']"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="idTipoConsulta">
+                    <div class="col-sm-12 col-md-12">
+                        <moldura titulo="Unidades de Atendimento" sub="true" oculto="true">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="unidadeAtendimento">
+                                        <div *ngFor="let unidade of unidadesAtendimento">
+                                            <input-checkbox
+                                                classe="check_todasSessoes"
+                                                [legenda]="unidade.descricao"
+                                                [estado]="validaCheck(unidade)" 
+                                                (trocaEstado)="salvarUnidadeAtendimento($event, unidade)"
+                                            ></input-checkbox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </moldura>
+                    </div>
+                </ng-container>
+
+            </div>
+
+            <ng-container *ngIf="idTipoConsulta">
+                <gridProcedimentos
+                    [codigo]="idTipoConsulta"
+                    labelIdAdd="tipo"
+                    labelIdList="atendimentoTipoId"
+                    [service]="serviceAtendimentoTipoTuss"
+                ></gridProcedimentos>
+            </ng-container>
+
+
+            <div class="row">
+                <div class="col-md-4" style="margin-top: 15px;">
+                    <botao nome="Salvar Tipo de Consulta" (click)="salvarTipo()"></botao>
+                </div>
+
+                <div class="col-md-4" style="margin-top: 15px;">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+        </moldura>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+<moldura titulo="Formulário">
+    <div class="row">
+        <div class="col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+
+    <br clear="all">
+
+    <moldura
+        [pesquisarKeydown]="filtrarFormulario.bind(this)"
+        [customFiltro]="filtroFormulario"
+        [filtrar]="filtrarFormulario.bind(this)"
+    >
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="status"></th>
+                    <th style="width: 5%"></th>
+                    <th style="width: 30%">
+                        Título
+                    </th>
+                    <th>
+                        Descrição
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let formulario of formularios">
+                    <td *ngIf="formulario.ativo === true" class="status verde"></td>
+                    <td *ngIf="formulario.ativo === false" class="status cinza"></td>
+                    <td>
+                        <icone nome="clear"></icone>
+                    </td>
+                    <td (click)="atualizar(formulario.id)">{{formulario.titulo}}</td>
+                    <td (click)="atualizar(formulario.id)">{{formulario.descricao}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br clear="all">
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscaFormularioPaginado($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtual}}"
+            ></paginacao>
+        </div>
+    </moldura>
+</moldura>
+
+
+<!-- 
+#############################################################################################
+                                FILTRO Formulario
+#############################################################################################
+-->
+
+<ng-template #filtroFormulario>
+    <entrada
+        nome="Situação"
+        tipo="seleciona"
+        [valor]="'true'"
+        (getValor)="situacao($event)" 
+        [opcoes]="[{id: 'true', nome: 'Ativos'}, {id: 'false', nome: 'Inativos'}, {id: ' ', nome: 'Todos'}]"
+    ></entrada>
+</ng-template>

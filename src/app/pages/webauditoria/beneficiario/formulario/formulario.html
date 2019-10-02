@@ -1,0 +1,435 @@
+<div *ngIf="beneficiario" baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <icone nome="arrow_back_ios" class="voltar" tamanho="pequeno" (click)="voltar()"></icone>
+            <div class="dados semPadding">
+                {{beneficiario.codigo}} - {{beneficiario.nome}}, {{beneficiario.idade}}
+            </div>
+        </div>
+
+        <div class="navegacao">
+            <div (click)="navegar('basico')" [ngClass]="{ativo: atual === 'basico'}">Geral</div>
+            <div (click)="navegar('evolucoes')" [ngClass]="{ativo: atual === 'evolucoes'}">Evolução</div>
+            <div (click)="navegar('diagnosticos')" [ngClass]="{ativo: atual === 'diagnosticos'}">Diagnósticos</div>
+            <div (click)="navegar('exames')" [ngClass]="{ativo: atual === 'exames'}">Exames</div>
+            <div (click)="navegar('guias')" [ngClass]="{ativo: atual === 'guias'}">Guias</div>
+            <!-- <div (click)="navegar('procedimentos')" [ngClass]="{ativo: atual === 'procedimentos'}">Procedimentos</div> -->
+            <div (click)="navegar('preexistencia')" [ngClass]="{ativo: atual === 'preexistencia'}">Pré-existência</div>
+            <!-- <div (click)="navegar('carencia')" [ngClass]="{ativo: atual === 'carencia'}">Carência</div> -->
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div *ngIf="atual === 'basico'">
+            <entrada nome="Contratante" bloqueado="true" [valor]="beneficiario.contratante"></entrada>
+            <entrada nome="Estado Civil" bloqueado="true" [valor]="beneficiario.estadoCivil"></entrada>
+            <entrada nome="Endereço" bloqueado="true" [valor]="beneficiario.endereco"></entrada>
+            <entrada nome="Telefone" bloqueado="true" [valor]="beneficiario.telefone"></entrada>
+        </div>
+
+        <div *ngIf="atual === 'evolucoes'">
+            <table *ngIf="evolucoes" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>FORMULÁRIO</th>
+                        <th>RESPONSÁVEL</th>
+                        <th>DATA</th>
+                        <!-- <th></th> -->
+                    </tr>
+                </thead>
+
+                <ng-container *ngFor="let evolucao of evolucoes">
+
+                    <tr (click)="abrirFormulario(evolucao.id)" class="link">
+                        <td>
+                            <icone nome="print" title="Imprimir evolução" style="cursor: pointer !important;" (click)="imprimir(evolucao.id)"></icone>
+                        </td>
+                        <td>{{evolucao.formulario.titulo}}</td>
+                        <td>{{evolucao.usuario ? evolucao.usuario.nome : evolucao.atendimento && evolucao.atendimento.prestador
+                            ? evolucao.atendimento.prestador.nome : "" | uppercase}}</td>
+                        <td>{{evolucao.data}}</td>
+                        <!-- <td>
+                            <div class="row">
+                                <icone nome="star"></icone>
+                                <icone nome="star"></icone>
+                                <icone nome="star"></icone>
+                                <icone nome="star_border"></icone>
+                                <icone nome="star_border"></icone>
+                            </div>
+                        </td> -->
+                    </tr>
+                    <tr *ngIf="evolucao.id == idFormAberto">
+                        <td colspan="4" class="formulario">
+                            <paciente-formulario [id]="evolucao.id" [semBotoes]="true" [botaoSalvarFormulario]="false" [bloqueiaRequisicoes]="true"
+                                [atendimento]="atendimento" (salvaFormulario)="abrirFormulario($event)"></paciente-formulario>
+                        </td>
+                    </tr>
+                </ng-container>
+
+            </table>
+        </div>
+
+        <div *ngIf="atual === 'diagnosticos'">
+            <table *ngIf="cids" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>CID</th>
+                        <th>Descrição</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cid of cids" (click)="atualizar(leito.id)">
+                        <td>{{cid.codigo}}</td>
+                        <td>{{cid.descricao}}</td>
+                        <td>{{cid.data}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="atual === 'exames'">
+            <moldura
+                *ngIf="examesFiltrados"
+                titulo="Exames" 
+                [registros]="examesFiltrados.length"
+                [customFiltro]="customFiltroExames"
+                [filtrar]="getFiltro.bind(this)"
+            >
+                <div *ngIf="exames.length > 0" class="grid_exames">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status coluna_status"></th>
+                                <th class="status"></th>
+                                <th>GUIA</th>
+                                <th>SOLICITANTE</th>
+                                <th>DATA</th>
+                                <th>EXECUTANTE</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let exame of examesFiltrados; let pos = index">
+                                <tr (click)="abrirAbaExame(exame.guia)" class="{{ validaClasse(pos) ? 'even' : 'odd' }}">
+                                    <td class="status {{exame.status === true ? 'verde' : 'cinza'}} coluna_status"></td>
+                                    <td style="width: 40px !important;">
+                                        <icone *ngIf="exame.chave" nome="folder_open" title="Ver exame" (click)="abrirResultado(exame.exameId, exame.chave)"></icone>
+                                    </td>
+                                    <td>{{exame.guia}}</td>
+                                    <td>{{exame.solicitante}}</td>
+                                    <td>{{exame.data}}</td>
+                                    <td>{{exame.nome}}</td>
+                                    <td class="fa {{idAbaAberta === exame.guia ? 'fa-angle-up' : 'fa-angle-down'}}"></td>
+                                </tr>
+
+                                <tr [hidden]="idAbaAberta !== exame.guia" class="{{ validaClasse(pos) ? 'even' : 'odd' }}">
+                                    <td class="link" *ngIf="exame.chave" (click)="abrirResultado(exame.exameId, exame.chave)">Ver Exame</td>
+                                    <td class="table" [attr.colspan]="exame.chave ? 6 : 7">
+                                        <table class="table table-striped">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>PROCEDIMENTO</th>
+                                                    <th>DESCRIÇÃO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of exame.exames">
+                                                    <td>{{item.procedimento}}</td>
+                                                    <td>{{item.descricao}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+            </moldura>
+        </div>
+
+        <div *ngIf="atual === 'guias'">
+            <moldura
+                *ngIf="guias"
+                titulo="Guias" 
+                [registros]="qtdItensTotalGuia" 
+                [customFiltro]="customFiltroGuias"
+                [filtrar]="filtrarGuias.bind(this)"
+                [customAcoes]="customFiltroAcoesGuias"
+            >
+                <ng-container *ngIf="!guiasVisaoFiltro">
+                    <div *ngIf="guias && guias.length > 0" class="grid_guias">
+                        <table class="table table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="status"></th>
+                                    <th>GUIA</th>
+                                    <th>SOLICITANTE</th>
+                                    <th>EXECUTANTE</th>
+                                    <th>ESPECIALIDADE</th>
+                                    <th>DATA</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let guia of guias; let pos = index">
+                                    <tr (click)="abrirAbaExame(guia.id)">
+                                        <td class="status {{(guia.guia || guia).status === 'AUTORIZADA' ? 'verde' : 'cinza'}}"></td>
+                                        <td>{{(guia.guia || guia).impresso}}</td>
+                                        <td>{{(guia.guia || guia).solicitanteNome}}</td>
+                                        <td>{{(guia.guia || guia).prestador.nome}}</td>
+                                        <td>{{((guia.guia || guia).especialidade) ? (guia.guia || guia).especialidade.descricao : ''}}</td>
+                                        <td>{{ ( (guia.guia || guia).digitacao ) ? momentjs( (guia.guia || guia).digitacao, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : '' }}</td>
+                                        <td class="fa {{idAbaAberta === guia.id ? 'fa-angle-up' : 'fa-angle-down'}}"></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="7" class="table" [hidden]="idAbaAberta !== guia.id">
+                                            <table class="table table-striped">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="status"></th>
+                                                        <th>PROCEDIMENTO</th>
+                                                        <th>DESCRIÇÃO</th>
+                                                        <th>QTD AUTORIZADA</th>
+                                                        <th>QTD SOLICITADA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let item of (guia.guia || guia).itens">
+                                                        <td class="status {{item.status == '0' ? 'vermelho' : 'verde'}}"></td>
+                                                        <td>{{item.procedimento.codigo}}</td>
+                                                        <td>{{item.procedimento.descricao}}</td>
+                                                        <td>{{item.quantidadeAutorizada}}</td>
+                                                        <td>{{item.quantidadeSolicitada}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+
+                        <div>
+                            <paginacao 
+                                (atualizaDados)="buscaGuiasPaginado($event)" 
+                                qtdItensTotal="{{qtdItensTotalGuia}}" 
+                                itensPorPagina="{{itensPorPagina}}"
+                                paginaAtual="{{paginaAtualGuia}}"
+                                [scrollPagination]="true"
+                            ></paginacao>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="guiasVisaoFiltro">
+                    <div class="row">
+                        <div class="col">
+                            <span>TOTAL AUDITADO: {{qtdAudit}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <span>TOTAL REALIZADO: {{qtdReal}}</span>
+                        </div>
+                    </div>
+                    <ng-template [ngTemplateOutlet]="visaoGuiasFiltro"></ng-template>
+                </ng-container>
+            </moldura>
+
+        </div>
+
+        <div *ngIf="atual === 'procedimentos'">
+            <table *ngIf="evolucoes" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th>PRESTADOR</th>
+                        <th>TIPO</th>
+                        <th>DESCRIÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let leito of leitos" (click)="atualizar(leito.id)">
+                        <td *ngIf="leito.ativo === true" class="status verde"></td>
+                        <td *ngIf="leito.ativo === false" class="status cinza"></td>
+                        <td>{{leito.prestador.nome}}</td>
+                        <td>{{leito.tipo}}</td>
+                        <td>{{leito.descricao | uppercase}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="atual === 'preexistencia'">
+            <div class="grid_guias">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>DATA</th>
+                            <th>CID</th>
+                            <th>DESCRIÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let preexistencia of preexistencias">
+                            <td>{{preexistencia.cid ? preexistencia.cid.data : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.codigo : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.descricao : ''}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscaPreExistenciasPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotalPreex}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                        paginaAtual="{{paginaAtualPreex}}"
+                    ></paginacao>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="atual === 'carencia'">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>DATA</th>
+                        <th>DESCRIÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let carencia of carencias">
+                        <td>{{carencia?.fim}}</td>
+                        <td>{{carencia?.descricao}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div>
+                <paginacao
+                    (atualizaDados)="buscaPreExistenciasPaginado($event)"
+                    qtdItensTotal="{{qtdItensTotalCarencia}}"
+                    itensPorPagina="{{itensPorPagina}}"
+                    paginaAtual="{{paginaAtualCarencia}}"
+                ></paginacao>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ############################## CUSTOM FILTRO ############################################## -->
+<ng-template #customFiltroExames>
+    <form class="filtro">
+        <entrada nome="Filtro de exames" (getValor)="getFiltro($event)" semTitulo="true"></entrada>
+    </form>
+</ng-template>
+
+<ng-template #customFiltroGuias>
+    <form class="filtro">
+        <div class="row">
+            <div class="col">
+                <entrada nome="Filtro de guias" (getValor)="getFiltroGuias($event)"></entrada>
+            </div>
+        </div>
+
+        <div class="row">                
+            <div class="col-md-12">
+                <autocomplete 
+                    titulo="Procedimento" 
+                    [placeholder]="'Procedimentos'" 
+                    [minimo]="3" 
+                    [valor]="objProcedimento"
+                    [camposFiltro]="['codigo', 'descricao']"
+                    [valorSelecionado]="valorProcedimentoSelecionado" 
+                    [fnSearch]="fnCfgProcedimentoRemote.bind(this)"
+                    (fnOnSelected)="setProcedimento($event)"
+                ></autocomplete>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Data Inicial</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getData.bind(this, 'liberacaoItemInicio')"
+                    (setInstancia)="getDataInicioInstancia($event)"
+                    [(datas)]='liberacaoItemInicio'
+                > </datepicker>
+            </div>
+
+            <div class="col">
+                <label>Data Final</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getData.bind(this, 'liberacaoItemFim')"
+                    (setInstancia)="getDataFimInstancia($event)"
+                    [(datas)]='liberacaoItemFim'
+                ></datepicker>
+            </div>
+        </div>
+    </form>
+</ng-template>
+
+<ng-template #visaoGuiasFiltro>
+    <div *ngIf="guiaFiltroFiltradas && guiaFiltroFiltradas.length > 0" class="grid_guias">
+        <div *ngFor="let guia of guiaFiltroFiltradas" class="guias animated fadeIn card link" zoom-in id="{{guia.id}}" style="cursor: pointer !important;">
+            <div class="card-header clearfix" (click)="abrirAbaExame(guia.id)">
+                <div class="titulo link">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th>GUIA</th>
+                                <th>PROCEDIMENTO</th>
+                                <th>QTD SOLICITADA</th>
+                                <th>QTD REALIZADA</th>
+                                <th>DATA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="status {{(guia.guia || guia).status === 'AUTORIZADA' ? 'verde' : 'cinza'}}"></td>
+                                <td>{{guia.impresso}}</td>
+                                <td>{{guia.procedimentoCodigo + ' - ' + guia.procedimentoDescricao}}</td>
+                                <td>{{guia.quantidadeSolicitada}}</td>
+                                <td>{{guia.quantidadeRealizada}}</td>
+                                <td>{{guia.guiaDigitacao ? momentjs( guia.guiaDigitacao, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : '' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <paginacao 
+                (atualizaDados)="buscaGuiasPaginado($event)" 
+                qtdItensTotal="{{qtdItensTotal}}" 
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtual}}"
+                [scrollPagination]="true"
+            ></paginacao>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #customFiltroAcoesGuias>
+    <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+        <botao 
+            nome="Limpar" 
+            classe="btn-default"
+            debounceClick 
+            [debounceTime]="200"
+            (debounceClick)="limparFiltros()" 
+        ></botao>
+    </div>
+</ng-template>

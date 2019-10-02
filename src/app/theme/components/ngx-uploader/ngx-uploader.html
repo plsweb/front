@@ -1,0 +1,80 @@
+<div *ngIf="style == 'padrao'">
+	<label class="upload-button">
+		<input
+			type="file"
+			ngFileSelect
+			[options]="options"
+			[uploadInput]="uploadInput"
+			(change)="handleFileSelect($event)"
+			(uploadOutput)="onUploadOutput($event, [])"
+		>
+	</label>
+
+	<button type="button" class="start-upload-btn" (click)="startUpload()">Enviar Arquivo</button>
+</div>
+
+<div class="{{classe}}" *ngIf="style == 'icone'">
+
+	<span
+		*ngIf="mostraNomeArquivo && nameFile"
+		class="form-control name-file"
+	>
+		{{ nameFile }}
+	</span>
+
+	<input
+		#output
+		type="file"
+		ngFileSelect
+		class="arquivo"
+		[options]="options"
+		[uploadInput]="uploadInput"
+		(change)="handleFileSelect($event)"
+		(uploadOutput)="onUploadOutput($event, [])"
+	>
+	<i *ngIf="!files.length" class="material-icons" (click)="output.click()" title="Selecione o arquivo">attach_file</i>
+	<i *ngIf="files.length" class="material-icons ml-1 cancel" (click)="cancelUpload(files[0].id)" title="Excluir arquivo">cancel</i>
+	<i *ngIf="files.length && upload" class="material-icons ml-1 send" (click)="startUpload()" title="Enviar arquivo">send</i>
+
+	<div
+		ngFileDrop
+		*ngIf="container"
+		[options]="options"
+		(drop)="drop($event)"
+		class="drop-container"
+		[uploadInput]="uploadInput"
+		(ondrop)="handleFileSelect($event)"
+		(uploadOutput)="onUploadOutput($event, [])"
+	></div>
+		<!-- (dragover)="container = false" -->
+</div>
+
+<!-- <div class="upload-item" *ngFor="let f of files; let i = index;">
+	<div class="upload-item-content">
+	<div class="filename">
+		<div class="filename-left">
+		<i class="ionicon ion-ios-copy"></i>
+		<span>{{ f.name }}</span>
+		</div>
+		<div class="filename-right">
+		<i class="ionicon ion-close-round" (click)="cancelUpload(f.id)"></i>
+		</div>
+	</div>
+	<div class="progress-content">
+		<div class="progress">
+		<span class="bar" [style.width]="f?.progress?.data?.percentage + '%'" [class.is-done]="f?.progress?.data?.percentage === 100"></span>
+		</div>
+	</div>
+	<div class="progress-text-content">
+		<span class="progress-text" [class.is-done]="f?.progress?.data?.percentage === 100">
+		<span>{{ f.progress?.data?.percentage }}% </span>
+		<span *ngIf="f.progress?.data?.percentage !== 100">Uploading...</span>
+		<span *ngIf="f.progress?.data?.percentage === 100">Done</span>
+		</span>
+		<span class="speed-and-eta-text" *ngIf="f.progress?.data?.percentage !== 0 && f.progress?.data?.percentage !== 100">
+		<span>{{ f.progress?.data?.speedHuman }} </span>
+		<span>ETA {{ f.progress?.data?.etaHuman }}</span>
+		</span>
+	</div>
+	</div>
+</div> -->

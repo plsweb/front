@@ -1,0 +1,32 @@
+:host /deep/ {
+  icone {
+  	position: absolute;
+    right: 20px;
+    top: 7px;
+  }
+}
+
+
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.nome_arquivo{
+  position: absolute;
+  top: 14px;
+  right: 50px;
+  /* width: 150px; */ //TODO
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+#mensagem {
+    padding-right: 200px;
+}

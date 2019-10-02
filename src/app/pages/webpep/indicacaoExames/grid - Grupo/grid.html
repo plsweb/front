@@ -1,0 +1,44 @@
+<moldura titulo="Agendamento de exames">
+    <moldura>
+        <entrada nome="Protocolo" class="entrada tamanho90" (getValor)="getProtocolo($event)" semTitulo="true"></entrada>
+        <botao icone="search" (click)="buscarProcedimentos()"></botao>
+        <br clear="all" />
+        <div *ngIf="guia">
+            <b>{{guia.beneficiario.nome}}</b> - {{guia.beneficiario.idade}}
+            <br>
+            {{guia.beneficiario.endereco}}
+        </div>
+    </moldura>
+
+    <br clear="all">
+
+    <div *ngFor="let list of lista">
+        <moldura titulo="{{list.prestador.nome}}" sub="true" oculto="true">
+            <h5>
+                {{list.prestador.endereco}} - {{list.prestador.telefone}}
+            </h5>
+            <botao *ngIf="!list.atendimento" nome="Agendar" (click)="agendarProcedimento(guia.paciente, list.prestador, list.procedimentos)"></botao>
+            <span *ngIf="list.atendimento">
+                Agendado: {{list.atendimento.agendamento}}
+                <br>
+            </span>
+            <br>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>PROCEDIMENTO</th>
+                        <th>DESCRIÇÃO</th>
+                        <th>QNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let proc of list.procedimentos">
+                        <td>{{proc.codigo}}</td>
+                        <td>{{proc.descricao}}</td>
+                        <td>{{proc.quantidade}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </moldura>
+    </div>
+</moldura>

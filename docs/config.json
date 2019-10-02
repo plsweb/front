@@ -1,0 +1,35 @@
+{
+  "baseUrl": "/plsweb/",
+  "locals": {
+    "url": "http://localhost:8080",
+    "name": "plsweb blog",
+    "owner": "Akveo",
+    "description": ""
+  },
+  "plugins": [
+    "wintersmith-sassy",
+    "./plugins/paginator.coffee"
+  ],
+  "sass": {
+    "debug": "undefined"
+  },
+  "require": {
+    "moment": "moment",
+    "_": "underscore",
+    "typogr": "typogr"
+  },
+  "jade": {
+    "pretty": true
+  },
+  "markdown": {
+    "smartLists": true,
+    "smartypants": true
+  },
+  "paginator": {
+    "perPage": 3,
+    "groupSort": {
+      "Quick Start": 1000,
+      "Customization": 900
+    }
+  }
+}

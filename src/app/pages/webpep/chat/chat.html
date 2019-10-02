@@ -1,0 +1,55 @@
+<tabela
+    titulo="Mensagens Chat"
+    [colunas]="colunasTabela"
+    [linhas]="chats"
+    [ordenacao]="ordenacao"
+    [atualizaDados]="atualizaNovosChats.bind(this)"
+    [limparFiltros]="atualizaNovosChats.bind(this)"
+    [linhaClick]="abrirChat.bind(this)"
+    [registros]="totalMensagens"
+    [mostraFiltrar]="false"
+>
+    <div class="row tabela-acoes">
+        <div class="col-md-10">
+            <autocomplete
+                [minimo]="3"
+                [semTitulo]="true"
+                [valor]="objUsuario"
+                [camposFiltro]="['nome']"
+                [valorSelecionado]="usuarioSelecionado"
+                [fnSearch]="fnCfgUsuarioRemote.bind(this)"
+                [placeholder]="'Digite para buscar um Usuário'"
+                (fnOnSelected)="getUsuario($event)"
+            ></autocomplete>
+        </div>
+        <div class="col-md-2 float-right">
+            <button type="button" class="btn btn-primary" (click)="criarChat()">Adicionar chat</button>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaBeneficiarioPaginado($event)"
+            itensPorPagina="{{ordenacao.itensPorPagina}}"
+            qtdItensTotal="{{totalMensagens}}"
+            paginaAtual="{{ordenacao.paginaAtual}}"
+            [scrollPagination]="true"
+            [contaRegistro]="true"
+        ></paginacao>
+    </div>
+</tabela>
+
+<ng-template #chatMensagem>
+
+    <ng-container *ngIf="chatAberto">
+        <chat 
+            [mostraPopup]="false" 
+            [chatSelecionado]="chatAberto"
+        ></chat>
+    </ng-container>
+
+    <ng-container *ngIf="!chatAberto">
+        <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando Chat...
+    </ng-container>
+
+</ng-template>

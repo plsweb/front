@@ -1,0 +1,48 @@
+<moldura 
+    titulo="Usuario" 
+    [registros]="qtdItensTotal" 
+    [pesquisarKeydown]="pesquisar.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th class="status"></th>
+                        <th>USUÁRIO</th>
+                        <th>NOME</th>
+                        <th>EMAIL</th>
+                    </tr>
+                    <tr *ngFor="let usuario of usuarios" (click)="atualizar(usuario.guid)">
+                        <td *ngIf="usuario.ativo === true" class="status verde"></td>
+                        <td *ngIf="usuario.ativo === false" class="status cinza"></td>
+                        <td>
+                            <icone *ngIf="usuario.bloqueado == true" nome="lock_outline" tamanho="grande"></icone>
+                        </td>
+                        <td>{{usuario.username}}</td>
+                        <td>{{usuario.nome ? usuario.nome : ""}}</td>
+                        <td>{{usuario.email ? usuario.email : "" }}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaUsuarioPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>

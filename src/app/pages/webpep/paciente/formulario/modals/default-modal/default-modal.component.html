@@ -1,0 +1,18 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">{{modalHeader}}</h4>
+        <button class="close" aria-label="Close" (click)="closeModal()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body" id="modalBody">
+        Aguarde o paciente chegar no consultório.<br>
+        A cada {{segundos}} segundos a senha será chamada novamente.
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary confirm-btn btn-raised" (click)="abrir()">Paciente Chegou</button>
+        <button class="btn btn-default confirm-btn btn-raised" (click)="cancelar()">Cancelar</button>
+    </div>
+</div>
+<style type="text/css">
+</style>

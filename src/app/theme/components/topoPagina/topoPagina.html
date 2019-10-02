@@ -1,0 +1,109 @@
+<div class="page-top clearfix" baScrollPosition maxHeight="50" (scrollChange)="scrolledChanged($event)" [ngClass]="{scrolled: isScrolled}">
+        <a href (click)="toggleMenu()" class="collapse-menu-link ion-navicon"></a>
+    
+        <a routerLink="" class="al-logo clearfix">
+            <span>web</span>{{nomeModulo}}
+        </a>
+    
+        <div class="user-profile clearfix">
+            <div class="dropdown al-user-profile" customdropdown>
+                <a class="profile-toggle-link dropdown-toggle" id="user-profile-dd" data-toggle="dropdown" aria-expanded="false">
+                    <img *ngIf="foto" [src]="foto" alt="">
+                </a>
+                <ul class="dropdown-menu top-dropdown-menu profile-dropdown" aria-labelledby="user-profile-dd" style="width: 225px;">
+                    <li class="dropdown-item" routerLink="/webpep/usuario/perfil">
+                        <a>
+                            <i class="fa fa-user"></i>Perfil</a>
+                    </li>
+                    <li class="dropdown-item" (click)="trocarConsultorio()">
+                        <a class="signout">
+                            <i class="fa fa-refresh"></i>Trocar Consultório</a>
+                    </li>
+                    <li class="dropdown-item" (click)="alerta()">
+                        <a class="signout"><i class="fa fa-exclamation-triangle"></i>Pânico</a>
+                    </li>
+                    <li class="dropdown-item" (click)="sair()">
+                        <a class="signout">
+                            <i class="fa fa-power-off"></i>Sair</a>
+                    </li>
+                    <li class="dropdown-item no_hover div_troca_tema">
+                        <label class="label-dropdown">Escolha um Tema:</label>
+                        <div class="troca_tema">
+                            <span (click)="mudaTema('dark_tema')" [ngClass]="(tema == 'dark_tema') ? 'selecionado' : ''" class="span_tema tema_1">Escuro</span>
+                            <span (click)="mudaTema('light_tema')" [ngClass]="(tema == 'light_tema') ? 'selecionado' : ''" class="span_tema tema_2">Claro</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <ul class="al-msg-center clearfix">
+                <li class="dropdown"*ngIf="callCenterEmAtendimento && callCenterEmAtendimento.inicioAtendimento">
+                    <div class="ligacao" (click)="abreCallCenter()">
+                        <a href class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <icone nome="call" tamanho="grande"></icone>
+                        </a>
+                        <a href class="dropdown-toggle" title="Finalizar Atendimento" data-toggle="dropdown" aria-expanded="false">
+                            <icone nome="call_end" classe="vermelho" tamanho="grande" (click)="finalizarAtendimento()"></icone>
+                        </a>
+                        <h4>{{ formatTempoLigacao(callCenterEmAtendimento) }}</h4>
+                    </div>
+                </li>
+                <li>
+                    {{mensagemAviso}}
+                </li>
+                <!-- <li *ngIf="!alertaEmitido" class="dropdown">
+                    <botao nome="Pânico" classe="btn-danger" (click)="alerta()"></botao>
+                </li> -->
+                <li 
+                    *ngIf="alertaEmitido"
+                    class="dropdown"
+                >
+                    <botao nome="Socorro Chegou" (click)="finalizarPedidoSocorro()"></botao>
+                </li>
+                <!-- <li class="dropdown">
+                    <a href class="msg dropdown-toggle" id="msg-dd2" data-toggle="dropdown" aria-expanded="false">
+                        <icone nome="mail_outline" tamanho="pequeno"></icone>
+                    </a>
+                </li> -->
+            </ul>
+        </div>
+        <div class="user-profile clearfix">
+            <chat
+            ></chat>
+        </div>
+        
+    </div>
+    
+    <ng-template #bodyModalAlerta>
+        <h3>{{mensagemAviso}}</h3>
+    </ng-template>
+    
+    <ng-template #botoesModalAlerta>
+        <!-- ver necessidade de botões -->
+        <botao nome="Socorro Chegou" (click)="finalizarPedidoSocorro()"></botao>
+    </ng-template>
+    
+    <ng-template #bodyModalAlertasPanico>
+        <div>
+            <table class="table table-striped" *ngIf="meusAlertas && meusAlertas.length">
+                <thead>
+                    <tr>
+                        <th>USUARIO</th>
+                        <th>LOCAL</th>
+                        <th>PACIENTE</th>
+                    </tr>
+                </thead>
+    
+                <tbody>
+                    <tr *ngFor="let alerta of meusAlertas">
+                        <td>{{ (alerta.usuario) ? alerta.usuario.nome : '' }}</td>
+                        <td>{{ (alerta.unidadeAtendimento) ? alerta.unidadeAtendimento.descricao : ''}} {{ alerta.guiche ? ' - ' + alerta.guiche.descricao : '' }}</td>
+                        <td>{{ (alerta.paciente) ? alerta.paciente.nome : '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-template>
+    
+    <ng-template #botoesModalAlertasPanico>
+        <botao nome="Ciente" (click)="atualizaAlertas()"></botao>
+    </ng-template>

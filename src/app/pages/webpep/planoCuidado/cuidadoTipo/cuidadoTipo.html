@@ -1,0 +1,41 @@
+<moldura 
+    [ngInit]="buscaCuidadosTipo.bind(this)"
+    titulo="Tipos de Cuidado"
+    [pesquisar]="pesquisarTiposCuidado.bind(this)"
+>
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+            <botao nome="Adicionar" (click)="abrir(null)"></botao>
+        </div>
+    </div>
+    <br>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Nome</th>
+                <th>Tabela</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let cuidadoTipo of tiposCuidado; let pos = index" (click)="abrir(cuidadoTipo)">
+                <td>{{cuidadoTipo.descricao}}</td>
+                <td>{{cuidadoTipo.tabela ? cuidadoTipo.tabela.nome : ''}}</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <br class="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaAcoes($event)"
+
+            qtdItensTotal="{{qtdItensTotalAcoes}}"
+            paginaAtual="{{paginaAtualAcoes}}"
+            itensPorPagina="{{itensPorPaginaAcoes}}"
+        ></paginacao>
+
+    </div>
+</moldura>

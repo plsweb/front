@@ -1,0 +1,64 @@
+<tabela
+    [titulo]="'Faturamento'"
+    [colunas]="colunasTabela"
+    [linhas]="faturamentos"
+    [ordenacao]="ordenacao"
+    [atualizaDados]="atualizaDados.bind(this)"
+    [limparFiltros]="limparFiltros.bind(this)"
+    [linhaClick]="atualizar.bind(this)"
+    [registros]="qtdItensTotal"
+    [qtdItensTotal]="qtdItensTotal"
+    [buscaAoIniciar]="false"
+>
+    <form class="filtro container">
+        <span>Não há filtros disponíveis</span>
+
+        <!-- <div class="row">
+            <div class="col-sm-6 col-md-6 col-lg-6">
+                <label>Data Inicial</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getValor.bind(this, 'dataInicio')"
+                    (setInstancia)="getDataInicioInstancia($event)"
+                    [(datas)]='dataInicio'
+                ></datepicker>
+            </div>
+
+            <div class="col-sm-6 col-md-6 col-lg-6">
+                <label>Data Final</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getValor.bind(this, 'dataFim')"
+                    (setInstancia)="getDataFimInstancia($event)"
+                    [(datas)]='dataFim'
+                ></datepicker>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Beneficiário" 
+                    [valor]="(filtro && filtro['nome']) ? filtro['nome'].valor : ''"
+                    (getValor)="getValor($event, 'nome')" 
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Unidade de Atendimento" 
+                    tipo="multiselect" 
+                    [noLabels]="true"
+                    [objMultiselect]="['id', 'descricao']" 
+                    [itemList]="unidadesAtendimento" 
+                    [selectedItems]="filtro['unidadeAtendimento.id'] ? filtro['unidadeAtendimento.id'].valor : []" 
+                    (getValor)="getValor($event, 'unidadeAtendimento.id')"
+                ></entrada>
+            </div>
+        </div> -->
+    </form>
+</tabela>

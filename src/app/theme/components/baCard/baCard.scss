@@ -1,0 +1,141 @@
+@import '../../sass/conf/conf';
+
+h3{
+    margin: 0px;
+}
+
+h6{
+    font-size: 13px;
+    margin: 0px;
+}
+
+.titulo{
+    float: left;
+}
+
+.pesquisar {
+    text-shadow: none;
+    font-size: 13px;
+    line-height: 25px;
+    transition: all 0.5s ease;
+    white-space: nowrap;
+    float: right;
+
+    icone i{
+      display: inline-block;
+      font-size: 16px;
+      line-height: 25px;
+    }
+
+    icone{
+        margin-right: 5px;
+    }
+
+    input {
+      color: #fff;
+      background: none;
+      padding: 0;
+      width: 200px;
+      outline: 0;
+      border-width: 0 0 1px 0;
+      border-color: #fff;
+    }
+
+    .seta-baixo {
+        content: "";
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 5px;
+        width: 0; 
+        height: 0; 
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #fff;
+    }
+
+    .dropdown {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+        color:    #fff;
+    }
+    :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+       color:    #fff;
+       opacity:  1;
+    }
+    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+       color:    #fff;
+       opacity:  1;
+    }
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+       color:    #fff;
+    }
+    ::-ms-input-placeholder { /* Microsoft Edge */
+       color:    #fff;
+    }
+  }
+  
+    a{
+      cursor: pointer;
+    }
+  
+    .al-user-profile {
+      float: right;
+      margin-right: 12px;
+      transition: all .15s ease-in-out;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      opacity: 1;
+      position: relative;
+      ul.profile-dropdown:after {
+        bottom: 100%;
+        right: 0;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: rgba(255, 255, 255, 0);
+        border-bottom-color: #fff;
+        border-width: 10px;
+        margin-right: 28px;
+      }
+      a {
+        display: block;
+      }
+    }
+  
+  .top-dropdown-menu {
+    left: auto;
+    right: -47px;
+    top: 26px;
+    
+  
+    &.profile-dropdown {
+      width: 145px;
+      top: 30px;
+      right: -12px;
+      a {
+        text-align: left;
+        border: none;
+        text-decoration: none;
+        color: $dropdown-text;
+        padding: 4px 16px 4px 20px;
+        &.signout {
+          border-top: 1px solid $default;
+        }
+        i {
+          margin-right: 10px;
+        }
+      }
+      i.dropdown-arr {
+        right: 25px;
+      }
+    }
+  
+  }

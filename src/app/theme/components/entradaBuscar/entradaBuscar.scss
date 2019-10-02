@@ -1,0 +1,67 @@
+.entradaBuscar {
+	position: relative;
+}
+
+.entradaBuscar input {
+	position: relative;
+	float: left;
+}
+
+.desc {
+	width: 100% !important;
+}
+
+.entradaBuscar button.btn {
+	float: left;
+	height: 35px;
+	position: relative;
+}
+
+botao {
+    display: block !important;
+}
+
+/* ----------------------------------  */
+
+table.table-modal tbody {
+    height: 300px;    
+}
+
+table.table-modal tbody tr{
+	white-space: nowrap
+}
+
+table.table.table-modal {
+	overflow: auto;
+	margin-left: 35px;
+	width: 95.4%;
+}
+
+.div_table_modal {
+    display: block;
+	overflow: auto;
+	min-height: 230px;
+}
+
+.coluna_add {
+    position: absolute;
+	left: 15px;
+	background: #f0f0f0;
+}
+
+.table > thead > tr > th.coluna_add:first-child {
+    width: 36px;
+    height: 49px;
+	z-index: 1;
+	background: #3a3668;
+}
+
+tbody .coluna_add {
+	background: #3a3668;
+	width: 36px;
+}
+
+.botoes_acao{
+	display: -webkit-box;
+    padding-top: 4px;
+}

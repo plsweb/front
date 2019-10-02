@@ -1,0 +1,22 @@
+@import 'sass/conf/conf';
+@import 'sass/bootstrap-overrides/overrides';
+@import '~animate.css/animate';
+@import 'sass/typography';
+@import 'sass/buttons';
+@import 'sass/icons';
+@import 'sass/layout';
+@import 'sass/socicon';
+@import 'sass/table';
+@import 'sass/form';
+@import 'sass/switched_button';
+@import 'sass/treeView';
+@import 'sass/modal';
+@import 'sass/preloader';
+@import 'sass/ionicons';
+@import 'sass/fonts';
+@import "~nouislider/distribute/nouislider.min.css";
+
+// CUSTOM IMPORTS
+@import 'components/dropdown-treeview-select/dropdown-treeview-select';
+@import 'components/autocomplete/autocomplete';
+@import 'components/botaoSearchAcoes/botaoSearchAcoes';

@@ -1,0 +1,25 @@
+<moldura>
+
+	<div class="row">
+		<div id="area-assinatura" class="col area-assinatura">
+			<canvas id="assinatura" width="800" height="100">
+				<p>
+					Infelizmente, seu navegador não suporta este recurso.
+				</p>
+			</canvas>
+		</div>
+	</div>
+	<br>
+	<p class="text-center"> {{label ? label : 'Beneficiário'}} </p>
+	<div class="row">
+		<div class="col">
+
+			<div class="row">
+				<div class="col">
+					<button class="btn btn-success" (click)="confirmar($event)">Confirmar</button>
+					<button class="btn btn-danger" (click)="limpar($event)">Limpar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</moldura>

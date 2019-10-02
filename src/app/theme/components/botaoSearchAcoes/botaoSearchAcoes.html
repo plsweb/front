@@ -1,0 +1,68 @@
+<div class="">
+        <label> </label>
+        <div id="{{id}}" class="botaoSearch form-group">
+            <div class="row">
+                <div class="col-sm-3 col-md-3 text-center">
+                    <div class="botoes_acao">
+                        <botao nome="{{label}}" icone="{{icone}}" tamanho="medio" (click)="buscaTodos( { paginaAtual : 1 } )"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+    
+    <ng-template #bodyModal let-c="close" let-d="dismiss">
+    
+        <div *ngIf="!camposFiltro; else divCamposFiltro" class="row">
+            <entrada class="col-md-10" nome="Descrição" tema="popup" (getValor)="getDescricao($event)" semTitulo="true"></entrada>
+            <botao class="col-md-1 botaoSearch" icone="search" tamanho="medio" (click)="buscaLikePaginado($event)"></botao>
+            <div class="botao_adicionar semFiltro">
+                <ng-template [ngTemplateOutlet]="btnAdicionar"></ng-template>
+            </div>
+        </div>
+        <ng-template #divCamposFiltro>
+            <div class="row">
+                <ng-template [ngTemplateOutlet]="camposFiltro"></ng-template>
+            </div>
+            <div class="row">
+                <botao class="col-md-1 botaoSearch" icone="search" tamanho="medio" (click)="buscaTodos($event)"></botao>
+                <div class="botao_adicionar">
+                    <ng-template [ngTemplateOutlet]="btnAdicionar"></ng-template>
+                </div>
+            </div>
+        </ng-template>
+    
+        <div class="div_table_modal">
+            <table [ngClass]=" { 'responsiva' : !actionsFirst }" class="table table-modal">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="coluna_add"></th>
+                        <th class="coluna_label" *ngFor="let col of params">{{ retornaLabelTabela(col) }}</th>
+                        <th *ngIf="!actionsFirst && elementoAcoes" class=""></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let itemLista of lista" class="link" id="linha{{itemLista[params[0]]}}">
+                        <td class="coluna_add">
+                            <icone *ngIf="!hideColunaAdd" nome="add_circle" class="acao" tamanho="medio" (click)=clickLinha(itemLista)></icone>
+                            <ng-template *ngIf="actionsFirst && elementoAcoes" [ngTemplateOutlet]="elementoAcoes" [ngTemplateOutletContext]="{ 'item': itemLista }"></ng-template>                        
+                        </td>
+                        <td *ngFor="let col of params" [style.backgroundColor]="( col.colunaCor && col.colunaCor[retornaValorLista(itemLista, col, itemLista[col], true)] ) ? col.colunaCor[retornaValorLista(itemLista, col, itemLista[col], true)] : ''" > {{ retornaValorLista(itemLista, col, itemLista[col], false) }} </td>
+                        <ng-template *ngIf="!actionsFirst && elementoAcoes" [ngTemplateOutlet]="elementoAcoes" [ngTemplateOutletContext]="{ 'item': itemLista }"></ng-template>                        
+                    </tr>
+                </tbody>            
+            </table>
+        </div>
+        <div>
+            <paginacao
+                (atualizaDados)="buscaPaginado($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtual}}"
+            ></paginacao>
+        </div>
+        
+    </ng-template>
+    
+    

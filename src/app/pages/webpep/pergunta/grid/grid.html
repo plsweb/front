@@ -1,0 +1,57 @@
+<!-- <div class="row">
+    <div class="col-sm-2">
+        <botao nome="Adicionar" (click)="adicionar()"></botao>
+    </div>
+</div> -->
+<moldura
+    titulo="Perguntas"
+    [registros]="ordenacao.qtdItensTotal"
+    [pesquisarKeydown]="filtrarPergunta.bind(this)"
+	[filtrar]="filtrarPergunta.bind(this)"
+    [customFiltro]="filtroPergunta"
+>
+	<!-- [elementoAcoes]="" -->
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <!-- <th></th> -->
+                <th>DESCRIÇÃO</th>
+                <th style="width:150px">TIPO</th>
+            </tr>
+            <tr *ngFor="let pergunta of perguntas" (click)="atualizar(pergunta.id)">
+                <!-- <td class="text-center"><icone nome="delete" title="Excluir" (click)="excluir(pergunta.id)"></icone></td> -->
+                <td>{{pergunta.descricao}}</td>
+                <td>{{pergunta.tipo == 'BOOLEAN' ? 'SIM OU NÃO' : pergunta.tipo}}</td>
+            </tr>
+        </thead>
+    </table>
+
+    <br clear="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="getPergunta($event)"
+            paginaAtual="{{ordenacao.paginaAtual}}"
+            qtdItensTotal="{{ordenacao.qtdItensTotal}}"
+            itensPorPagina="{{ordenacao.quantidade}}"
+            contaRegistro="true"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</moldura>
+
+
+<!-- 
+#############################################################################################
+                                FILTRO Pergunta
+#############################################################################################
+-->
+
+<ng-template #filtroPergunta>
+    <entrada
+        nome="Tipo"
+        tipo="seleciona"
+        [opcoes]="tipoPergunta"
+        (getValor)="tipoSelecionado($event)"
+    ></entrada>
+</ng-template>

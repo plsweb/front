@@ -1,0 +1,13 @@
+<moldura titulo="Leito">
+    <form (ngSubmit)="submit()">
+        <entrada nome="Prestador" [valor]="prestadorValor"  tipo="seleciona" [opcoes]="hospitais" (getValor)="getPrestador($event)"></entrada>
+        <entrada nome="Tipo" [valor]="tipoValor" tipo="seleciona" [opcoes]="tipoLeito" (getValor)="getTipo($event)"></entrada>
+        <entrada nome="Descrição" [valor]="descricaoValor" (getValor)="getDescricao($event)"></entrada>
+        <entrada nome="Ativo" [valor]="ativoValor" tipo="simNao" (getValor)="getAtivo($event)"></entrada>
+        <div class="row">
+            <div class="col-sm-2">
+                <botao nome="Salvar" submit="true" ></botao>
+            </div>
+        </div>
+    </form>
+</moldura>

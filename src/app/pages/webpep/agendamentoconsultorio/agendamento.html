@@ -1,0 +1,182 @@
+<div class="row">
+    
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <moldura>
+
+            <autocomplete
+                [placeholder]="'Digite para buscar Prestadores'"
+                [minimo]="3"
+                [titulo]="'Prestador'"
+                [valor]="variaveisDeAmbiente['prestadores']"
+                [camposFiltro]="['nome']"
+                [valorSelecionado]="variaveisDeAmbiente['prestadorSelecionado']"
+                (fnOnSelected)="getPrestadorFiltro($event)"
+            ></autocomplete>
+
+        </moldura>
+    </div>
+
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+    </div>
+</div>
+
+
+<!-- 
+#############################################################################################
+                                        Base Pagina
+#############################################################################################
+-->
+<ng-template #tmplBasePagina let-c="close" let-d="dismiss">
+    <div class="card-body">
+        <ng-template [ngTemplateOutlet]="tmplPacienteColsultorio"></ng-template>
+    </div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Tabela
+#############################################################################################
+-->
+<ng-template #tmplPacienteColsultorio let-c="close" let-d="dismiss">
+    <tabela
+        [titulo]="'Pacientes'"
+        [colunas]="variaveisDeAmbiente['colunas']"
+        [linhas]="pacientes"
+        [linhaClick]="abrirPaciente.bind(this)"
+        [atualizaDados]="pesquisar.bind(this)"
+        [ordenacao]="objFiltroAtendimento"
+        [registros]="objFiltroAtendimento['qtdItensTotal']"
+        [elementoAcoesMoldura]="elementoAgendamento"
+        [mostraFiltrar]="false"
+    >
+        <form class="filtro">
+            <ng-template [ngTemplateOutlet]="tmplFiltro"></ng-template>
+        </form>
+
+        <paginacao 
+            (atualizaDados)="getPaciente($event, this.unidadeAtendimento[0])" 
+            [qtdItensTotal]="objFiltroAtendimento['qtdItensTotal']" 
+            [itensPorPagina]="objFiltroAtendimento['quantidade']"
+            [paginaAtual]="objFiltroAtendimento['paginaAtual']"
+            [scrollPagination]="true"
+            [contaRegistro]="true"
+        ></paginacao>
+    </tabela>
+</ng-template>
+
+<ng-template #elementoAgendamento>
+    <div class="row" style="float: left;margin-right: 20px;">
+        <div class="col">
+            <button class="btn btn-primary" (click)="novoAgendamento()">Novo Paciente</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplFiltro let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            <label>Data Inicial</label>
+            <datepicker
+                [inputForm]='true'
+                [semData]='true'
+                ></datepicker>
+                <!-- [fnOnChange]="getValor.bind(this, 'dataInicio')"
+                [(datas)]='dataInicio'
+                (setInstancia)="getDataInicioInstancia($event)" -->
+        </div>
+
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            <label>Data Final</label>
+            <datepicker
+                [inputForm]='true'
+                [semData]='true'
+                ></datepicker>
+                <!-- [fnOnChange]="getValor.bind(this, 'dataFim')"
+                [(datas)]='dataFim'
+                (setInstancia)="getDataFimInstancia($event)" -->
+        </div>
+    </div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Historico Agendamento
+#############################################################################################
+-->
+<ng-template #bodyModalPaciente>
+    <paciente
+        [foto]="true"
+        [salva]="true"
+        [dados]="true"
+        [plano]="true"
+        [contato]="true"
+        [responsavel]="true"
+        [pacienteId]="idPacienteSelecionado"
+        [novoPaciente]="!idPacienteSelecionado"
+        [navegacaoTaps]="true"
+        (atualizaDados)="setDados($event)"
+    ></paciente>
+</ng-template>
+
+<ng-template #botoesModalPaciente>
+
+</ng-template>
+
+<!-- 
+#############################################################################################
+                                        Historico Agendamento
+#############################################################################################
+-->
+<ng-template #bodyModalAtendimentosPaciente>
+    <div class="row" *ngIf="atendimentosPaciente.length > 0; else naoTemAtendimentos">
+        <table *ngIf="atendimentosPaciente" class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="status"></th>
+                    <th>STATUS</th>
+                    <th>ESPECIALIDADE</th>
+                    <th>PRESTADOR</th>
+                    <th>AGENDAMENTO</th>
+                    <th>USUÁRIO</th>
+                    <th>OBSERVAÇÃO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let atendimento of atendimentosPaciente" class="link">
+                    <td class="status"></td>
+                    <td>{{ atendimento?.status }}</td>
+                    <td>{{ atendimento?.especialidade ? atendimento?.especialidade?.descricao : ((atendimento?.configuraHorario?.agendamentoColetivo) ? atendimento?.configuraHorario?.agendamentoColetivo?.especialidade?.descricao : '') }}</td>
+                    <td>{{ atendimento?.usuario ? atendimento?.usuario?.nome : '' }}</td>
+                    <td>{{ atendimento?.agendamento }}</td>
+                    <td>{{ (atendimento?.UsuarioAgendamento) ? atendimento?.UsuarioAgendamento?.nome : ''}}</td>
+                    <td>{{ atendimento?.observacao }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- <paginacao
+            (atualizaDados)="buscarProximasConsultasPaginado($event)"
+            qtdItensTotal="{{qtdItensTotalHist}}"
+            itensPorPagina="{{itensPorPaginaHist}}"
+            paginaAtual="{{paginaAtualHist}}"
+        ></paginacao> -->
+
+    </div>
+    <ng-template #naoTemAtendimentos>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Paciente sem histórico de Agendamentos.</h3>
+            </div>
+        </div>
+    </ng-template>
+</ng-template>
+
+<ng-template #botoesModalAtendimentosPaciente></ng-template>

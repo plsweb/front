@@ -1,0 +1,150 @@
+<moldura [titulo]="(( idProduto ) ? 'Editar' : 'Novo') + ' Produto'">
+	<ng-container *ngIf="novoProduto; else carregandoProduto">
+		<div class="row">
+			<div class="col-sm-6 col-md-6">
+				<entrada 
+					nome="Nome"
+					[valor]="novoProduto['nome']"
+					(getValor)="novoProduto['nome'] = $event.valor"
+				></entrada>
+			</div>
+    
+			<div class="col-sm-4 col-md-4">
+                <entrada 
+                    nome="Codigo do Protheus"
+                    [valor]="novoProduto['codigoProtheus']"
+                    (getValor)="novoProduto['codigoProtheus'] = $event.valor"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-2 col-md-2" style="margin-bottom: 25px;">
+                <div class="form-group">
+                    <label class="label_check">Principal</label>
+                    <input-checkbox 
+                        classe="check_principal"
+                        [estado]="novoProduto['principal']"
+                        (trocaEstado)="novoProduto['principal'] = $event"
+                    ></input-checkbox>
+                </div>
+            </div>
+
+			<div *ngIf="!novoProduto['principal']" class="col-md-6">
+				<autocomplete
+					[titulo]="'Princípio Ativo'"
+					[placeholder]="'Digite para buscar Princípio Ativo'"
+					[minimo]="3"
+					[valor]="objProdutoMestre"
+					[camposFiltro]="['nome']"
+					[valorSelecionado]="valorProdutoMestreSelecionado"
+					[fnSearch]="fnCfgProdutoMestreRemote.bind(this)"
+					(fnOnSelected)="setObjParamProdutoMestre($event)"
+				></autocomplete>
+			</div>
+		</div>
+
+		<ng-container *ngIf="novoProduto.id">    
+            <gridProcedimentos
+                [codigo]="idProduto"
+                labelIdAdd="produto"
+                labelIdList="produtoId"
+                [service]="serviceProdutoTuss"
+            ></gridProcedimentos>
+		</ng-container>
+	</ng-container>
+
+	<div class="row">
+		<botao 
+			nome="Salvar"
+			[ngClass]="'col-md-3'" 
+			(click)="salvarProduto()"
+		></botao>
+		<botao nome="Voltar" [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+	</div>
+</moldura>
+
+<ng-template #modalEditaProcedimento let-objProcedimento="objProcedimento">
+    <ng-template 
+        [ngTemplateOutlet]="adicionarProcedimento"
+        [ngTemplateOutletContext]="{procedimento: objProcedimento}"
+    ></ng-template>
+</ng-template>
+
+<ng-template #modalEditaProcedimentoBotoes let-objProcedimento="objProcedimento">
+    <botao nome="Salvar" (click)="salvarProcedimento(objProcedimento)"></botao>
+</ng-template>
+
+<ng-template 
+    #adicionarProcedimento 
+    let-procedimento="procedimento"
+    let-novo="novo"
+>
+    <div class="row">
+        <div class="col-md-8">
+            <autocomplete
+                titulo="Procedimento" 
+                [placeholder]="'Procedimentos'" 
+                [minimo]="3"
+                [requerido]="true"
+                [valor]="objProcedimentos"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="valorProcedimentoSelecionado" 
+                [fnSearch]="fnCfgProcedimentoRemote.bind(this)"
+                (fnOnSelected)="fnSetProcedimento($event, procedimento)"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                nome="Operadora"
+                tipo="seleciona"
+                [requerido]="true"
+                [opcoes]="operadoras"
+                [valor]="procedimento?.operadora?.id"
+                (getValor)="setOperadora($event, procedimento)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                nome="Fracionamento"
+                tipo="numero"
+                [valor]="procedimento?.fracaoTuss"
+                (getValor)="$event && $event.valor ? procedimento['fracaoTuss'] = $event.valor : procedimento['fracaoTuss'] = ''"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                nome="Arredondar"
+                tipo="simnao"
+                [valor]="procedimento?.arredondamento || '0'"
+                (getValor)="$event && $event.valor ? procedimento['arredondamento'] = $event.valor : procedimento['arredondamento'] = '0'"
+            ></entrada>
+        </div>
+        <!-- <div class="col-md-3">
+            <entrada 
+                nome="Quantidade *"
+                class="entrada qnts"
+                tipo="numero"
+                [valor]="procedimento?.quantidade"
+                (getValor)="$event && $event.valor ? procedimento['quantidade'] = $event.valor : procedimento['quantidade'] = undefined"
+            ></entrada>
+        </div> -->
+
+        <div *ngIf="novo" class="col-md-2">
+			<botao 
+				nome="Adicionar" 
+				[botao_lateral]="true"
+				(click)="salvarProcedimento(procedimento, true)"
+			></botao>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #carregandoProcedimentos>
+    <icone tamanho="grande" nome="cached" [loading]="true"></icone> Carregando procedimentos...
+</ng-template>
+
+<ng-template #carregandoProduto>
+    <icone tamanho="grande" nome="cached" [loading]="true"></icone> Carregando produto...
+</ng-template>

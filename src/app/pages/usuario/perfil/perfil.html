@@ -1,0 +1,66 @@
+<moldura *ngIf="usuario" titulo="Perfil">
+
+    <form (ngSubmit)="submit()">
+
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="row">
+                    <entrada [ngClass]="'col-sm-4'" nome="Usuário" [valor]="(usuario.userName) ? usuario.userName : ''" bloqueado="true"></entrada>
+                    <entrada [ngClass]="'col-sm-8'" nome="Nome" [valor]="(usuario.nome) ? usuario.nome : '' " (getValor)="getNome($event)" ></entrada>
+                    <entrada [ngClass]="'col-sm-6'" nome="Email" tipo="email" [valor]="(usuario.email) ? usuario.email : '' " (getValor)="getEmail($event)" ></entrada>
+                    <entrada [ngClass]="'col-sm-3'" nome="Celular" tipo="celular" [valor]="(usuario.celular) ? usuario.celular : '' " (getValor)="getCelular($event)" ></entrada>
+                    <entrada [ngClass]="'col-sm-3'" nome="Nascimento" tipo="data" [valor]="usuario.nascimento | slice:0:10" [incluirMascara]="true" (getValor)="getNascimento($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-6'" nome="Conselho" tipo="seleciona" [opcoes]="conselhos" [valor]="usuario.conselho ? usuario.conselho.id : ''" (getValor)="getConselho($event)"></entrada>                
+                    <entrada [ngClass]="'col-sm-4'" nome="Registro" [valor]="usuario.conselhoRegistro" (getValor)="getRegistro($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-2'" nome="UF" [valor]="usuario.conselhoUf" (getValor)="getUf($event)" [tamanhoMaximo]="'2'"></entrada>
+                    <entrada [ngClass]="'col-sm-6'" nome="Desejo receber mensagens do sistema por Email"   tipo="simnao" [valor]="(usuario.receberEmail != undefined) ? usuario.receberEmail : '0'" (getValor)="getReceberEmail($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-6'" nome="Desejo receber mensagens do sistema por Celular" tipo="simnao" [valor]="(usuario.receberSms != undefined) ? usuario.receberSms : '0'" (getValor)="getReceberSms($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-4'" nome="Ordem da fila de atendimentos"                   tipo="seleciona" [valor]="usuario.ordemFilaAtendimento" [opcoes]="ordensFilaAtendimento" (getValor)="getOrdemFila($event)"></entrada>
+
+                    <div class="row col-sm-12">
+                        <botao [ngClass]="'col-sm-4'" nome="Gravar"     (click)="submit()"></botao>
+                        <botao [ngClass]="'col-sm-4'" nome="Alterar Senha" classe="btn-info" (click)="alterarSenha(bodyModal, templateBotoes)"></botao>
+                        <botao [ngClass]="'col-sm-4'" nome="Voltar"       [btnVoltar]="true"   classe="btn-default"></botao>
+    
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-sm-4" style="text-align: center">
+                <div class="col-sm-12">
+                    <ba-card cardTitle="Foto" baCardClass="with-scroll">
+                        <ba-picture-uploader 
+                            [tipo]="'FOTO'"
+                            [picture]="imagem"
+                            (setImage)="getImagemCompleta($event)">
+                        </ba-picture-uploader>
+                    </ba-card>
+                </div>
+                <div class="col-sm-12">
+                    <ba-card cardTitle="Assinatura" baCardClass="with-scroll">
+                        <ba-picture-uploader 
+                            [tipo]="'ASSINATURA'"
+                            [picture]="assinatura" 
+                            (setImage)="getImagemCompleta($event)">
+                        </ba-picture-uploader>
+                    </ba-card>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+
+</moldura>
+
+<!-- MODAL -->
+<ng-template #bodyModal let-c="close" let-d="dismiss">
+    <entrada nome="Nova Senha" tipo="senha" id="novasenha" (getValor)="getNovaSenha($event)"></entrada>
+    <entrada nome="Confirmar Senha" tipo="senha" (getValor)="getConfirmacao($event)"></entrada>
+</ng-template>
+
+
+<ng-template #templateBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar Senha" (click)="salvarSenha()"></botao>
+</ng-template>

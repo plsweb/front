@@ -1,0 +1,41 @@
+.botoes {
+    position: relative;
+}
+
+.botoes botao {
+    float: left;
+    margin: 0 1% 0 0;
+    position: relative;
+    width: 48%;
+}
+
+:host /deep/ entrada {
+    
+    .form-group > label {
+        float: left;
+    }
+
+    .selecao label{
+        float: left;
+        text-align: left !important;
+        top: 5px !important;
+    }
+
+}
+
+:host /deep/ .documento entrada{
+
+    textarea{
+        resize: none;
+        height: auto !important;
+    }
+    
+}
+
+:host /deep/ toast-container {
+
+    div#toast-container {
+        top: 75px;
+    }
+
+}

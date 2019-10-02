@@ -1,0 +1,480 @@
+<!-- <plano-cuidado
+    [semAbaCoacher]="true"
+    [mostraBotaoAdicionaCoacher]="mostraBotaoAdd"
+></plano-cuidado> -->
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+        </div>
+    </div>
+
+
+    <!-- 
+    #############################################################################################
+                                            Base Pagina
+    #############################################################################################
+    -->
+    <ng-template #tmplBasePagina let-c="close" let-d="dismiss">
+        <!--div class="card-acoes">
+            <i class="material-icons acao salvar" (click)="abreModalRelatorioFiltro('Salvar')">save</i>
+        </div-->
+
+        <moldura [podeOcultar]="true" [oculto]="true" titulo="Adicionar Paciente">
+            <div class="row">
+                <div class="col">
+                    
+                    <autocomplete
+                        titulo="Paciente"
+                        [placeholder]="'Digite para buscar Pacientes'"
+                        [minimo]="3"
+                        [valor]="objPacientes"
+                        [camposFiltro]="['nome', 'cpf']"
+                        [valorSelecionado]="valorPacienteSelecionado"
+                        [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                        (fnOnSelected)="getPaciente($event)"
+                    ></autocomplete>
+                
+                </div>
+
+                <div *ngIf="!variaveisDeAmbiente['mostraBotaoAdd']" class="col">
+                    <autocomplete
+                        [titulo]="'Especialidade'"
+                        [placeholder]="'Digite para buscar Especialidade'"
+                        [minimo]="3"
+                        [valor]="objEspecialidades"
+                        [camposFiltro]="['descricao']"
+                        [valorSelecionado]="especialidadeSelecionada"
+                        [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                        (fnOnSelected)="getEspecialidade($event)"
+                    ></autocomplete>
+                </div>
+
+                <div class="col">
+                    <entrada
+                        tipo="seleciona"
+                        nome="Unidade Atendimento"
+                        [opcoes]="this.variaveisDeAmbiente['unidade']"
+                        (getValor)="$event && $event.valor ? unidadeId = $event.valor : unidadeId = ''"
+                    ></entrada>
+                </div>
+
+                <div class="col-sm-2 col-md-2 col-lg-2">
+                    <botao (click)="addCoacher()" [botao_lateral]="true" nome="Adicionar"></botao>
+                </div>
+    
+            </div>
+        </moldura>
+
+        <ng-template [ngTemplateOutlet]="tmplPacientesCoacher"></ng-template>
+
+        <!-- <plano-cuidado *ngIf="pacienteIdSelecionado" [pacientesSelecionados]="pacienteIdSelecionado" [semAbaCoacher]="true"></plano-cuidado> -->
+    </ng-template>
+
+
+    <!-- 
+    #############################################################################################
+                                            Botão Ação Grid PacientesCoacher
+    #############################################################################################
+    -->
+    <ng-template #tmplAddPacientesCoacher let-c="close" let-d="dismiss">
+        <div class="row" style="float: left;margin-right: 20px;">
+            <div class="col">
+                <button class="btn btn-primary" (click)="adicionarPacientesCoacher()" >Adicionar</button>
+            </div>
+        </div>
+    </ng-template>
+
+
+    <!-- 
+    #############################################################################################
+                                            Filtro
+    #############################################################################################
+    -->
+    <ng-template #tmplFiltro let-c="close" let-d="dismiss">
+        <div class="row">
+            <div class="col">
+                <ng-template [ngTemplateOutlet]="pacienteFiltro"></ng-template>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #pacienteFiltro>
+        <div class="row">
+            <div class="col-md-12">
+                <autocomplete
+                    [placeholder]="'Digite para buscar Cuidados'"
+                    [minimo]="3"
+                    [titulo]="'Cuidado'"
+                    [valor]="variaveisDeAmbiente['serviceCuidado']"
+                    [camposFiltro]="['nome']"
+                    [valorSelecionado]="variaveisDeAmbiente['cuidado'] ? variaveisDeAmbiente['cuidado'].valor.nome : ''"
+                    [fnSearch]="fnCfgRemote.bind(this, 'serviceCuidado', 'get')"
+                    (fnOnSelected)="getResposta($event, 'cuidado')"
+                ></autocomplete>
+            </div>
+            <div class="col-md-12">
+                <autocomplete
+                    [placeholder]="'Digite para buscar Pacientes'"
+                    [minimo]="3"
+                    [titulo]="'Paciente'"
+                    [valor]="variaveisDeAmbiente['pacientes']"
+                    [camposFiltro]="['nome', 'cpf']"
+                    [valorSelecionado]="variaveisDeAmbiente['paciente'] ? variaveisDeAmbiente['paciente'].valor.nome : ''"
+                    [fnSearch]="false"
+                    (fnOnSelected)="getResposta($event, 'paciente')"
+                ></autocomplete>
+            </div>
+            <div class="col-md-6 datepicker_escuro">
+                <label>Data</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getData.bind(this, dataInicio)"
+                    (setInstancia)="getDataInicioInstancia($event)"
+                    [(datas)]='dataInicio'
+                ></datepicker>
+            </div>
+        </div>
+    </ng-template>
+
+
+    <!-- 
+    #############################################################################################
+                                            Tabela
+    #############################################################################################
+    -->
+    <ng-template #tmplPacientesCoacher let-c="close" let-d="dismiss">
+        <tabela
+            [titulo]="'Meus Pacientes'"
+            [className]="'tabela_borda'"
+            [mostraFiltrar]="false"
+            [mostraPesquisar]="false"
+        >
+            <div class="card-detalhe">
+                <totalAcoes
+                    [tipo]="variaveisDeAmbiente['tipoPagina']"
+                    [usuarioGuid]="variaveisDeAmbiente['usuario']['guid']"
+                ></totalAcoes>
+            </div>
+
+            <div class="tabela-acoes">
+                <div *ngFor="let unidade of variaveisDeAmbiente['unidade']">
+
+                    <moldura
+                        *ngIf="unidade && variaveisDeAmbiente['tipoPagina'] == 'tarefas'"
+                        [oculto]="true"
+                        [titulo]="unidade.descricao"
+                        [podeOcultar]="false"
+                        [pesquisar]="pesquisarPaciente.bind(this, unidade)"
+                        labelRegistros="pacientes"
+                        [registros]="pacienteCoacher[unidade.id]?.qtdItensTotal | number"
+                    >
+
+                        <div class="card-detalhe">
+                            <totalAcoes
+                                [tipo]="variaveisDeAmbiente['tipoPagina']"
+                                [usuarioGuid]="variaveisDeAmbiente['usuario']['guid']"
+                                [unidadeAtendimentoId]="unidade.id"
+                            ></totalAcoes>
+                        </div>
+
+                        <div class="card-body">
+                            
+                            <div *ngIf="pacienteCoacher[unidade.id]?.dados; else carregandoPacientes">
+                                <div class="row">
+                                    <div class="col">
+                                        <!-- <table class="table table-striped">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>PACIENTE</th>
+                                                    <th>ESPECIALIDADE</th>
+                                                    <th>INICIO</th>
+                                                    <th>FIM</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let paciente of pacienteCoacher[unidade.id].dados" (click)="abrePacienteCoacher(paciente)">
+                                                    <td>{{paciente.paciente.nome}}</td>
+                                                    <td>{{paciente.especialidade.descricao}}</td>
+                                                    <td>{{paciente.inicio}}</td>
+                                                    <td>{{paciente.fim}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table> -->
+
+                                        <ng-template 
+                                            [ngTemplateOutlet]="tabelaPacientes"
+                                            [ngTemplateOutletContext]="{
+                                                tipo: variaveisDeAmbiente['tipoPagina'],
+                                                dados: pacienteCoacher[unidade.id].dados  
+                                            }"
+                                        ></ng-template>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <paginacao
+                                            (atualizaDados)="iniciaTabela(unidade.id, $event)"
+                                            [qtdItensTotal]="pacienteCoacher[unidade.id]?.qtdItensTotal"
+                                            [paginaAtual]="pacienteCoacher[unidade.id]?.paginaAtual"
+                                            [itensPorPagina]="pacienteCoacher[unidade.id]?.qtdItensPagina"
+                                        ></paginacao>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </moldura>
+
+                    <!-- GET pacienteCoacher retornar UnidadeAtendimento -->
+                    <moldura
+                        *ngIf="unidade && variaveisDeAmbiente['tipoPagina'] == 'coacher'"
+                        [oculto]="true"
+                        [titulo]="unidade.descricao"
+                        [pesquisar]="pesquisarPaciente.bind(this, unidade)"
+                        labelRegistros="pacientes"
+                        [podeOcultar]="false"
+                        [registros]="pacienteCoacher[unidade.id]?.qtdItensTotal | number"
+                    >
+
+                        <div class="card-detalhe">
+                            <totalAcoes
+                                [tipo]="variaveisDeAmbiente['tipoPagina']"
+                                [usuarioGuid]="variaveisDeAmbiente['usuario']['guid']"
+                                [unidadeAtendimentoId]="unidade.id"
+                            ></totalAcoes>
+                        </div>
+
+                        <div class="card-body">
+                            
+                            <div *ngIf="pacienteCoacher[unidade.id]?.dados; else carregandoPacientes">
+                                <div class="row">
+                                    <div class="col">
+                                        
+                                        <ng-template 
+                                            [ngTemplateOutlet]="tabelaPacientes"
+                                            [ngTemplateOutletContext]="{
+                                                tipo: variaveisDeAmbiente['tipoPagina'],
+                                                dados: pacienteCoacher[unidade.id].dados  
+                                            }"
+                                        ></ng-template>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <paginacao
+                                            (atualizaDados)="iniciaTabela(unidade.id, $event)"
+                                            [qtdItensTotal]="pacienteCoacher[unidade.id]?.qtdItensTotal"
+                                            [paginaAtual]="pacienteCoacher[unidade.id]?.paginaAtual"
+                                            [itensPorPagina]="pacienteCoacher[unidade.id]?.qtdItensPagina"
+                                        ></paginacao>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </moldura>
+                </div>
+
+            <moldura
+                    *ngIf="variaveisDeAmbiente['tipoPagina'] == 'tarefas'"
+                    [oculto]="true"
+                    [titulo]="'Sem Unidade de Atendimento'"
+                    [pesquisar]="pesquisarPaciente.bind(this, unidade)"
+                    labelRegistros="pacientes"
+                    [podeOcultar]="false"
+                    [registros]="pacienteSemUnidade?.qtdItensTotal"
+            >
+                <div class="card-body">
+                    <div *ngIf="pacienteSemUnidade?.dados; else carregandoPacientes">
+                        <div class="row">
+                            <div class="col">
+                                <ng-template 
+                                    [ngTemplateOutlet]="tabelaPacientes"
+                                    [ngTemplateOutletContext]="{
+                                        tipo: variaveisDeAmbiente['tipoPagina'],
+                                        dados: pacienteSemUnidade.dados
+                                    }"
+                                ></ng-template>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <paginacao
+                                    (atualizaDados)="iniciaTabela(null, $event)"
+                                    [qtdItensTotal]="pacienteSemUnidade?.qtdItensTotal"
+                                    [paginaAtual]="pacienteSemUnidade?.paginaAtual"
+                                    [itensPorPagina]="pacienteSemUnidade?.qtdItensPagina"
+                                ></paginacao>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </moldura>
+
+            <moldura
+                *ngIf="variaveisDeAmbiente['tipoPagina'] == 'coacher'"
+                [oculto]="true"
+                [titulo]="'Sem Unidade de Atendimento'"
+                [podeOcultar]="false"
+                [registros]="pacienteSemUnidade?.qtdItensTotal"
+            >
+                <div class="card-body">
+                    <div *ngIf="pacienteSemUnidade?.dados; else carregandoPacientes">
+                        <div class="row">
+                            <div class="col">
+                                <ng-template 
+                                    [ngTemplateOutlet]="tabelaPacientes"
+                                    [ngTemplateOutletContext]="{
+                                        tipo: variaveisDeAmbiente['tipoPagina'],
+                                        dados: pacienteSemUnidade.dados
+                                    }"
+                                ></ng-template>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <paginacao
+                                    (atualizaDados)="iniciaTabela(null, $event)"
+                                    [qtdItensTotal]="pacienteSemUnidade?.qtdItensTotal"
+                                    [paginaAtual]="pacienteSemUnidade?.paginaAtual"
+                                    [itensPorPagina]="pacienteSemUnidade?.qtdItensPagina"
+                                ></paginacao>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </moldura>
+
+            </div>
+
+            <form class="filtro">
+                <ng-template [ngTemplateOutlet]="tmplFiltro"></ng-template>
+            </form>
+
+        </tabela>
+    </ng-template>
+
+
+
+    <!-- 
+    #############################################################################################
+                                            Modal
+    #############################################################################################
+    -->
+    <ng-template #Acoes let-c="close" let-d="dismiss">
+        <div class="col">{{variaveisDeAmbiente['paciente'] | json}}
+            <entrada 
+                nome="Paciente"
+                [valor]="variaveisDeAmbiente['paciente'].paciente"
+            ></entrada>
+            <entrada 
+                nome="Idade"
+                [valor]="variaveisDeAmbiente['paciente'].paciente"
+            ></entrada>
+            <entrada 
+                nome="Inicio"
+                [valor]="variaveisDeAmbiente['paciente'].inicio"
+            ></entrada>
+            <entrada 
+                nome="Ações Realizadas"
+                [valor]="variaveisDeAmbiente['paciente']"
+            ></entrada>
+            <entrada 
+                nome="Ações Restantes"
+                tipo="numero"
+                [valor]="variaveisDeAmbiente['paciente']"
+            ></entrada>
+            <entrada 
+                nome="Total de Ações"
+                [valor]="variaveisDeAmbiente['paciente']"
+            ></entrada>
+        </div>
+    </ng-template>
+
+    <ng-template #botoesModalAcoes let-c="close" let-d="dismiss">
+        <botao nome="Excluir" *ngIf="true"></botao>
+        <botao nome="Salvar" *ngIf="true"></botao>
+        <botao nome="Editar" *ngIf="true"></botao>
+    </ng-template>
+
+
+    <ng-template 
+        #tabelaPacientes 
+        let-tipo="tipo"
+        let-dados="dados"
+    >
+    
+        <ng-container *ngIf="dados && dados.length; else semRegistro">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>PACIENTE</th>
+                        <ng-container *ngIf="tipo == 'tarefas'">
+                            <th>ESPECIALIDADE</th>
+                        </ng-container>
+                        <th>INICIO</th>
+                        <th title="Ações a serem realizadas">P</th>
+                        <th title="Ações vencidas">V</th>
+                        <!-- <th>REALIZADAS</th> -->
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let paciente of dados" (click)="abrePacienteCoacher(paciente)">
+                        <td>{{paciente.paciente.nome}}</td>
+                        <ng-container *ngIf="tipo == 'tarefas'">
+                            <td>{{paciente.especialidade.descricao}}</td>
+                        </ng-container>
+                        <td>{{paciente.inicio}}</td>
+                        <td (click)="verDetalheAcoes($event, 'avencer', paciente)">
+                            {{paciente.totalAcoesPaciente?.avencer || 0}}
+                        </td>
+                        <td (click)="verDetalheAcoes($event, 'vencidas', paciente)">
+                            {{paciente.totalAcoesPaciente?.vencidas || 0}}
+                        </td>
+                        <!-- <td (click)="verDetalheAcoes($event, 'realizadas', paciente)">
+                            {{paciente.totalAcoesPaciente?.realizadas || 0}}
+                        </td> -->
+                        <td (click)="verDetalheAcoes($event, 'total', paciente)">
+                            {{( (paciente.totalAcoesPaciente?.vencidas || 0) + (paciente.totalAcoesPaciente?.realizadas || 0) + (paciente.totalAcoesPaciente?.avencer || 0) ) || 0}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ng-container>
+
+    </ng-template>
+
+    <ng-template #carregandoPacientes>
+        <icone 
+            tamanho="grande" 
+            nome="cached" 
+            [loading]="true" 
+        ></icone> Carregando pacientes...
+    </ng-template>
+
+    <ng-template #informacoesCoacher let-unidade="unidade">
+        <totalAcoes
+            [tipo]="variaveisDeAmbiente['tipoPagina']"
+            [usuarioGuid]="variaveisDeAmbiente['usuario']['guid']"
+            [unidadeAtendimentoId]="unidade"
+        ></totalAcoes>
+    </ng-template>
+
+    <ng-template #informacoesCoacherUnidade let-unidade="unidade">
+        
+        ID UNIDADE: {{unidade}}
+        <!-- <totalAcoes
+            [tipo]="variaveisDeAmbiente['tipoPagina']"
+            [usuarioGuid]="variaveisDeAmbiente['usuario']['guid']"
+            [unidadeAtendimentoId]="unidade"
+        ></totalAcoes> -->
+    </ng-template>
+
+    <ng-template #semRegistro>Não ha pacientes</ng-template>

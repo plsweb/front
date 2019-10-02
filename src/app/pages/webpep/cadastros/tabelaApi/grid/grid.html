@@ -1,0 +1,41 @@
+<moldura 
+    titulo="Tabelas API" 
+    [registros]="qtdItensTotal" 
+    [pesquisar]="pesquisar.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>NOME</th>
+                        <th>NOME BANCO</th>
+                        <th>NOME JAVA</th>
+                    </tr>
+                    <tr *ngFor="let tabela of tabelasApi" (click)="atualizar(tabela.id)">
+                        <td>{{tabela.nome}}</td>
+                        <td>{{tabela.nomeBanco}}</td>
+                        <td>{{tabela.nomeJava}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaTabelaApiPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>

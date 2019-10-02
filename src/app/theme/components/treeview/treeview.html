@@ -1,0 +1,80 @@
+<div class="row">
+    <div class="col">
+        <input
+            type="text"
+            #inputFiltrar
+            class="form-control"
+            placeholder="Filtrar"
+            (keyup)="filtrar($event, inputFiltrar)"
+            [(ngModel)]="selecionado['descricao']"
+        >
+    </div>
+</div>
+
+<div *ngIf="!grupo" class="animated fadeIn" zoom-in>
+    <div *ngIf="items && items.length" class="card-body">
+        <ul>
+            <li *ngFor="let item of items">
+                <div (click)="clickPai(item);">
+                    <div class="inline">
+                        <icone *ngIf="!item.collapsed" nome="keyboard_arrow_down"></icone>
+                        <icone *ngIf="item.collapsed" nome="keyboard_arrow_right"></icone>
+
+                        <span class="legenda text-truncate" title="{{item?.descricao || item?.item?.descricao}}">{{item?.descricao || item?.item?.descricao}}</span>
+                    </div>
+                </div>
+
+                <ul *ngIf="item.collapsed">
+                    <li 
+                        class="filho text-truncate"
+                        *ngFor="let childItem of item.filhos"
+                        (click)="clickFilho(item, childItem);"
+                        title="{{childItem.descricao}}"
+                    >
+                        {{childItem.descricao}}
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<ng-container *ngIf="grupo">
+    <div *ngFor="let grupoItem of grupoItems">
+        <div class="animated fadeIn" zoom-in >
+            <div class="card-body" *ngIf="validafiltro(filtro, grupoItem?.resultado)">
+                <div (click)="clickPai(grupoItem)">
+                    <icone *ngIf="!grupoItem?.collapsed" nome="keyboard_arrow_down"></icone>
+                    <icone *ngIf="grupoItem?.collapsed" nome="keyboard_arrow_right"></icone>
+                    <span class="legenda text-truncate" title="{{grupoItem?.descricao}}">{{grupoItem?.descricao}}</span>
+                </div>
+    
+                <ul *ngIf="grupoItem?.collapsed" class="ml-4 mb-0">
+                    <div *ngFor="let tema of grupoItem?.temas">
+                        <li *ngIf="tema?.grupos?.length">
+                            <div (click)="clickPai(tema);">
+                                <div class="inline">
+                                    <icone *ngIf="!tema?.collapsed" nome="keyboard_arrow_down"></icone>
+                                    <icone *ngIf="tema?.collapsed" nome="keyboard_arrow_right"></icone>
+                                
+                                    <span class="legenda text-truncate" title="{{tema?.descricao}}">{{tema?.descricao}}</span>
+                                </div>
+                            </div>
+    
+                            <ul *ngIf="tema?.collapsed">
+                                <li 
+                                    class="filho text-truncate" 
+                                    *ngFor="let childItem of tema?.grupos" 
+                                    (click)="clickFilho(tema, childItem);" 
+                                    title="{{childItem.descricao}}"
+                                >
+                                    {{childItem.descricao}}
+                                </li>
+                            </ul>
+                        </li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </div>
+</ng-container>

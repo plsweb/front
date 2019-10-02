@@ -1,0 +1,692 @@
+<div 
+    [ngStyle]="{'width': 'calc(' + parent + 'px - ' + tamanhoVw + 'vw)'}"
+    class="grid-itens {{ modoDetalhado ? 'grid-detalhada' : '' }} {{ modoRealizacao ? 'modo-realizacao' : 'modo-prescricao' }} {{ somenteVisualizacao ? 'somente-visualizacao' : '' }}"
+    ng-repeat="bHoje = true"
+>
+    <div class="row animated fadeIn" zoom-in>
+        <moldura titulo="Adicionar Procedimento" class="col-sm-12" sub="true" oculto="true" *ngIf="!modoRealizacao && !somenteVisualizacao">
+            <div class="col">
+                <div class="row addProcedimento">
+                    <div class="col-sm-6 col-md-6">
+                        <autocomplete
+                            titulo="Procedimentos"
+                            [placeholder]="'Digite para buscar Procedimentos'"
+                            [minimo]="3"
+                            [requerido]="true"
+                            [valor]="objProcedimentos"
+                            [camposFiltro]="['nome']"
+                            [valorSelecionado]="valorProcedimentosSelecionado"
+                            [fnSearch]="fnCfgProcedimentosRemote.bind(this)"
+                            (fnOnSelected)="setObjParamProcedimentos($event)"
+                            (onClear)="clearObjParamProcedimentos()"
+                        ></autocomplete>
+                    </div>
+
+                    <div class="col-md-2 col-sm-2">
+                        <entrada 
+                            nome="Acesso" 
+                            tipo="seleciona"
+                            [requerido]="true"
+                            [opcoes]="opcoesViaAcesso" 
+                            objId="codigo" 
+                            [valor]="objParamAddProcedimento['viaAcesso']" 
+                            (getValor)="($event) ? objParamAddProcedimento['viaAcesso'] = $event.valor : null"
+                        ></entrada>
+                    </div>
+            
+                    <div class="col-md-2 col-sm-2">
+                        <entrada
+                            nome="Frequência"
+                            tipo="seleciona"
+                            [requerido]="true"
+                            [opcoes]="opcoesFrequencia"
+                            [valor]="objParamAddProcedimento['frequencia']['id']"
+                            (getValor)="bHoje = false; setProcedimentosFrequencia($event, objParamAddProcedimento, 'Frequência')"
+                        ></entrada>
+                    </div>
+            
+                    <div class="col entrada" style="left: 15px;">
+                        <div class="datahoje" style="left: 15px;">
+                            <label *ngIf="!!!pos">Agora</label>
+                            <input-checkbox
+                                estado="true" 
+                                classe="check_tipodata"
+                                (trocaEstado)="bHoje = !bHoje"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+            
+                    <div *ngIf="bHoje" class="col-md-4 entrada">
+                        <entrada
+                            nome="Inicio"
+                            tipo="datepicker"
+                            classe="top"
+                            [requerido]="true"
+                            [hora]="true"
+                            [valor]="dataInicio"
+                            (getValor)="getData($event)"
+                        ></entrada>
+                    </div>
+            
+                    <div class="col entrada">
+                        <div class="form-group">
+                            <label>Dias</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                value="1" 
+                                min="1" 
+                                [(ngModel)]="objParamAddProcedimento['dias']">
+                        </div>
+                    </div>
+            
+                    <div class="col-md-6 col-sm-6">
+                        <div class="row" style="margin:auto 0px">
+                            <div class="col-md-4 col-sm-4">
+                                <entrada
+                                    nome="Dose Aplicada"
+                                    tipo="numero"
+                                    [requerido]="true"
+                                    [valor]="objParamAddProcedimento['doseAplicada']"
+                                    (getValor)="objParamAddProcedimento['doseAplicada'] = $event.valor"
+                                ></entrada>
+                            </div>
+            
+                            <div class="col-md-8 col-sm-8">
+                                <entrada
+                                    nome="&nbsp;"
+                                    tipo="seleciona"
+                                    objId="id"
+                                    [requerido]="true"
+                                    mostraOpcaoEmBranco="true"
+                                    [opcoes]="opcoesDmTissUnidadeMedica"
+                                    [valor]="objParamAddProcedimento['doseAplicadaUnidade'] ? objParamAddProcedimento?.doseAplicadaUnidade?.id : null"
+                                    (getValor)="$event?.valor && $event?.valor != 0 ? objParamAddProcedimento['doseAplicadaUnidade'] = { id: $event.valor } : null"
+                                ></entrada>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-12">
+                        <entrada
+                            tipo="area"
+                            nome="Orientações"
+                            [semTitulo]="true"
+                            [tamanhoMaximo]="250"
+                            [valor]="objParamAddProcedimento['orientacaoPadrao']"
+                            (getValor)="objParamAddProcedimento['orientacaoPadrao'] = $event.valor"
+                        ></entrada>
+                    </div>
+                </div>      
+    
+                <div class="row">
+                    <botao nome="Salvar" (click)="salvarProcedimento()"></botao>
+                </div>
+            </div>
+        </moldura>
+    
+        <moldura titulo="Adicionar Modelo" class="col-sm-12" sub="true" oculto="true" *ngIf="mostraModelo && !modoRealizacao && !somenteVisualizacao">
+            <div class="col">   
+                <div class="row addProcedimento">
+                    <div class="col-sm-12 col-md-12">
+                        <autocomplete
+                            titulo="Modelos"
+                            [placeholder]="'Digite para buscar Modelos de Prescrição'"
+                            [minimo]="3"
+                            [valor]="objModelos"
+                            [camposFiltro]="['nome']"
+                            [valorSelecionado]="valorModelosSelecionado"
+                            [fnSearch]="fnCfgModelosRemote.bind(this)"
+                            (fnOnSelected)="setObjParamModelos($event)"
+                            (onClear)="itensModeloSelecionado=false"
+                        ></autocomplete>
+                    </div>
+                    
+                    <ng-container *ngIf="itensModeloSelecionado && itensModeloSelecionado.length; else modeloVazio">
+    
+                        <div class="row item_modelo" *ngFor="let item of itensModeloSelecionado; let pos = index">
+    
+                            <div class="col-md-3 entrada">
+                                <div class="form-group">
+                                    <label *ngIf="!!!pos"></label>
+                                    <div title="{{item.nome}}" class="text-overflow">
+                                        <icone nome="delete" class="acao" (click)="deleteItem(item, pos)"></icone>
+                                        <span>{{(item.prescricaoItem || item).nome}}</span>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="col-md-2 col-sm-2">
+                                <entrada 
+                                    nome="Frequência"
+                                    tipo="seleciona"
+                                    [semTitulo]="!!pos"
+                                    [id]="'Frequência'+pos"
+                                    [opcoes]="opcoesFrequencia" 
+                                    [valor]="item['frequencia'] ? item['frequencia'] : '0'" 
+                                    (getValor)="setProcedimentosFrequencia($event, itensModeloSelecionado[pos], 'Frequência'+pos)"
+                                ></entrada>
+                            </div>
+    
+                            <div class="col-md-2 col-sm-2">
+                                <entrada 
+                                    nome="Acesso" 
+                                    tipo="seleciona" 
+                                    [semTitulo]="!!pos"
+                                    [opcoes]="opcoesViaAcesso" 
+                                    objId="codigo" 
+                                    [valor]="item['viaAcesso']" 
+                                    (getValor)="($event) ? item['viaAcesso'] = $event.valor : null"
+                                ></entrada>
+                            </div>
+    
+                            <div class="col entrada" style="left: 15px;">
+                                <div class="datahoje"style="left: 15px;">
+                                    <label *ngIf="!!!pos">Agora</label>
+                                    <input-checkbox
+                                        estado="true"
+                                        classe="check_tipodata"
+                                        (trocaEstado)="bHoje = !bHoje"
+                                    ></input-checkbox>
+                                </div>
+                            </div>
+    
+                            <div *ngIf="bHoje" class="col-md-3 entrada">
+                                <entrada
+                                    nome="Inicio"
+                                    tipo="datepicker"
+                                    classe="top"
+                                    [semTitulo]="!!pos"
+                                    [hora]="true"
+                                    [valor]="dataInicio"
+                                    (getValor)="item['horaInicio'] = $event['valor']"
+                                ></entrada>
+                            </div>
+                
+                            <div class="col entrada">
+                                <div class="form-group">
+                                    <entrada
+                                        nome="Dias"
+                                        tipo="numero"
+                                        [semTitulo]="!!pos"
+                                        [valor]="item['dias']"
+                                        [minimo]="1"
+                                        (getValor)="item['dias'] = $event['valor']"
+                                    ></entrada>
+                                </div>
+                            </div>
+    
+                        </div>
+                        
+                    </ng-container>
+                    
+                    <ng-template #modeloVazio>
+                        <span *ngIf="itensModeloSelecionado && !itensModeloSelecionado.length">Não há itens para esse modelo de prescrição</span>
+                    </ng-template>
+                </div>
+
+                <div class="row">
+                    <botao nome="Salvar" (click)="adicionarModelo()"></botao>
+                </div>
+            </div>
+        </moldura>
+    
+        <div class="expand" *ngIf="modoRealizacao">
+            <icone [hidden]="modoDetalhado" (click)="resize(); modoDetalhado = true" nome="add"></icone>
+            <icone [hidden]="!modoDetalhado" (click)="resize(); modoDetalhado = false" nome="minimize"></icone>
+        </div>
+    
+        <moldura titulo="Procedimentos" class="col-sm-12">
+            <table class="table table-responsive table-striped no-hover" *ngIf="!loadingProcedimentos && itensPrescricao.length">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th *ngIf="!modoRealizacao && !somenteVisualizacao"></th><!-- Delete -->
+                        <th *ngIf="obrigaOrdem && !modoRealizacao && !somenteVisualizacao"></th><!-- Ordenação -->
+                        <th>
+                            PROCEDIMENTO
+                        </th>
+                        <th>
+                            VIA DE ACESSO
+                        </th>
+                        <th *ngIf="modoDetalhado">
+                            FREQUÊNCIA
+                        </th>
+                        <th>
+                            DOSE APLICADA
+                        </th>
+                        <th>
+                            UNIDADE APLICADA
+                        </th>
+                        <th>
+                            DOSE PADRÃO
+                        </th>
+                        <th>
+                            TEMPO INFUSÃO
+                        </th>
+                        <th *ngIf="modoDetalhado && modoRealizacao">
+                            INFUSÃO MININA
+                        </th>
+                        <th *ngIf="modoDetalhado && modoRealizacao">
+                            INFUSÃO MAXIMA
+                        </th>
+                        <th *ngIf="modoDetalhado">
+                            INICIO
+                        </th>
+                        <th *ngIf="modoDetalhado">
+                            FIM
+                        </th>
+                        <th *ngIf="modoRealizacao && visualizaHistoricoRealizacao">
+                            EXECUÇÕES
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngIf="!loadingProcedimentos; else carregandoItens">
+                        <ng-container *ngIf="itensPrescricao && itensPrescricao.length">
+                            <ng-container *ngFor="let item of itensPrescricao; let pos = index;">
+                                <tr class="{{ validaClasse(pos) ? 'even' : 'odd' }}">
+                                    <td class="status {{validaStatus(item.status)}}" title="{{item.status}}"></td>
+        
+                                    <td class="valor" *ngIf="!modoRealizacao && !somenteVisualizacao">
+                                        <icone nome="delete" title="Excluir Item" (click)='removerItem($event, item)' *ngIf="item.status == 'PRESCRITO'"></icone>
+                                        <icone nome="block" title="Suspender Item" (click)='suspenderItem($event, item)' *ngIf="item.status != 'PRESCRITO'"></icone>
+                                    </td>
+        
+                                    <td class="valor" *ngIf="obrigaOrdem && !modoRealizacao && !somenteVisualizacao">
+                                        <icone nome="expand_less" title="Subir Nivel" (click)="ordemItemPrescricao(item?.id, itensPrescricao[pos-1]?.id)" [ngClass]="{'invisible' : 0 == pos}"></icone>
+                                        <icone nome="expand_more" title="Descer Nivel" (click)="ordemItemPrescricao(itensPrescricao[pos+1]?.id, item?.id)" *ngIf="itensPrescricao.length-1 > pos"></icone>
+                                    </td>
+        
+                                    <td class="valor nome_procedimento" (click)="selecionaItem(item)" title="Clique para ver os produtos">
+                                        <span>{{item.prescricaoItem.nome}}</span>
+                                    </td>
+                                    
+                                    <td class="valor edit" (click)="editaCampoItem( $event, 'viaAcesso', item.id, item['viaAcesso'])">
+                                        <div class="edit" *ngIf="!somenteVisualizacao && campoEdita['viaAcesso'] && campoEdita['viaAcesso']['id'] == item.id; else campoSimplesVia">
+                                            <entrada 
+                                                class="entrada qnts" 
+                                                [opcoes]="opcoesViaAcesso" 
+                                                semTitulo="true" 
+                                                tipo="seleciona" 
+                                                objId="codigo" 
+                                                [valor]="item.viaAcesso" 
+                                                [fnOnChange]="salvarCampoEdita.bind(this, 'viaAcesso')"
+                                            ></entrada>
+                                        </div>
+        
+                                        <ng-template #campoSimplesVia>
+                                            <span>{{item.viaAcesso || 'SELECIONE VIA ACESSO'}}</span>
+                                        </ng-template>
+                                    </td>
+        
+                                    <td *ngIf="modoDetalhado">
+                                        <div class="{{ modoRealizacao ? 'col-md-1' : 'col-md-2' }} valor edit" (click)="editaCampoItem( $event, 'frequencia', item.id, (item['frequencia'] ? item['frequencia'] : undefined))">
+                                            <div class="edit" *ngIf="!somenteVisualizacao && campoEdita['frequencia'] && campoEdita['frequencia']['id'] == item.id; else campoSimplesFreq">
+                                                <entrada
+                                                    tipo="seleciona"
+                                                    semTitulo="true"
+                                                    class="entrada qnts"
+                                                    [opcoes]="opcoesFrequencia"
+                                                    [fnOnChange]="salvarCampoEdita.bind(this, 'frequencia' )"
+                                                    valor="{{item['frequencia'] ? item['frequencia']['id'] : undefined}}"
+                                                ></entrada>
+                                            </div>
+        
+                                            <ng-template #campoSimplesFreq>
+                                                <span>{{item.frequencia ? item.frequencia.descricao : 'SELECIONE FREQUENCIA'}}</span>
+                                            </ng-template>
+                                        </div>                      
+                                    </td>
+        
+                                    <td class="valor edit" (click)="editaCampoItem( $event, 'doseAplicada', item.id, item['doseAplicada'])">
+                                        <div class="edit" *ngIf="!somenteVisualizacao && campoEdita['doseAplicada'] && campoEdita['doseAplicada']['id'] == item.id; else campoSimplesDoseAplicada">
+                                            <entrada 
+                                                class="entrada qnts" 
+                                                semTitulo="true" 
+                                                tipo="numero" 
+                                                [valor]="item.doseAplicada" 
+                                                [fnOnChange]="salvarCampoEdita.bind(this, 'doseAplicada')"
+                                            ></entrada>
+                                        </div>
+        
+                                        <ng-template #campoSimplesDoseAplicada>
+                                            <span>{{item.doseAplicada}}</span>
+                                        </ng-template>
+                                    </td>
+
+                                    <td class="valor edit" (click)="editaCampoItem( $event, 'doseAplicadaUnidade', item.id, item['doseAplicadaUnidade'])">
+                                        <div class="edit" *ngIf="!somenteVisualizacao && campoEdita['doseAplicadaUnidade'] && campoEdita['doseAplicadaUnidade']['id'] == item.id; else campoSimplesDoseAplicadaUnidade">
+                                            <entrada
+                                                class="entrada qnts"
+                                                semTitulo="true"
+                                                tipo="seleciona"
+                                                [opcoes]="opcoesDmTissUnidadeMedica"
+                                                [fnOnChange]="salvarCampoEdita.bind(this, 'doseAplicadaUnidade')"
+                                                valor="{{item['doseAplicadaUnidade'] ? item['doseAplicadaUnidade']['id'] : undefined}}"
+                                            ></entrada>
+                                        </div>
+                                        
+                                        <ng-template #campoSimplesDoseAplicadaUnidade>
+                                            <span>{{item?.doseAplicadaUnidade?.descricao}}</span>
+                                        </ng-template>
+                                    </td>
+
+                                    <td class="valor" (click)="selecionaItem(item)" title="Dose ">
+                                        <span>
+                                                {{ (item?.quantidadeDosePadrao || item?.prescricaoItem?.quantidadeDosePadrao) }} 
+                                                {{ (item?.quantidadeDosePadrao || item?.prescricaoItem?.quantidadeDosePadrao) &&
+                                                   (item.dosePadrao || item?.prescricaoItem?.dosePadrao) ? '/' : ''}} 
+                                                {{ (item.dosePadrao || item?.prescricaoItem?.dosePadrao) }}
+                                        </span>
+                                    </td>
+
+                                    <td class="valor edit" (click)="editaCampoItem( $event, 'tempoInfusao', item.id, item['tempoInfusao'])">
+                                        <div class="edit" *ngIf="!somenteVisualizacao && campoEdita['tempoInfusao'] && campoEdita['tempoInfusao']['id'] == item.id; else campoSimplesInfusao">
+                                            <entrada 
+                                                tipo="hora" 
+                                                tipoRetorno="mm"
+                                                semTitulo="true" 
+                                                class="entrada qnts"
+                                                nome="Tempo de Infusão"
+                                                [valor]="converteHora(item.tempoInfusao)" 
+                                                (getValor)="$event?.valorSimples ? salvarCampoEdita('tempoInfusao', $event?.valorSimples) : null"
+                                            ></entrada>
+                                                <!-- [fnOnChange]="salvarCampoEdita.bind(this, 'tempoInfusao')" -->
+                                        </div>
+        
+                                        <ng-template #campoSimplesInfusao>
+                                            <span>{{converteHora(item.tempoInfusao)}}</span>
+                                        </ng-template>
+                                    </td>
+        
+                                    <td *ngIf="modoDetalhado && modoRealizacao">
+                                    </td>
+        
+                                    <td *ngIf="modoDetalhado && modoRealizacao">
+                                    </td>
+        
+                                    <td *ngIf="modoDetalhado">
+                                        <span>{{(item.horaInicio) ? momentjs( item.horaInicio, formatosDeDatas.dataHoraSegundoFormato ).format( formatosDeDatas.dataHoraFormato ) : ''}}</span>
+                                    </td>
+        
+                                    <td *ngIf="modoDetalhado" class="d-table-cell">
+                                        <span>{{(item.horaFim) ? momentjs( item.horaFim, formatosDeDatas.dataHoraSegundoFormato ).format( formatosDeDatas.dataHoraFormato ) : ''}}</span>
+                                    </td>
+        
+                                    <td *ngIf="modoRealizacao && visualizaHistoricoRealizacao" class="d-table-cell">
+                                        <div class="execucoes"> 
+                                            <ng-container *ngIf="validaObjHistoricoPrescricoes()">
+            
+                                                <div    
+                                                    *ngFor="let historico of historicoPrescricoes[item.id]; let pos = index"
+                                                    class="historico-prescricao"
+                                                    (click)="mudaStatusMedicacao( ( historico.status == 'PENDENTE' ? 'INICIAL' : 'CHECADO'), historico, pos, item, $event)"
+                                                    (contextmenu)="mudaStatusMedicacao('BOLADO', historico, pos, item, $event)"
+                                                    title=" {{ historico.dataExecutada ? historico.dataExecutada : 'Previsto: ' + historico.dataPrevista }} "
+                                                >
+                                                    <div class="play" *ngIf="historico.status == 'PENDENTE'">
+                                                        <icone
+                                                            nome="play_circle_outline"
+                                                            tamanho="medio"
+                                                        ></icone>
+                                                    </div>
+
+                                                    <div class="inicial bolado" *ngIf="historico.status == 'INICIAL'">
+                                                    </div>
+            
+                                                    <div class="bolado" *ngIf="historico.status == 'BOLADO'">
+                                                    </div>
+            
+                                                    <div class="checado" *ngIf="historico.status == 'CHECADO'">
+                                                        <input-checkbox [estado]="true"></input-checkbox>
+                                                    </div>
+                                                </div>
+            
+                                            </ng-container>
+                                        </div>                      
+                                    </td>
+        
+                                    <td *ngIf="proximaPrescricao" class="historico-prescricao valor">
+                                        <div class="checar">
+                                            <input-checkbox 
+                                                classe="check_principal"
+                                                [estado]="false" 
+                                                legenda="Checar"
+                                                (trocaEstado)="definePlanoPrincipal($event, plano)"
+                                            ></input-checkbox>
+                                        </div>
+                                        <div class="bolar">
+                                            <input-checkbox 
+                                                classe="check_principal"
+                                                [estado]="true" 
+                                                legenda="Bolar"
+                                                (trocaEstado)="definePlanoPrincipal($event, plano)"
+                                            ></input-checkbox>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr [hidden]="itemSelecionado != item.id" class="{{ validaClasse(pos) ? 'even' : 'odd' }}">
+                                    <td colspan="100%">
+                                        <div class="produtosItem">
+                                            <ng-container *ngIf="!loadingProdutos; else carregandoItens">
+                                                <ng-container *ngIf="produtosItem && produtosItem.length">
+                                                    <div *ngIf="produtosItem && produtosItem.length" class="row head-sub-itens">
+                                                        <table style="width: 100%;">
+                                                            <thead class="thead-dark">
+                                                                <tr>
+                                                                    <th *ngIf="!modoRealizacao && !somenteVisualizacao"></th>
+                                                                    <th>PRODUTO</th>
+                                                                    <th>QUANTIDADE</th>
+                                                                    <th>UNIDADE</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr
+                                                                    *ngFor="let produto of produtosItem"
+                                                                    [ngClass]="{'riscado' : produto.apagado}"
+                                                                    title="{{ produto.apagado ? 'Produto excluido' : 'Produto do item' }}"
+                                                                >
+                                                                    <td class="valor" *ngIf="!modoRealizacao && !somenteVisualizacao">
+                                                                        <icone *ngIf="!produto.apagado" (click)='excluirProduto($event, produto)' nome="close" class="acao"></icone>
+                                                                    </td>
+                            
+                                                                    <td class="valor text-overflow">
+                                                                        <span>{{produto.produto.nome}}</span>
+                                                                    </td>
+                            
+                                                                    <td class="valor" (click)="editaCampoItem( $event, 'quantidade', produto.id, produto['quantidade'])">
+                                                                        <div class="edit" *ngIf="campoEdita['quantidade']['id'] == produto.id; else campoSimplesQtd">
+                                                                            <entrada class="entrada qnts" tipo="numero" semTitulo="true" [valor]="produto.quantidade" [fnOnChange]="salvarCampoEditaProduto.bind(this, 'quantidade')"></entrada>
+                                                                        </div>
+                                                                        <ng-template #campoSimplesQtd>
+                                                                            <span>{{produto.quantidade}}</span>
+                                                                        </ng-template>
+                                                                    </td>
+                            
+                                                                    <td class="valor" (click)="editaCampoItem( $event, 'unidade', produto.id, ( produto['unidade'] ? produto['unidade']['id'] : undefined ) )">
+                                                                        <div class="edit" *ngIf="campoEdita['unidade']['id'] == produto.id; else campoSimplesUnid">
+                                                                            <entrada class="entrada qnts" [opcoes]="opcoesUnidadeMedida" semTitulo="true" tipo="seleciona" valor="{{produto.unidade ? produto.unidade.id : undefined}}" [fnOnChange]="salvarCampoEditaProduto.bind(this, 'unidade')"></entrada>
+                                                                        </div>
+                                                                        <ng-template #campoSimplesUnid>
+                                                                            <span>{{produto.unidade ? produto.unidade.descricao : ''}}</span>
+                                                                        </ng-template>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </ng-container>
+                
+                                                <ng-container *ngIf="produtosItem && !produtosItem.length">
+                                                    <span>Não há itens para esse procedimento</span>
+                                                </ng-container>
+                
+                                                <div class="descricao_item" *ngIf="item?.prescricaoItem?.orientacaoPadrao">
+                                                    <p><b>Orientação Padrão:</b> {{item?.prescricaoItem?.orientacaoPadrao}}</p>
+                                                </div>
+                
+                                                <div class="descricao_item" *ngIf="item?.orientacaoMedica">
+                                                    <p><b>Orientação Médica:</b> {{item?.orientacaoMedica}}</p>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                
+                                        <div class="addProduto" *ngIf="!modoRealizacao && !somenteVisualizacao">
+                                            <div class="row grid-novo">
+                                                <div class="col-md-2">
+                                                    <label>Novo Produto</label>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <botao nome="Adicionar" (click)="salvarNovoProduto()"></botao>
+                                                </div>
+                                            </div>
+                                        
+                                            <div class="row grid-campos">
+                                                <div class="col-sm-7 col-md-7">
+                                                    <autocomplete
+                                                        [semTitulo]="true"
+                                                        [placeholder]="'Digite para buscar Produtos'"
+                                                        [minimo]="3"
+                                                        [valor]="objProdutos"
+                                                        [camposFiltro]="['nome']"
+                                                        [valorSelecionado]="valorProdutosSelecionado"
+                                                        [fnSearch]="fnCfgProdutosRemote.bind(this)"
+                                                        (fnOnSelected)="setObjParamProdutos($event)"
+                                                    ></autocomplete>
+                                                </div>
+                                        
+                                                <div class="col-md-3 col-sm-3">
+                                                    <entrada nome="Unidade" tipo="seleciona" [semTitulo]="true" [opcoes]="opcoesUnidadeMedida" (getValor)="objParamAddProduto['unidade'] = { id :$event.valor }"></entrada>
+                                                </div>
+                
+                                                <div class="col-md-2 col-sm-2">
+                                                    <entrada nome="Quantidade" tipo="numero" [semTitulo]="true" (getValor)="objParamAddProduto['quantidade'] = $event.valor"></entrada>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </ng-container>
+        
+                        <ng-container *ngIf="itensPrescricao && !itensPrescricao.length">
+                            <span>Não há itens para essa prescrição</span>
+                        </ng-container>
+                    </ng-container>
+                </tbody>
+            </table>
+        </moldura>
+    </div>
+</div>
+
+
+<!-- ///////////////////////// Modal de confirmação ///////////////////////// -->
+<ng-template #bodyModalConfirm>
+    {{modalMensagem}}
+</ng-template>
+
+
+<!-- ///////////////////////// Justificar Bolar ///////////////////////// -->
+<ng-template #bodyModalJustificativa let-id='id' let-execucao='execucao'>
+    <div class="col-sm-12 col-md-12">
+        <textarea
+            name="Observacao" 
+            class="form-control" 
+            placeholder="Justificativa"
+            [(ngModel)]="textoJustificativa"
+        ></textarea>
+    </div>
+</ng-template>
+
+<ng-template #modalJustificativaBotoes let-id='id' let-execucao='execucao' let-pos='pos' let-item='item'>
+    <botao nome="Salvar" (click)="mudaStatusMedicacao(id, execucao, pos, item)"></botao>
+</ng-template>
+
+
+<!-- ///////////////////////// Carregamento ///////////////////////// -->
+<ng-template #carregandoItens let-label="label">
+    <div class="carregando">
+        <icone 
+            tamanho="grande" 
+            nome="cached" 
+            [loading]="true"
+            [ngClass]="'pointer'"
+        ></icone>
+        <label>Carregando...</label>
+    </div>
+</ng-template>
+
+
+<!-- INFORMAR LOTES -->
+<ng-template 
+    #bodyLotesPrescricao
+    let-id="id"
+    let-execucao="execucao"
+    let-pos="pos"
+    let-item="item"
+    let-obj="obj"
+    let-dataExecutada="dataExecutada"
+    let-lotes="lotes"
+>
+    <ng-container *ngIf="loadingProdutos">
+        <ng-template [ngTemplateOutlet]="carregandoItens"></ng-template>
+    </ng-container>
+
+    <ng-container *ngIf="produtosItem && produtosItem.length; else carregando">
+        <table class="table table-striped no-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>PRODUTO</th>
+                    <th>SOL.</th>
+                    <th>REAL.</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let produto of produtosItem;"
+                    [ngClass]="{
+                        'baixatotal': (produto.quantidadeRealizada == produto.quantidade),
+                        'parcial': (produto.quantidadeRealizada > 0 && produto.quantidadeRealizada < produto.quantidade),
+                        'sembaixa': (produto.quantidadeRealizada == 0) || !produto.quantidadeRealizada
+                }">
+                    <td class="col label_slots" ><span>{{produto.produto.nome}}</span></td>
+                    <td class="col label_slots" ><span>{{produto.quantidade}}</span></td>
+                    <td class="col label_slots" ><span>{{produto.quantidadeRealizada || 0}}</span></td>
+                    <td class="d-table-cell">
+                        <icone 
+                            *ngIf="((produto.quantidadeRealizada || 0) < produto.quantidade)" 
+                            tamanho="pequeno-16"
+                            title="Quantidade solicitada: {{produto.quantidade}}"
+                            nome="watch_later"
+                        ></icone>
+                        <icone 
+                            *ngIf="((produto.quantidadeRealizada || 0) == produto.quantidade)" 
+                            tamanho="pequeno-16"
+                            title="Item baixado no estoque: {{produto.quantidade}}"
+                            nome="check"
+                        ></icone>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </ng-container>
+
+    <ng-container *ngIf="!loadingProdutos && produtosItem && !produtosItem.length">
+        <span>Não há itens para esse procedimento</span>
+    </ng-container>
+
+</ng-template>
+
+<ng-template 
+    #botoesLotesPrescricao
+    let-id="id"
+    let-execucao="execucao"
+    let-pos="pos"
+    let-item="item"
+    let-obj="obj"
+    let-dataExecutada="dataExecutada"
+>
+    <botao nome="Baixar" (click)="salvarStatusExecucao(execucao, id, item, pos, obj, dataExecutada, produtosItem)"></botao>
+</ng-template>

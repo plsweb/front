@@ -1,0 +1,42 @@
+.icone{
+	min-width: 50px;
+}
+
+.btn-default {
+	background-color: #5B5C65 !important;
+	border-color: #5B5C65 !important;
+}
+
+.alinhamento {
+	background: transparent !important;
+	position: relative;
+
+	&.padding_0{
+		padding: 0;
+	}
+}
+
+.transparente{
+	background: transparent;
+    border-color: transparent;
+}
+
+.btn-success {
+	background-color: #00401A !important;
+	border-color: #00401A !important;
+}
+
+.btn-info {
+	background-color: #F47920 !important;
+	border-color: #F47920 !important;
+}
+
+.btn-warning {
+	background-color: #FFCB08 !important;
+	border-color: #FFCB08 !important;
+}
+
+.btn-danger {
+	background-color: rgb(237, 22, 22);
+	border-color: rgb(237, 22, 22);
+}

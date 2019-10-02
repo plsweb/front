@@ -1,0 +1,618 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix" *ngIf="cobranca; else carregandoCobranca">
+        <div class="cabecalho">
+            <div class="dados">
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-truncate">
+                        <b>GUIA: </b>
+                        {{cobranca?.guia?.impresso || cobranca?.guiaImpresso}}
+                    </div>
+
+                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 text-truncate">
+                        <b>Prestador: </b>
+                        <span>
+                            {{cobranca?.prestador?.codigo}} - {{cobranca?.prestador?.nome}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-truncate">
+                        <b>RN: </b>
+                        <span>
+                            {{ cobranca.rn ? 'SIM' : 'NÃO' }}
+                        </span>
+                    </div>
+
+                    <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7 text-truncate">
+                        <b>Paciente: </b>
+                        <span class="pointer" title="Abrir Detalhes do Paciente" (click)="direcionaPaciente(cobranca.paciente)">
+                            <ng-container *ngIf="cobranca?.pacientePlano?.codigo">
+                                {{cobranca?.pacientePlano?.codigo + ' -'}}
+                            </ng-container> {{cobranca?.paciente?.nome}}
+                        </span>
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Nascimento: </b>
+                        <span title="{{cobranca?.paciente?.idade}}">
+                            {{cobranca?.paciente?.idade}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-truncate">
+                        <b>Caráter: </b>
+                        {{cobranca?.caraterAtendimento?.descricao}}
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Acidente: </b>
+                        {{cobranca?.acidente?.descricao}}
+                    </div>
+
+                    <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7 text-truncate">
+                        <b>CID: </b>
+                        <span title="{{cobranca?.cid?.codigo}} - {{cobranca?.cid?.descricao}}">
+                            {{cobranca?.cid?.codigo}} - {{cobranca?.cid?.descricao}}
+                        </span>
+                    </div>
+                </div>
+
+                <div *ngIf="cobranca?.obitoCid || cobranca?.obitoDeclaracao" class="row">
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-truncate">
+                        <b>Declaração Óbito: </b>
+                        <span title="{{cobranca?.obitoDeclaracao}}">
+                            {{cobranca?.obitoDeclaracao}}
+                        </span>
+                    </div>
+
+                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 text-truncate">
+                        <b>CID Óbito: </b>
+                        <span title="{{cobranca?.obitoCid?.codigo}} - {{cobranca?.obitoCid?.descricao}}">
+                            {{cobranca?.obitoCid?.codigo}} - {{cobranca?.obitoCid?.descricao}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Regime: </b>
+                        <span>{{cobranca?.regimeInternacao?.descricao}}</span>
+                    </div>
+                    
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Internação: </b>
+                        <span>{{cobranca?.tipoInternacao?.descricao}}</span>
+                    </div>
+                    
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Consulta: </b>
+                        <span>{{cobranca?.tipoConsulta?.descricao}}</span>
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 text-truncate">
+                        <b>Faturamento: </b>
+                        <span>{{cobranca?.tipoFaturamento?.descricao}}</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-truncate">
+                        <b>Tipo: </b>
+                        <span>{{cobranca?.tipoAtendimento?.descricao}}</span>
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-truncate" title="Abrir Detalhes do Paciente">
+                        <b>Alta: </b>
+                        <span>{{cobranca?.encerramento?.descricao}}</span>
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-truncate">
+                        <b>Valor: </b>
+                        <span>{{cobranca?.valor}}</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div *ngIf="cobranca?.inicio" class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-truncate">
+                        <b>Período: </b>
+                        <span>{{cobranca?.inicio}}</span>
+                        <span *ngIf="cobranca?.fim">{{ ' á ' + cobranca?.fim}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form *ngIf="cobranca">
+            <moldura titulo="Procedimentos" [podeOcultar]="true" [oculto]="false">
+
+                <moldura *ngIf="cobranca?.cobrancaStatus == 'EDITANDO'" titulo="Adicionar" [podeOcultar]="true" [oculto]="true">
+                    <ng-template 
+                        [ngTemplateOutlet]="adicionarProcedimento"
+                        [ngTemplateOutletContext]="{procedimento: novoItem, novo: true}"
+                    ></ng-template>
+                </moldura>
+
+                <div *ngFor="let item of cobranca?.itens; let pos = index" class="itens animated" zoom-in id="{{item.id}}">
+                    <div class="titulo link">
+                        <div class="table-responsive">
+                            <table class="table no-hover" style="margin-bottom: 0 !important;">
+                                <tbody>
+                                    <tr (click)="abreModalItem(item)">
+                                        <td *ngIf="cobranca?.cobrancaStatus == 'EDITANDO'">
+                                            <div class="row">
+                                                <botao 
+                                                    icone="edit"
+                                                    classe="transparente"
+                                                    tamanho="pequeno-16"
+                                                    (click)="abreModalItem(item)"
+                                                ></botao>
+    
+                                                <botao 
+                                                    icone="delete"
+                                                    classe="transparente"
+                                                    tamanho="pequeno-16"
+                                                    (click)="removeItem(item)"
+                                                ></botao>
+                                            </div>
+                                        </td>
+
+                                        <!--
+                                        <td colspan class="acoes">
+                                            <icone nome="date_range" title="Visualizar Histórico de Procedimento" (click)="visualizarHistorico( null, item?.procedimento?.codigo )"></icone>
+                                        </td>
+                                        -->
+
+                                        <td title="{{item?.procedimento?.descricao}}" class="nome_procedimento1">
+                                            {{item?.procedimento?.codigo}} - {{item?.procedimento?.descricao}}
+                                        </td>
+
+                                        <td title="Quantidade">
+                                            {{item?.quantidade}}
+                                        </td>
+
+                                        <!-- <td style="width: 80px !important; display: table-cell;"> -->
+                                            <!-- {{item?.quantidade}} -->
+                                            <!--
+                                            <entrada 
+                                                tipo="numero" 
+                                                nome="Qtd Autorizada"
+                                                [semTitulo]="true" 
+                                                mascara="999" 
+                                                [valor]="item.quantidade"
+                                                [maximo]="item.quantidadeAutoditor" 
+                                                (getValor)="setQuantidadeSolicitada($event, item.id, item['posicao'], item)"
+                                            ></entrada>
+                                            -->
+                                        <!-- </td> -->
+
+                                        <!-- <td *ngIf="item.procedimento.altoCusto" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.altoCusto" class="sinalizacao alto verde col-md-3" (mouseover)="mostraDesc($event, item, 'altoCusto')"
+                                                    (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">P</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">Procedimento de Alto Custo</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.dut" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.dut" class="sinalizacao dut verde col-md-3" (mouseover)="mostraDesc($event, item, 'dut')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">D</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.dut}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.rac" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.rac" class="sinalizacao rac verde col-md-3" (mouseover)="mostraDesc($event, item, 'rac')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">R</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.rac}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td> -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-body composicoes">
+                            <table class="table linha_critica no-hover">
+                                <tbody>
+                                    <ng-container *ngIf="item?.composicoes?.length">
+                                        <tr
+                                            class="composicao"
+                                            *ngFor="let composicao of item.composicoes"
+                                            (click)="abreModalItem(composicao, 'Composicao', item.id)"
+                                        >
+                                            <td *ngIf="cobranca?.cobrancaStatus == 'EDITANDO'" class="acoes">
+                                                <div class="row">
+                                                    <botao 
+                                                        icone="edit"
+                                                        classe="transparente"
+                                                        tamanho="pequeno-16"
+                                                        (click)="abreModalItem(composicao, 'Composicao', item.id)"
+                                                    ></botao>
+    
+                                                    <botao 
+                                                        icone="delete"
+                                                        classe="transparente"
+                                                        tamanho="pequeno-16"
+                                                        (click)="removeItem(composicao, 'Composicao')"
+                                                    ></botao>
+                                                </div>
+                                            </td>
+
+                                            <td title="Participação"> 
+                                                {{composicao?.participacao?.descricao}}
+                                            </td>
+
+                                            <td title="Profissional"> 
+                                                {{composicao?.profissional?.nome}}
+                                            </td>
+
+                                            <td title="Prestador"> 
+                                                {{(composicao?.prestador?.codigo) ? (composicao?.prestador?.codigo + ' - ' + composicao?.prestador?.nome) : ''}}
+                                            </td>
+
+                                            <td title="Via de Acesso"> 
+                                                {{composicao?.dmTissViaAcesso?.descricao2}}
+                                            </td>
+
+                                            <td title="Unidade de Saude"> 
+                                                {{composicao?.unidadeSaude?.descricao}}
+                                            </td>
+
+                                            <td title="Valor"> 
+                                                <ng-container *ngIf="composicao?.valor"> R$ {{composicao?.valor}} </ng-container>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+
+                                    <tr *ngIf="cobranca?.cobrancaStatus == 'EDITANDO' && item?.procedimento?.tabelatipo?.codigo != 16" class="composicao">
+                                        <td colspan="100%">
+                                            <botao 
+                                                icone="add"
+                                                tamanho="medio"
+                                                classe="transparente"
+                                                nome="Adicionar Composição"
+                                                (click)="abreModalItem(novaComposicao, 'Composicao', item.id)"
+                                            ></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </moldura>
+        </form>
+
+        <div class="row mt-2">
+            <div *ngIf="cobranca?.cobrancaStatus == 'EDITANDO'" class="col-md-2">
+                <botao nome="Faturar" (click)="faturar()"></botao>
+            </div>
+
+            <div class="col-md-2">
+                <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #carregandoCobranca>
+    <ng-container *ngIf="!erro">
+        <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando cobrança...
+    </ng-container>
+    <ng-container *ngIf="erro">
+        <div class="card-header clearfix">
+            <span>Houve um erro ao carregar a cobrança: {{paramId}}</span>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template #bodyHistoricoExames>
+    <div *ngIf="guiaFiltroFiltradas && guiaFiltroFiltradas.length > 0" class="grid_guias">
+
+        <div class="guias animated fadeIn card link" zoom-in id="{{cobranca.id}}" style="cursor: pointer !important;">
+            <div class="clearfix">
+                <div class="titulo link">
+                    <table class="table table-striped not-margin">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th>GUIA</th>
+                                <th>PROCEDIMENTO</th>
+                                <th>DATA</th>
+                                <th>QTD</th>
+                                <!-- <th>QTD REALIZADA</th> -->
+                                <th>OBSERVAÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let cobranca of guiaFiltroFiltradas" title="{{cobranca.cobranca.status}}">
+                                <td class="status {{validaClasse(cobranca.cobranca.status)}}"></td>
+                                <td>{{cobranca.impresso}}</td>
+                                <td>{{cobranca.procedimentoCodigo + ' - ' + cobranca.procedimentoDescricao}}</td>
+                                <td>{{ cobranca.guiaDigitacao ? momentjs( cobranca.guiaDigitacao, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : '' }}</td>
+                                <td>{{cobranca.quantidadeSolicitada}}/{{cobranca.quantidadeRealizada}}</td>
+                                <!-- <td>{{cobranca.quantidadeRealizada}}</td> -->
+                                <td>{{cobranca.mensagem}}</td>
+                                <!-- 1 autorizado -->
+                                <!-- 0 negado -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <paginacao 
+                (atualizaDados)="buscaGuiasPaginado($event)" 
+                qtdItensTotal="{{qtdItensTotal}}" 
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtual}}"
+                [scrollPagination]="true"
+            ></paginacao>
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #modalEdita let-objProcedimento="objProcedimento" let-objComposicao="objComposicao" let-criaNovo="criaNovo">
+    <ng-container *ngIf="objProcedimento">
+        <ng-template 
+            [ngTemplateOutlet]="adicionarProcedimento"
+            [ngTemplateOutletContext]="{procedimento: objProcedimento}"
+        ></ng-template>
+    </ng-container>
+
+    <ng-container *ngIf="objComposicao">
+        <ng-template 
+            [ngTemplateOutlet]="adicionarComposicao"
+            [ngTemplateOutletContext]="{composicao: objComposicao, novo: criaNovo}"
+        ></ng-template>
+    </ng-container>
+</ng-template>
+
+<ng-template #modalEditaBotoes let-objProcedimento="objProcedimento" let-objComposicao="objComposicao">
+    <ng-container *ngIf="objProcedimento">
+        <botao nome="Salvar" (click)="salvarProcedimento(objProcedimento)"></botao>
+    </ng-container>
+
+    <ng-container *ngIf="objComposicao">
+        <botao nome="Salvar" (click)="salvarComposicao(objComposicao)"></botao>
+    </ng-container>
+</ng-template>
+
+<ng-template #adicionarProcedimento let-procedimento="procedimento" let-novo="novo">
+    <div class="row">
+        <div class="col-md-6">
+            <autocomplete
+                [bloqueado]="!status"
+                titulo="Procedimento" 
+                [placeholder]="'Procedimentos'" 
+                [minimo]="3"
+                [requerido]="true"
+                [valor]="objProcedimentos"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="valorProcedimentoSelecionado" 
+                [fnSearch]="fnCfgProcedimentoRemote.bind(this)"
+                (fnOnSelected)="fnSetProcedimento($event, procedimento)"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-3">
+            <entrada 
+                [bloqueado]="!status"
+                nome="Quantidade"
+                tipo="numero"
+                class="entrada qnts"
+                [requerido]="true"
+                [valor]="procedimento?.quantidade"
+                (getValor)="$event && $event.valor ? procedimento['quantidade'] = $event.valor : procedimento['quantidade'] = undefined"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <autocomplete
+                [bloqueado]="!status"
+                [titulo]="'Profissional'"
+                [placeholder]="'Digite para buscar um Profissional'"
+                [minimo]="3"
+                [valor]="objProfissional"
+                [camposFiltro]="['nome']"
+                [valorSelecionado]="procedimento?.profissional?.nome"
+                [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                (fnOnSelected)="getProfissional($event, procedimento)"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-3">
+            <entrada
+                [bloqueado]="!status"
+                nome="Despesa"
+                tipo="seleciona"
+                [opcoes]="opcoesDmTissDespesa"
+                objId=""
+                objDesc=""
+                [valor]="procedimento?.dmTissDespesa?.id"
+                (getValor)="($event && $event.valor) ? (procedimento['dmTissDespesa'] = { id : $event.valor } ) : (procedimento['dmTissDespesa'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <entrada
+                [bloqueado]="!status"
+                nome="Técnica"
+                tipo="seleciona"
+                [opcoes]="opcoesDmTissTecnica"
+                objId=""
+                objDesc=""
+                [valor]="procedimento?.dmTissTecnica?.id"
+                (getValor)="($event && $event.valor) ? (procedimento['dmTissTecnica'] = { id : $event.valor } ) : (procedimento['dmTissTecnica'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <entrada
+                [bloqueado]="!status"
+                nome="Unidade de Medida"
+                tipo="seleciona"
+                [opcoes]="opcoesDmTissUnidadeMedica"
+                objId=""
+                objDesc=""
+                [valor]="procedimento?.dmTissUnidadeMedida?.id || 36"
+                (getValor)="($event && $event.valor) ? (procedimento['dmTissUnidadeMedida'] = { id : $event.valor } ) : (procedimento['dmTissUnidadeMedida'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <entrada
+                [bloqueado]="!status"
+                nome="Via de Acesso"
+                tipo="seleciona"
+                [opcoes]="opcoesDmTissViaAcesso"
+                objId=""
+                objDesc="descricao2"
+                [valor]="procedimento?.dmTissViaAcesso?.id || 1"
+                (getValor)="($event && $event.valor) ? (procedimento['dmTissViaAcesso'] = { id : $event.valor } ) : (procedimento['dmTissViaAcesso'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                [bloqueado]="!status"
+                nome="Valor Unitário"
+                [requerido]="true"
+                expressaoRegular="^[\d]+([\.]?[\d]{1,2})?$"
+                (getValor)="($event) ? procedimento['valorUnitario'] = $event.valor : null"
+                [valor]="procedimento?.valorUnitario"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                [bloqueado]="!status"
+                nome="Valor"
+                tipo="numero"
+                [bloqueado]="!status"
+                expressaoRegular="^[\d]+([\.]?[\d]{1,2})?$"
+                [valor]="setValor(procedimento?.valorUnitario, procedimento?.quantidade)"
+                (getValor)="($event) ? procedimento['valor'] = $event.valor : null"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                [bloqueado]="!status"
+                nome="Realização"
+                tipo="datepicker"
+                [hora]="true"
+                [horaComSegundos]="true"
+                [requerido]="true"
+                [valor]="procedimento?.realizacao || momentjs()"
+                (getValor)="setDataItem($event, 'realizacao', procedimento)"
+            ></entrada>
+        </div>
+    </div>
+
+    <div *ngIf="novo" class="row">
+        <div class="col-md-2">
+            <botao nome="Adicionar" (click)="salvarProcedimento(procedimento, true)"></botao>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #adicionarComposicao let-composicao="composicao" let-novo="novo">
+    <div class="row">
+        <div class="col-md-4">
+            <autocomplete
+                [bloqueado]="!status"
+                [titulo]="'Prestador'"
+                [placeholder]="'Digite para buscar um Prestador'"
+                [minimo]="3"
+                [valor]="objPrestador"
+                [camposFiltro]="['codigo', 'nome']"
+                [valorSelecionado]="composicao?.prestador?.nome"
+                [fnSearch]="fnCfgPrestadorRemote.bind(this)"
+                (fnOnSelected)="getPrestador($event, composicao, 'prestador')"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-8">
+            <autocomplete
+                [bloqueado]="!status"
+                [titulo]="'Profissional'"
+                [placeholder]="'Digite para buscar um Profissional'"
+                [minimo]="3"
+                [valor]="objProfissional"
+                [camposFiltro]="['codigo', 'nome']"
+                [valorSelecionado]="composicao?.profissional?.nome"
+                [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                (fnOnSelected)="getProfissional($event, composicao)"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-8">
+            <entrada
+                [bloqueado]="!status"
+                nome="Participação"
+                tipo="seleciona"
+                [opcoes]="opcoesParticipacao"
+                objId=""
+                objDesc=""
+                [valor]="composicao?.participacao?.id"
+                (getValor)="($event && $event.valor) ? (composicao['participacao'] = { id : $event.valor } ) : (composicao['participacao'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                [bloqueado]="!status"
+                nome="Via de Acesso"
+                tipo="seleciona"
+                [opcoes]="opcoesDmTissViaAcesso"
+                objId=""
+                objDesc=""
+                [valor]="composicao?.dmTissViaAcesso?.id"
+                (getValor)="($event && $event.valor) ? (composicao['dmTissViaAcesso'] = { id : $event.valor } ) : (composicao['dmTissViaAcesso'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-6">
+            <entrada
+                [bloqueado]="!status"
+                nome="Unidade de Cobrança"
+                tipo="seleciona"
+                [opcoes]="opcoesUnidadeSaude"
+                objId=""
+                objDesc=""
+                [valor]="composicao?.unidadeSaude?.id || 7"
+                (getValor)="($event && $event.valor) ? (composicao['unidadeSaude'] = { id : $event.valor } ) : (composicao['unidadeSaude'] = undefined)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada
+                [bloqueado]="!status"
+                nome="Valor"
+                expressaoRegular="^[\d]+([\.]?[\d]{1,2})?$"
+                [valor]="composicao?.valor"
+                (getValor)="($event) ? composicao['valor'] = $event.valor : null"
+            ></entrada>
+        </div>
+    </div>
+</ng-template>

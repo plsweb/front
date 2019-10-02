@@ -1,0 +1,258 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-body">
+        <moldura 
+            *ngIf="novoPrograma; else carregandoPrograma"
+            [titulo]="(( idPrograma ) ? 'Editar' : 'Novo') + ' Programa'"
+        >
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input 
+                            type="text" 
+                            name="descricao" 
+                            class="form-control" 
+                            placeholder="Informe a Descrição"
+                            [(ngModel)]="novoPrograma['descricao']"
+                        />
+                    </div>
+                </div>
+        
+                <!-- <div *ngIf="idPrograma" class="col-sm-3 col-md-3">
+                    <entrada 
+                        nome="Ativo" 
+                        [valor]="novoPrograma?.ativo" 
+                        (getValor)="$event ? novoPrograma['ativo'] = $event.valor : novoPrograma['ativo'] = true" 
+                        tipo="simnao"
+                    ></entrada>
+                </div> -->
+            </div>
+
+            <div class="row">
+                <div class="col-sm-3 col-md-3">
+                    <div class="form-group">
+                        <entrada
+                            nome="Início"
+                            tipo="datepicker"
+                            [semData]="!(idPrograma)"
+                            formatoData="DD/MM/YYYY HH:mm:ss"
+                            classe="bottom"
+                            [valor]="novoPrograma?.dataInicio"
+                            (getValor)="$event && $event.valor ? novoPrograma['dataInicio'] = $event['valor'] : null"
+                        ></entrada>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                    <div class="form-group">
+                        <entrada
+                            nome="Fim"
+                            tipo="datepicker"
+                            [semData]="!(idPrograma)"
+                            formatoData="DD/MM/YYYY HH:mm:ss"
+                            classe="bottom"
+                            [valor]="novoPrograma?.dataFim"
+                            (getValor)="$event && $event.valor ? novoPrograma['dataFim'] = $event['valor'] : null"
+                        ></entrada>
+                    </div>
+                </div>
+            </div>
+
+            <moldura 
+                *ngIf="idPrograma"
+                titulo="Pacientes"
+                >
+                <!-- [pesquisar]="buscarPacientePrograma.bind(this, { paginaAtual: 1 })" -->
+                <moldura
+                    titulo="Adicionar novo Paciente"
+                    [podeOcultar]="true"
+                    [oculto]="true"
+                >
+                    <ng-template [ngTemplateOutlet]="adicionarPaciente" [ngTemplateOutletContext]="{ paciente: {paciente: novoPaciente}, novo: true }"></ng-template>
+                </moldura>
+
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th>
+                                <th>PACIENTE</th>
+                                <th>INICIO</th>
+                                <th>FIM</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngIf="novoPrograma?.programaSaudePaciente; else carregandoPacientes">
+                                <ng-container *ngIf="novoPrograma.programaSaudePaciente.length">
+                                    <tr *ngFor="let programa of novoPrograma?.programaSaudePaciente">
+                                        <td class="acoes">
+                                            <botao 
+                                                icone="edit"
+                                                *ngIf="programa?.status != 'ALTA'"
+                                                classe="transparente"
+                                                tamanho="pequeno-16"
+                                                (click)="abreModalPaciente(programa)"
+                                            ></botao>
+                                            <botao 
+                                                icone="delete"
+                                                *ngIf="programa?.status != 'ALTA'"
+                                                classe="transparente"
+                                                tamanho="pequeno-16"
+                                                (click)="removePaciente(programa)"
+                                            ></botao>
+                                        </td>
+                                        <td>{{programa?.paciente.nome}}</td>
+                                        <td>{{programa?.dataInicio ? momentjs(programa?.dataInicio, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : ''}}</td>
+                                        <td>{{programa?.dataFim ? momentjs(programa?.dataFim, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : ''}}</td>
+                                        <td>{{programa?.status}}</td>
+                                    </tr>
+                                </ng-container>
+
+                                <ng-container *ngIf="!novoPrograma.programaSaudePaciente.length">
+                                    <span>Não há pacientes para esse programa</span>
+                                </ng-container>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                    <paginacao
+                        (atualizaDados)="buscarPacientePrograma($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        paginaAtual="{{paginaAtual}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                        scrollPagination="true"
+                    ></paginacao>
+
+                </div>
+            </moldura>
+
+            <div class="row">
+                <div class="mt-3 col-md-3">
+                    <botao nome="Salvar Programa" (click)="salvarPrograma()"></botao>
+                </div>
+                <div class="mt-3 col-md-3">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+        </moldura>
+    </div>
+</div>
+
+
+<!-- ######################################## CARREGANDO ############################# -->
+<ng-template #carregandoPrograma>
+    <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando programa...
+</ng-template>
+
+<ng-template #carregandoPacientes>
+    <div class="mb-3">
+        <icone tamanho="grande" nome="cached" [loading]="true" ></icone> <label class="ml-3">Carregando pacientes...</label>
+    </div>
+</ng-template>
+
+
+
+<!-- ######################################## ADICIONAR PACIENTE ############################# -->
+<ng-template #modalEdita let-objPaciente="objPaciente">
+    <ng-template [ngTemplateOutlet]="adicionarPaciente" [ngTemplateOutletContext]="{ paciente: objPaciente }"></ng-template>
+</ng-template>
+
+<ng-template #modalEditaBotoes let-objPaciente="objPaciente">
+    <botao nome="Editar" (click)="adicionarNovoPaciente(objPaciente)"></botao>
+</ng-template>
+
+
+<!-- ######################################## NOVO PACIENTE ############################# -->
+<ng-template #adicionarPaciente let-paciente="paciente" let-novo="novo">
+    <div class="row">
+        <div class="col-md-12">
+            <ng-container *ngIf="!paciente?.id">
+                <autocomplete
+                    [placeholder]="'Digite para buscar Pacientes'"
+                    [minimo]="3"
+                    [valor]="objPacientes"
+                    [camposFiltro]="['nome', 'cpf']"
+                    [valorSelecionado]="paciente?.paciente?.nome"
+                    [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                    (fnOnSelected)="setObjParamPaciente($event)"
+                ></autocomplete>
+            </ng-container>
+
+            <ng-container *ngIf="paciente?.id">
+                <entrada
+                    nome="Paciente"
+                    [valor]="paciente?.paciente?.nome"
+                    [bloqueado]="true"
+                ></entrada>
+            </ng-container>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-4 col-md-4">
+            <div class="form-group">
+                <entrada 
+                    nome="Status" 
+                    objId="codigo"
+                    tipo="seleciona"
+                    requerido="true"
+                    [opcoes]="programaStatus"
+                    [valor]="paciente?.status"
+                    (getValor)="paciente['status'] = setStatus($event, paciente?.status)"
+                ></entrada>
+            </div>
+        </div>
+        
+        <div class="col-sm-3 col-md-3">
+            <div class="form-group">
+                <entrada
+                    nome="Início"
+                    classe="bottom"
+                    tipo="datepicker"
+                    requerido="true"
+                    formatoData="DD/MM/YYYY HH:mm:ss"
+                    [semData]="!(paciente?.id)"
+                    [valor]="paciente?.dataInicio"
+                    (getValor)="$event && $event.valor ? paciente['dataInicio'] = $event['valor'] : null"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="col-sm-4 col-md-4" *ngIf="paciente?.status == 'ALTA'">
+            <div class="form-group">
+                <entrada
+                    nome="Fim"
+                    classe="bottom"
+                    tipo="datepicker"
+                    requerido="true"
+                    formatoData="DD/MM/YYYY HH:mm:ss"
+                    [semData]="true"
+                    [valor]="paciente?.dataFim"
+                    (getValor)="$event && $event.valor ? paciente['dataFim'] = $event['valor'] : null"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-6" *ngIf="paciente?.status == 'ALTA'">
+            <div class="form-group">
+                <entrada
+                    tipo="seleciona"
+                    requerido="true"
+                    nome="Motivo Alta"
+                    [valor]="encerramentoValor"
+                    [opcoes]="tipoEncerramento"
+                    (getValor)="getEncerramento($event)"
+                ></entrada>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="novo">
+        <div class="col d-flex">
+            <botao nome="Adicionar" (click)="adicionarNovoPaciente(paciente)"></botao>
+        </div>
+    </div>
+</ng-template>
+
+

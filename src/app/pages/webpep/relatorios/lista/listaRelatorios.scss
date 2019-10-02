@@ -1,0 +1,150 @@
+@import "../../../../../styles";
+
+.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+#card-header {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}
+
+
+/* ====================================== */
+ul.filtro {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul.filtro li {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+ul.filtro li span.opcao {
+    background: #575287;
+    padding: 5px;
+}
+
+i.customizar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+}
+
+.btn-filtro {
+    cursor: pointer;
+}
+
+.btn-filtro:hover {
+    background: #575287;
+    border-radius: 2px;
+    width: 25px;
+    height: 25px;
+}
+
+.card-footer {
+    padding: 0rem 1.25rem !important;
+    background-color: #443f7a !important;
+    border-top: none !important;
+}
+
+.overflow-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    min-height: 250px;
+}
+
+.acao {
+    background: #575287;
+    padding: 5px;
+    float: right;
+    cursor: pointer;
+}
+
+.acao:hover {
+    background: #443f7a !important;
+}
+
+/*.acao.salvar {
+    background: #171435 !important;
+}*/
+
+.menu-context {
+    position: absolute;
+    z-index: 13;
+    top: 280px;
+    left: 400px;
+    color: #000;
+    display: none;
+}
+
+.col.colunas-a-salvar {
+    height: 300px;
+    overflow-y: auto;
+}
+
+.col.filtros-a-salvar {
+    height: 300px;
+    overflow-y: auto;
+}
+
+.opcoes{
+    position: absolute;
+    display: block;
+    width: 520px;
+
+    label,
+    span{
+        color: black;
+    }
+
+    .list-group-item{
+        display: block;
+    }
+}
+
+:host /deep/{
+
+    .botao_flutuante {
+        position: fixed;
+        bottom: 25px;
+        
+        button {
+            height: 35px;
+        }
+    }
+
+    dropdown{
+        
+        .campo_titulo_extracao {
+            
+            input {
+                background: #bbbbbb !important;
+                color: #000;
+
+                &::-webkit-input-placeholder  { color: black !important; }
+            }
+
+            label{
+                color: black;
+            }
+            
+        }
+
+    }
+
+}
+
+

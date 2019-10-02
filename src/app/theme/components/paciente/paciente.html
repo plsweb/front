@@ -1,0 +1,664 @@
+<div *ngIf="navegacaoTaps" class="navegacao card-header clearfix">
+    <div (click)="navegar('basico')" [ngClass]="{ativo: tapsAtual === 'basico'}">Geral</div>
+    <div (click)="navegar('historico_agendamento')" [ngClass]="{ativo: tapsAtual === 'historico_agendamento'}">Agenda</div>
+</div>
+
+<div [ngClass]="{'card-body': navegacaoTaps}">
+    <br *ngIf="navegacaoTaps">
+    <div *ngIf="tapsAtual === 'basico'">
+        <div class="row"><!-- *ngIf="paciente" -->
+            <div
+                *ngIf="novoPaciente || dados || plano || endereco || contato || responsavel"
+                [ngClass]="novoPaciente || foto ? 'col-sm-12 col-md-9' : 'col-sm-12'"
+            >
+                <div *ngIf="novoPaciente || dados">
+                    <div class="row" *ngIf="paciente?.id || novoPaciente; else carregando">
+    
+                        <entrada
+                            nome="CPF"
+                            [requerido]="cadastroBasico"
+                            mascara="999.999.999-99"
+                            [ngClass]="'col-sm-3'"
+                            [valor]="paciente?.cpf"
+                            [bloqueado]="verificaCpf(novoPaciente, objParamsPaciente['cpf'])"
+                            (getValor)="validaCpf($event.valor); objParamsPaciente['cpf'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-9'"
+                            nome="Nome"
+                            [requerido]="true"
+                            [valor]="paciente?.nome"
+                            (getValor)="objParamsPaciente['nome'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-6'"
+                            nome="Mãe"
+                            [requerido]="cadastroBasico"
+                            [valor]="paciente?.mae"
+                            (getValor)="objParamsPaciente['mae'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-6'"
+                            nome="Pai"
+                            [requerido]="cadastroBasico"
+                            [valor]="paciente?.pai"
+                            (getValor)="objParamsPaciente['pai'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-4'"
+                            nome="Nascimento"
+                            [requerido]="cadastroBasico"
+                            [incluirMascara]="true"
+                            [valor]="(paciente?.nascimento) ? momentjs(paciente?.nascimento, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.dataFormato) : ''"
+                            tipo="data"
+                            (getValor)="objParamsPaciente['nascimento'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-4'"
+                            nome="Estado Civil"
+                            [valor]="paciente?.estadoCivil"
+                            [objId]="'codigo'"
+                            [opcoes]="opcEstadoCivil"
+                            tipo="seleciona"
+                            (getValor)="objParamsPaciente['estadoCivil'] = $event.valor"
+                        ></entrada>
+    
+                        <entrada
+                            [ngClass]="'col-sm-4'"
+                            nome="Sexo"
+                            [valor]="paciente?.sexo"
+                            [opcoes]="opcSexo"
+                            tipo="seleciona"
+                            (getValor)="objParamsPaciente['sexo'] = $event.valor"
+                        ></entrada>
+    
+                        <div class="col-md-12">
+                            <autocomplete
+                                [titulo]="'Usuario'"
+                                [placeholder]="'Digite para buscar um Usuario'"
+                                [minimo]="3"
+                                [valor]="objProfissionais"
+                                [camposFiltro]="['nome']"
+                                [valorSelecionado]="usuarioPacienteSelecionado"
+                                [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                                (fnOnSelected)="getUsuarioPaciente($event)"
+                            ></autocomplete>
+                        </div>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="!novoPaciente">
+                    <moldura *ngIf="plano" [ngClass]="'col-sm-12'" titulo="Convênios" sub="true" oculto="true">
+                        <div class="adicionar">
+                            <botao nome="Adicionar novo Plano" (click)="abreModal(null, 'Plano')"></botao>
+                        </div>
+    
+                        <div *ngIf="paciente?.planos; else carregando">
+                            <moldura [ngClass]="'col-sm-12'" sub="true">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th class="status"></th>
+                                            <th></th>
+                                            <!-- <th></th> -->
+                                            <th>PRINCIPAL</th>
+                                            <th>CODIGO</th>
+                                            <th>OPERADORA</th> 
+                                            <th>VALIDADE</th>
+                                            <th>BLOQUEADO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ng-container *ngFor="let plano of paciente.planos; let pos = index">
+                                            <tr
+                                                class="link"
+                                                *ngIf="(inativo && !plano.ativo) || plano.ativo"
+                                                (click)="atualiza(plano, 'Plano')"
+                                                [ngClass]="{'planoInativo' : !plano.ativo}"
+                                            >
+                                                <td 
+                                                    class="status" 
+                                                    [style.background]="!plano.ativo ? 'grey' : validaStatus(plano.validade, plano.bloqueio) ? 'green' : 'red'"
+                                                ></td>
+                                                <td>
+                                                    <icone nome="edit" title="Editar" (click)="abreModal(plano, 'Plano')"></icone>
+                                                </td>
+                                                <!-- <td>
+                                                    <icone nome="delete" title="Excluir" classe="danger" (click)="removerElementoPaciente($event, 'Planos', plano.id)"></icone>
+                                                </td> -->
+                                                <td (click)="stopPropagation($event)">
+                                                    <input-checkbox
+                                                        *ngIf="plano.ativo"
+                                                        classe="check_principal" 
+                                                        [disabled]="disabledIndicador || !plano.ativo || !validaStatus(plano.validade, plano.bloqueio)"
+                                                        [estado]="plano.principal" 
+                                                        (trocaEstado)="definePlanoPrincipal($event, plano, true, pos)"
+                                                    ></input-checkbox>
+                                                    <icone *ngIf="!plano.ativo" nome="block" title="Ativo"></icone>
+                                                </td>
+                                                <td>{{ plano.codigo }}</td>
+                                                <td>{{ plano.operadora ? plano.operadora.nome : '' }}</td>
+                                                <td>{{ (plano.validade) ? momentjs( plano.validade, this.formatosDeDatas.dataHoraSegundoFormato ).format(this.formatosDeDatas.dataFormato) : '' }}</td>
+                                                <td>{{ (plano.bloqueio) ? 'Bloqueado' : '' }}</td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </moldura>
+                        </div>
+                    </moldura>
+    
+                    <moldura *ngIf="endereco" [ngClass]="'col-sm-12'" titulo="Endereços" sub="true" oculto="true">
+                        <div class="adicionar">
+                            <botao nome="Adicionar novo Endereço" (click)="abreModal(null, 'Endereco')"></botao>
+                        </div>
+    
+                        <div *ngIf="paciente?.enderecos; else carregando">
+    
+                            <moldura [ngClass]="'col-sm-12'" sub="true">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th>TITULO</th>
+                                            <th>LOGRADOURO</th>
+                                            <th>NUMERO</th>
+                                            <th>COMPLEMENTO</th>
+                                            <th>BAIRRO</th>
+                                            <th>CIDADE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let endereco of paciente.enderecos; let pos = index" (click)="atualiza(endereco, 'Endereco')" class="link">
+                                            <td>
+                                                <icone nome="delete" title="Excluir" classe="danger" (click)="removerElementoPaciente($event, 'Enderecos', endereco.id)"></icone>
+                                            </td>
+                                            <td>{{endereco.titulo}}</td>
+                                            <td>{{endereco.logradouro}}</td>
+                                            <td>{{endereco.numero}}</td>
+                                            <td>{{endereco.complemento}}</td>
+                                            <td>{{endereco.bairro}}</td>
+                                            <td>{{endereco.cidade.nome + ' - ' + endereco.cidade.estado}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+                        </div>
+                    </moldura>
+    
+                    <moldura *ngIf="contato" [ngClass]="'col-sm-12'" titulo="Contatos" sub="true" oculto="true">
+                        <div class="adicionar">
+                            <botao nome="Adicionar novo Contato" (click)="abreModal(null, 'Contato')"></botao>
+                        </div>
+    
+                        <div *ngIf="paciente?.contatos; else carregando">
+                            <moldura [ngClass]="'col-sm-12'" sub="true">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th>TITULO</th>
+                                            <th>DESCRIÇÃO</th>
+                                            <th>TIPO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let contato of paciente.contatos; let pos = index" (click)="atualiza(contato, 'Contato')" class="link">
+                                            <td>
+                                                <icone nome="delete" title="Excluir" classe="danger" (click)="removerElementoPaciente($event, 'Contatos', contato.id)"></icone>
+                                            </td>
+                                            <td>{{contato.titulo}}</td>
+                                            <td>{{contato.descricao}}</td>
+                                            <td>{{contato.tipo}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+                        </div>
+                    </moldura>
+    
+                    <moldura *ngIf="responsavel" [ngClass]="'col-sm-12'" titulo="Responsáveis" sub="true" oculto="true">
+                        <div class="adicionar">
+                            <botao nome="Adicionar novo Responsável" (click)="abreModal(null, 'Responsavel')"></botao>
+                        </div>
+    
+                        <div *ngIf="paciente?.responsaveis; else carregando">
+                            <moldura [ngClass]="'col-sm-12'" sub="true">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th>CPF</th>
+                                            <th>NOME</th>
+                                            <th>PARENTESCO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let responsavel of paciente.responsaveis; let pos = index" (click)="atualiza(responsavel, 'Responsavel')" class="link">
+                                            <td>
+                                                <icone nome="delete" title="Excluir" classe="danger" (click)="removerElementoPaciente($event, 'Responsaveis', responsavel.id)"></icone>
+                                            </td>
+                                            <td>{{responsavel.cpf}}</td>
+                                            <td>{{responsavel.nome}}</td>
+                                            <td>{{responsavel.parentesco.nome}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+                        </div>
+                    </moldura>
+                </ng-container>
+            </div>
+
+            <div *ngIf="novoPaciente || (foto && salva)" class="col-md-3 text-center">
+                <ba-card cardTitle="Foto" baCardClass="with-scroll">
+                    <ba-picture-uploader
+                        [ableTakePhoto]="true"
+                        [tipo]="'FOTO'"
+                        [picture]="imagem"
+                        (setImage)="getImagemCompleta($event)"
+                    ></ba-picture-uploader>
+                </ba-card>
+            </div>
+
+            <div *ngIf="!novoPaciente && !salva && foto">
+                <img [src]="imagem" width="200" height="200" class="rounded mx-auto d-block">
+            </div>
+        </div>
+
+        <div *ngIf="salva || novoPaciente">
+            <div class="row">
+                <div class="col-md-3">
+                    <botao nome="Salvar Paciente" (click)="salvarPaciente()"></botao>
+                </div>
+                <div class="col-md-3">
+                    <botao nome="Pulseira" classe="btn-info" (click)="print()"></botao>
+                </div>
+                <ng-template [ngTemplateOutlet]="botoesAcoes"></ng-template>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="tapsAtual === 'historico_agendamento'">
+        <div *ngIf="paciente && atendimentosPaciente; else carregando">
+            <div *ngIf="atendimentosPaciente.length; else naoTemAtendimentos">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="status"></th>
+                            <th>STATUS</th>
+                            <th>TIPO CONSULTA</th>
+                            <th>PRESTADOR</th>
+                            <th>AGENDAMENTO</th>
+                            <th>USUÁRIO</th>
+                            <th>OBSERVAÇÃO</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let atendimento of atendimentosPaciente" (click)="abreLogAtendimento(atendimento)" class="link">
+                            <td class="status" [style.background]="setColorBackgroundStatus(atendimento?.status)"></td>
+                            <td>{{ atendimento?.status }}</td>
+                            <td>{{ atendimento?.tipo ? atendimento?.tipo?.descricao : (atendimento?.configuraHorario?.agendamentoColetivo?.especialidade?.descricao || '') }}</td>
+                            <td>{{ atendimento?.usuario ? atendimento?.usuario?.nome : '' }}</td>
+                            <td>{{ atendimento?.agendamento }}</td>
+                            <td>{{ (atendimento?.UsuarioAgendamento) ? atendimento?.UsuarioAgendamento?.nome : ''}}</td>
+                            <td>{{ atendimento?.observacao }}</td>
+                            <td>
+                                <botao *ngIf="validaStatusDesmarcar(atendimento)" nome="Cancelar" classe="form-control btn btn-danger" (click)="cancelarAtendimento($event, atendimento)"></botao>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+                <paginacao
+                    (atualizaDados)="buscarProximasConsultasPaginado($event)"
+                    qtdItensTotal="{{qtdItensTotalHist}}"
+                    itensPorPagina="{{itensPorPaginaHist}}"
+                    paginaAtual="{{paginaAtualHist}}"
+                ></paginacao>
+            </div>
+
+            <ng-template #naoTemAtendimentos>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>Paciente sem histórico de Agendamentos.</h3>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+
+<ng-template #carregando>
+    <div class="row">
+        <icone tamanho="grande" nome="cached" [loading]="true"></icone> Carregando dados...
+    </div>
+</ng-template>
+
+
+<!-- POPOPWIN PULSEIRA -->
+<div id="print-qrcode" hidden>
+    <table>
+        <tr>
+            <td style="width:55px;"></td>
+            <td>
+                <img width="100" height="40" alt="Unimed Uberaba" src="assets\images\logo-unimed\unimed-uberaba-negativo.jpg" style="float:left;">
+            </td>
+            <td>
+                <div *ngIf="paciente" style="margin:0 20px;">
+                    <qrcode [qrdata]="toString(paciente?.id)" [size]="74" [level]="'Q'"></qrcode>
+                </div>
+            </td>
+            <td>
+                <p style="margin:5px 0;"><b>Prontuário:</b> {{paciente?.id}}</p>
+                <p style="margin:5px 0;"><b>Paciente:</b> {{paciente?.nome}}</p>
+                <p style="margin:5px 0;"><b>Idade:</b> {{ (paciente?.nascimento) ? (paciente?.nascimento | replace: {'00:00:00':''}) : '' }} - {{paciente?.idade}}</p>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<!-- MODAL PLANOS -->
+<ng-template #formularioPlanoBody>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label>Operadora:</label>
+                        <select
+                            #selectElem
+                            class="form-control"
+                            (change)="setOperadora(selectElem.value)"
+                            [(ngModel)]="objParamsPlano['operadora']['id']"
+                            [disabled]="objParamsPlano['id'] ? true : false"
+                        >
+                            <option *ngFor="let item of operadoras" [value]="item.id">
+                                {{item.nome}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-2 col-md-2">
+            <botaoSearchAcoes
+                (setInstanciaBtnSearch)="instanciaBtnSearchOperadora=$event"
+                [icone]="'search'"
+                [params]="['id', 'nome']"
+                [service]="serviceOperadora"
+                [elementoAcoes]="acoesOperadora"
+                [btnAdicionar]="btnAdicionarOperadora"
+                [fnService]="['getOperadoraPaginado', 'getOperadoraPaginado']"
+                (onSelect)="refreshOperadoras($event, true);novoOperadora.setItem($event)"
+            ></botaoSearchAcoes>
+        </div>
+
+        <ng-container *ngIf="!bParticular">
+
+            <div class="col-md-4">
+                <entrada
+                    nome="Código Carteira"
+                    [valor]="objParamsPlano['codigo']"
+                    (getValor)="objParamsPlano['codigo'] = $event.valor"
+                    (change)="debounce.next($event)"
+                ></entrada>
+            </div>
+
+            <div class="col-md-3 datepicker_escuro">
+                <entrada
+                    nome="Validade"
+                    tipo="datepicker"
+                    formatoData="DD/MM/YYYY"
+                    [valor]="objParamsPlano['validade']"
+                    (getValor)="objParamsPlano['validade'] = $event.valor"
+                ></entrada>
+            </div>
+
+            <div class="col-md-3">
+                <entrada 
+                    nome="Ativo" 
+                    [valor]="objParamsPlano['ativo']" 
+                    (getValor)="objParamsPlano['ativo'] = $event.valor"
+                    tipo="simnao"
+                ></entrada>
+            </div>
+
+        </ng-container>
+    </div>
+</ng-template>
+
+<ng-template #formularioPlanoBotoes>
+    <botao nome="Salvar" (click)="criarElementoPaciente(objParamsPlano, 'Planos', objParamsPlano['id'])"></botao>
+</ng-template>
+
+
+<!-- MODAL CONTATOS -->
+<ng-template #formularioContatoBody>
+    <div class="row">
+        <div class="col-md-6">
+            <entrada nome="Tipo de Contato" tipo="seleciona" objId="codigo" (getValor)="getTipoContato($event)" [opcoes]="contatosPaciente"
+                [valor]="objParamsContato['tipo']" (onChange)="getTipoContato($event)"></entrada>
+        </div>
+
+        <div class="col-md-6">
+            <entrada nome="Titulo" (getValor)="objParamsContato['titulo'] = $event.valor" [valor]="objParamsContato['titulo']"></entrada>
+        </div>
+
+        <div class="col-md-6" *ngIf="tipoContato == 'EMAIL'">
+            <entrada nome="Email" [tipo]="'email'" (getValor)="getDescricaoContato($event)" [valor]="objParamsContato['descricao']"></entrada>
+        </div>
+        
+        <div class="col-md-6" *ngIf="tipoContato == 'TELEFONE'">
+            <entrada nome="Telefone" [tipo]="'celular'" (getValor)="getDescricaoContato($event)" [valor]="objParamsContato['descricao']"></entrada>
+        </div>
+
+        <div class="col-md-6" *ngIf="tipoContato == 'REDESOCIAL'">
+            <entrada nome="Rede Social" [tipo]="'url'" (getValor)="getDescricaoContato($event)" [valor]="objParamsContato['descricao']"></entrada>
+        </div>
+
+        <div class="col-md-6" *ngIf="tipoContato == 'text'">
+            <entrada nome="Telefone" [tipo]="'text'" (getValor)="getDescricaoContato($event)" [valor]="objParamsContato['descricao']"></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #formularioContatoBotoes>
+    <botao nome="Salvar" (click)="criarElementoPaciente(objParamsContato, 'Contatos', objParamsContato['id'])"></botao>
+</ng-template>
+
+
+<!-- MODAL ENDERECOS -->
+<ng-template #formularioEnderecoBody>
+    <div class="row">
+        <div class="col-md-6">
+            <entrada nome="Titulo" (getValor)="objParamsEndereco['titulo'] = $event.valor" [valor]="objParamsEndereco['titulo']"></entrada>
+        </div>
+
+        <div class="col-md-6">
+            <entrada nome="CEP" mascara="99999-999" (getValor)="getEndereco($event)"></entrada>
+
+        </div>
+
+        <div class="col-md-6">
+            <entrada nome="Logradouro" (getValor)="objParamsEndereco['logradouro'] = $event.valor" [valor]="objParamsEndereco['logradouro']"></entrada>
+        </div>
+
+        <div class="col-md-2">
+            <entrada nome="Nro" tipo="numero" (getValor)="objParamsEndereco['numero'] = $event.valor" [valor]="objParamsEndereco['numero']"></entrada>
+        </div>
+
+        <div class="col-md-4">
+            <entrada nome="Complemento" (getValor)="objParamsEndereco['complemento'] = $event.valor" [valor]="objParamsEndereco['complemento']"></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <entrada nome="Bairro" (getValor)="objParamsEndereco['bairro'] = $event.valor" [valor]="objParamsEndereco['bairro']"></entrada>
+        </div>
+
+        <div class="col-md-5">
+
+            <autocomplete *ngIf="!buscaCep; else mostraCidadeGetEndereco" [titulo]="'Cidade'" [minimo]="3" [valor]="objCidades" [camposFiltro]="['nome']"
+                [valorSelecionado]="cidadeSelecionada" [placeholder]="'Digite para buscar Cidade'" [fnSearch]="fnCfgCidadeRemote.bind(this)"
+                (fnOnSelected)="getCidadeSelect($event)"></autocomplete>
+
+            <ng-template #mostraCidadeGetEndereco>
+                <entrada nome="Cidade" bloqueado="true" [valor]="objParamsEndereco['cidade']['nome']"></entrada>
+            </ng-template>
+        </div>
+
+        <div class="col-md-2">
+            <entrada nome="Estado" bloqueado="true" [valor]="objParamsEndereco['cidade']['estado']"></entrada>
+        </div>
+
+
+    </div>
+</ng-template>
+
+<ng-template #formularioEnderecoBotoes>
+    <botao nome="Salvar" (click)="criarElementoPaciente(objParamsEndereco, 'Enderecos', objParamsEndereco['id'])"></botao>
+</ng-template>
+
+
+<!-- MODAL RESPONSAVEL -->
+<ng-template #formularioResponsavelBody>
+    <div class="row">
+        <div class="col-md-4">
+            <entrada nome="CPF Responsavel" tamanhoMaximo="11" mascara="999.999.999-99" (getValor)="objParamsResponsavel['cpf'] = $event.valor" [valor]="objParamsResponsavel['cpf']"></entrada>
+        </div>
+
+        <div class="col-md-8">
+            <entrada nome="Nome" (getValor)="objParamsResponsavel['nome'] = $event.valor" [valor]="objParamsResponsavel['nome']"></entrada>
+        </div>
+
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-sm-9 col-md-9">
+                    <div class="form-group">
+                        <label>Parentesco:</label>
+                        <select #selectElem class="form-control" [(ngModel)]="objParamsResponsavel['parentesco']['id']" (change)="objParamsResponsavel['parentesco'] = { id : selectElem.value }">
+                            <option *ngFor="let item of parentescos" [value]="item.id">
+                                {{item.nome}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- GRAU DE PARENTESCO -->
+
+                <div class="col-sm-3 col-md-3">
+                    <botaoSearchAcoes
+                        (setInstanciaBtnSearch)="instanciaBtnSearchParentesco=$event"
+                        [icone]="'search'"
+                        [params]="['id', 'nome']"
+                        [service]="serviceParentesco"
+                        [elementoAcoes]="acoesParentesco"
+                        [btnAdicionar]="btnAdicionarParentesco"
+                        [fnService]="['getParentescoPaginado', 'getParentescoPaginado']"
+                        (onSelect)="refreshParentescos($event, true);novoParentesco.setItem($event)"
+                    ></botaoSearchAcoes>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #formularioResponsavelBotoes>
+    <botao nome="Salvar" (click)="criarElementoPaciente(objParamsResponsavel, 'Responsaveis', objParamsResponsavel['id'])"></botao>
+</ng-template>
+
+
+<!-- ######################### CRIA OPERADORA ################################ -->
+<ng-template #acoesOperadora let-item="item">
+    <td>
+        <botao icone="mode_edit" (click)="salvarOperadora(item)"></botao>
+    </td>
+</ng-template>
+
+<ng-template #btnAdicionarOperadora>
+    <botao nome="Adicionar" classe="form-control btn btn-primary" (click)="salvarOperadora(null)"></botao>
+</ng-template>
+
+<ng-template #bodyModalAdicionaOperadora let-c="close" let-d="dismiss">
+    <input type="hidden" name="id" [(ngModel)]="novoOperadora.item.id">
+
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group">
+            <label>Código ANS:</label>
+            <input type="text" name="descricao" class="form-control" placeholder="Informe o Código ANS" [(ngModel)]="novoOperadora.item.codigoAns"/>
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group">
+            <label>Nome Operadora:</label>
+            <input type="text" name="descricao" class="form-control" placeholder="Nome da Operadora" [(ngModel)]="novoOperadora.item.nome"/>
+        </div>
+    </div>
+
+</ng-template>
+
+<ng-template #modalAdicionaOperadoraBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="novoOperadora.salvarOperadora(novoOperadora, serviceOperadora)"></botao>
+</ng-template>
+
+
+<!-- ######################### CRIA PARENTESCO ################################ -->
+<ng-template #acoesParentesco let-item="item">
+    <td>
+        <botao icone="mode_edit" (click)="salvarParentesco(item)"></botao>
+    </td>
+</ng-template>
+
+<ng-template #btnAdicionarParentesco>
+    <botao nome="Adicionar" classe="form-control btn btn-primary" (click)="salvarParentesco(null)"></botao>
+</ng-template>
+
+<ng-template #bodyModalAdicionaParentesco let-c="close" let-d="dismiss">
+    <input type="hidden" name="id" [(ngModel)]="novoParentesco.item.id">
+
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group">
+            <label>Descrição</label>
+            <input type="text" name="descricao" class="form-control" placeholder="Informe a Descrição" [(ngModel)]="novoParentesco.item.nome"/>
+        </div>
+    </div>
+
+</ng-template>
+
+<ng-template #modalAdicionaParentescoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="novoParentesco.salvarParentesco(novoParentesco, serviceParentesco)"></botao>
+</ng-template>
+
+
+<!-- #########################################   Mudar Status Agendamento  ######################################### -->
+<ng-template #botoesModalAlteraStatusAgendamento let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" (click)="alterarStatusAgendamento()"></botao>
+</ng-template>
+
+<ng-template #alteraStatusAgendamentoModal let-c="close" let-d="dismiss">
+    <div *ngIf="acaoAgendamento == 'DESMARCADO'">
+        <p>Motivo do cancelamento:</p>
+        <textarea class="form-control" [(ngModel)]="motivoCancelamento"></textarea>
+    </div>    
+</ng-template>
+
+
+<!-- #########################################   Mudar Log Atendimento  ######################################### -->
+<ng-template #bodyModalLogAtendimento>
+    <logAtendimento
+        [atendimentoId]="atendimentoSelecionado" 
+        [mostraBotaoVoltar]="false"
+        (refresh)="getRefreshLogAtendimento($event)">
+    </logAtendimento>
+</ng-template>
+
+<ng-template #botoesModalLogAtendimento></ng-template>

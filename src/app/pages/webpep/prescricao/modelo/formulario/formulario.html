@@ -1,0 +1,467 @@
+<moldura [titulo]="(( idModelo ) ? 'Editar' : 'Novo') + ' Modelo de Prescrição'">
+        
+    <div class="row">
+
+        <div class="col-sm-8 col-md-8">
+            <div class="form-group">
+                <label>Nome:</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe a Descrição"
+                    [(ngModel)]="novoModelo['nome']"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-2">
+            <entrada 
+                nome="Ativo?" 
+                tipo="simnao"
+                [valor]="novoModelo['ativo']" 
+                (getValor)="$event && $event.valor ? novoModelo['ativo'] = $event.valor : null" 
+            ></entrada>
+        </div>
+
+        <div class="col-sm-2">
+            <entrada 
+                nome="Obriga Ordem?" 
+                tipo="simnao"
+                [valor]="novoModelo['obrigaOrdem']" 
+                (getValor)="$event && $event.valor ? novoModelo['obrigaOrdem'] = $event.valor : null" 
+            ></entrada>
+        </div>
+        
+    </div>
+
+    <ng-container *ngIf="idModelo">
+        <moldura
+            podeOcultar="true"
+            titulo="Diagnóstico Modelo"
+            [customFiltro]="filtroDiagnostico"
+            [customAcoes]="customfiltroDiagnostico"
+            [filtrar]="filtrarDiagnostico.bind(this)"
+        >
+            
+            <moldura titulo="Adicionar Diagnóstico" podeOcultar="true">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <entrada
+                            nome="Unidade Atendimento" 
+                            tipo="seleciona"
+                            [opcoes]="localAtendimento"
+                            [valor]="idUnidade"
+                            (getValor)="setModelo($event, 'unidade')"
+                        ></entrada>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <autocomplete 
+                            titulo="CID" 
+                            [placeholder]="'Digite para buscar CID'" 
+                            [minimo]="3" 
+                            [valor]="requestDiagnostico['cid']"
+                            [camposFiltro]="['codigo', 'descricao']"
+                            [valorSelecionado]="valorCidSelecionado" 
+                            [fnSearch]="fnCfgModeloRemote.bind(this,'cid')"
+                            (fnOnSelected)="setModelo($event, 'cid')"
+                        ></autocomplete>
+                    </div>
+            
+                    <div class="col-sm-4">
+                        <autocomplete 
+                            titulo="CIAP" 
+                            [placeholder]="'Digite para buscar CIAP'"
+                            [minimo]="3"
+                            [valor]="requestDiagnostico['ciap']"
+                            [camposFiltro]="['codigo', 'descricao']"
+                            [valorSelecionado]="valorCiapSelecionado" 
+                            [fnSearch]="fnCfgModeloRemote.bind(this, 'ciap')"
+                            (fnOnSelected)="setModelo($event, 'ciap')"
+                        ></autocomplete>
+                    </div>
+
+                    <div class="col-md-2">
+                        <botao nome="Adicionar" (click)="salvaDiagnostico(requestDiagnostico)"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th> Unidade </th>
+                        <th style="width:35%;"> CID </th>
+                        <th style="width:35%;"> CIAP </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of objDiagnostico; let i = index" class="link" (click)="editarDiagnostico(item)">
+                        <td *ngIf="item" class="acao">
+                            <icone nome="delete" class="acao" (click)="deleteDiagnostico(item.id, i)"></icone>
+                        </td>
+                        <td *ngIf="item"> {{ item.unidadeAtendimento?.descricao }} </td>
+                        <td *ngIf="item"> {{ item.cid?.codigo }} - {{ item.cid?.descricao }} </td>
+                        <td *ngIf="item"> {{ item.ciap?.codigo }} - {{ item.ciap?.descricao }} </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </moldura>
+
+        <moldura titulo="Itens Modelo" podeOcultar="true">
+
+            <ng-template [ngTemplateOutlet]="addNovoItemPrescricaoModelo"></ng-template>
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="ordenar"></th>
+                        <th></th>
+                        <th> NOME </th>
+                        <th> VIA DE ACESSO </th>
+                        <th> FREQUÊNCIA </th>
+                        <th> DOSE PADRÃO </th>
+                        <th> INFUSÃO MIN </th>
+                        <th> INFUSÃO MAX </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of novoModelo['itens']; let pos = index" class="link">
+                        <td class="ordenar">
+                            <icone 
+                                nome="expand_less" 
+                                title="Subir Nivel" 
+                                (click)="ordemModelo(item?.id, novoModelo?.itens[pos-1]?.id)" 
+                                [ngClass]="{'invisible' : 0 == pos}"
+                            ></icone>
+                            <icone 
+                                nome="expand_more" 
+                                title="Descer Nivel" 
+                                (click)="ordemModelo(novoModelo?.itens[pos+1]?.id, item?.id)" 
+                                *ngIf="novoModelo['itens']?.length-1 > pos"
+                            ></icone>
+                        </td>
+                        <td class="acao">
+                            <!-- <icone nome="edit" class="acao" (click)=editarItem(item)></icone> -->
+                            <icone nome="delete" class="acao" (click)=removerItem(item)></icone>
+                        </td>
+
+                        <td> {{ (item.prescricaoItem || item).nome }} </td>
+
+                        <td (click)="editaCampoItem( $event, 'viaAcesso', item.id, item['viaAcesso'])"> 
+                            <div class="edit" *ngIf="campoEdita['viaAcesso']['id'] == item.id; else campoSimplesVia">
+                                <entrada 
+                                    class="entrada qnts" 
+                                    [opcoes]="opcoesViaAcesso" 
+                                    semTitulo="true" 
+                                    tipo="seleciona" 
+                                    objId="codigo" 
+                                    [valor]="item.viaAcesso" 
+                                    [fnOnChange]="salvarCampoEdita.bind(this, 'viaAcesso', item)"
+                                ></entrada>
+                            </div>
+                            <ng-template #campoSimplesVia>
+                                <span>{{item.viaAcesso || 'SELECIONE VIA ACESSO'}}</span>
+                            </ng-template>
+                        </td>
+
+                        <td (click)="editaCampoItem( $event, 'frequencia', item.id, (item['frequencia'] ? item['frequencia']['id'] : undefined))"> 
+                            <div class="edit" *ngIf="campoEdita['frequencia'] && campoEdita['frequencia']['id'] == item.id; else campoSimplesFreq">
+                                <entrada 
+                                    class="entrada qnts" 
+                                    [opcoes]="opcoesFrequencia" 
+                                    semTitulo="true" 
+                                    tipo="seleciona" 
+                                    valor="{{item['frequencia'] ? item['frequencia']['id'] : undefined}}" 
+                                    [fnOnChange]="salvarCampoEdita.bind(this, 'frequencia', item)"
+                                ></entrada>
+                            </div>
+                            <ng-template #campoSimplesFreq>
+                                <span>{{item?.frequencia ? item?.frequencia?.descricao : 'SELECIONE FREQUENCIA'}}</span>
+                            </ng-template>
+                        </td>
+
+                        <td> {{ (item?.quantidadeDosePadrao || item?.prescricaoItem?.quantidadeDosePadrao) }} 
+                             {{ (item?.quantidadeDosePadrao || item?.prescricaoItem?.quantidadeDosePadrao) &&
+                                (item.dosePadrao || item?.prescricaoItem?.dosePadrao) ? '/' : ''}} 
+                             {{ (item.dosePadrao || item?.prescricaoItem?.dosePadrao) }} </td>
+
+                        <td colspan (click)="editaCampoItem( $event, 'infusaoMinimo', item.id, (item['infusaoMinimo'] ? item['infusaoMinimo']['id'] : undefined))"> 
+                            <div class="edit" *ngIf="campoEdita['infusaoMinimo'] && campoEdita['infusaoMinimo']['id'] == item.id; else campoSimplesInfMin">
+                                <entrada
+                                    tipo="hora"
+                                    tipoRetorno="mm"
+                                    [semTitulo]="true"
+                                    nome="Minimo"
+                                    [valor]="converteHora(item?.infusaoMinimo)"
+                                    [fnOnChange]="salvarCampoEdita.bind(this, 'infusaoMinimo', item)"
+                                ></entrada>
+                            </div>
+                            <ng-template #campoSimplesInfMin>
+                                <span>{{item?.infusaoMinimo ? converteHora(item.infusaoMinimo) : ''}}</span>
+                            </ng-template>
+                        </td>
+
+                        <td colspan (click)="editaCampoItem( $event, 'infusaoMaximo', item.id, (item['infusaoMaximo'] ? item['infusaoMaximo']['id'] : undefined))"> 
+                            <div class="edit" *ngIf="campoEdita['infusaoMaximo'] && campoEdita['infusaoMaximo']['id'] == item.id; else campoSimplesInfMax">
+                                <entrada
+                                    tipo="hora"
+                                    tipoRetorno="mm"
+                                    [semTitulo]="true"
+                                    nome="Máximo"
+                                    [valor]="converteHora(item?.infusaoMaximo)"
+                                    [fnOnChange]="salvarCampoEdita.bind(this, 'infusaoMaximo', item)"
+                                ></entrada>
+                            </div>
+                            <ng-template #campoSimplesInfMax>
+                                <span>{{item?.infusaoMaximo ? converteHora(item.infusaoMaximo) : ''}}</span>
+                            </ng-template>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </moldura>
+
+    </ng-container>
+
+
+    <div class="row">
+        <botao nome="Salvar" [ngClass]="'col-md-3'" (click)="salvarModeloPrescricao()"></botao>
+        <botao nome="Voltar" [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+    </div>
+
+</moldura>
+
+
+<ng-template #addNovoItemPrescricaoModelo>
+
+    <moldura titulo="Adicionar Item de Prescrição" podeOcultar="true">
+
+        <div class="row">
+
+            <div class="{{ ( objParamAddProcedimento['prescricaoItem'] ) ? 'col-sm-6 col-md-6' : 'col-md-12' }}">
+                <autocomplete
+                    titulo="Procedimento"
+                    [minimo]="3"
+                    [placeholder]="'Digite para buscar Procedimentos'"
+                    [semTitulo]="objParamAddProcedimento['prescricaoItem'] ? false : true"
+                    [valor]="objProcedimentos"
+                    [camposFiltro]="['nome']"
+                    [valorSelecionado]="valorProcedimentosSelecionado"
+                    [fnSearch]="fnCfgProcedimentosRemote.bind(this)"
+                    (fnOnSelected)="setObjParamProcedimentos($event)"
+                    (onClear)="objParamAddProcedimento['prescricaoItem'] = false"
+                ></autocomplete>
+            </div>
+
+            <ng-container *ngIf="objParamAddProcedimento['prescricaoItem']" >
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada
+                        nome="Via de Acesso"
+                        [opcoes]="opcoesViaAcesso"
+                        tipo="seleciona"
+                        objId="codigo"
+                        (getValor)="($event && $event.valor) ? objParamAddProcedimento['viaAcesso'] = $event.valor : null"
+                        [valor]="objParamAddProcedimento['viaAcesso']"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada 
+                        tipo="seleciona"
+                        nome="Frequência Padrão"
+                        mostraOpcaoEmBranco="true"
+                        [opcoes]="opcoesFrequencia"
+                        (getValor)="$event && $event.valor ? objParamAddProcedimento.frequencia.id = $event.valor : null"
+                        [valor]="objParamAddProcedimento?.frequencia?.id"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada 
+                        tipo="seleciona"
+                        nome="Frequência Mínima"
+                        mostraOpcaoEmBranco="true"
+                        [opcoes]="opcoesFrequencia"
+                        (getValor)="$event && $event.valor ? objParamAddProcedimento.frequenciaMinima = { id: $event.valor }  : objParamAddProcedimento.frequenciaMinima = undefined"
+                        [valor]="objParamAddProcedimento?.frequenciaMinima?.id"
+                    ></entrada>
+                </div>
+                
+                <div class="col-md-3 col-sm-3">
+                    <entrada 
+                        nome="Frequência Máxima"
+                        tipo="seleciona"
+                        [opcoes]="opcoesFrequencia"
+                        (getValor)="$event && $event.valor ? objParamAddProcedimento.frequenciaMaxima = { id: $event.valor }  : objParamAddProcedimento.frequenciaMaxima = undefined"
+                        [valor]="objParamAddProcedimento?.frequenciaMaxima?.id"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada
+                        tipo="hora"
+                        tipoRetorno="mm"
+                        nome="Tempo de Infusão Mínimo"
+                        [valor]="converteHora(objParamAddProcedimento['padrao']['infusaoMinimo'])"
+                        (getValor)="$event?.valorSimples ? objParamAddProcedimento.infusaoMinimo = $event.valorSimples : ''"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada
+                        tipo="hora"
+                        tipoRetorno="mm"
+                        nome="Tempo de Infusão Máximo"
+                        [valor]="converteHora(objParamAddProcedimento['padrao']['infusaoMaximo'])"
+                        (getValor)="$event?.valorSimples ? objParamAddProcedimento.infusaoMaximo = $event.valorSimples : ''"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-6 col-sm-6">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4">
+                            <entrada
+                                nome="Dose Máxima"
+                                tipo="numero"
+                                (getValor)="objParamAddProcedimento['doseMaximaValor'] = $event.valor"
+                            ></entrada>
+                        </div>
+
+                        <div class="col-md-8 col-sm-8">
+                            <entrada
+                                tipo="seleciona"
+                                nome="Dose Máxima (Un.)"
+                                placeholder="Unidade"
+                                [opcoes]="opcoesDmTissUnidadeMedica"
+                                (getValor)="objParamAddProcedimento['doseMaximaUnidadade'] = { id: $event.valor }"
+                            ></entrada>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada 
+                        nome="Quantidade Dose Padrão"
+                        expressaoRegular="^[\d]+([\.]?[\d]{1,2})?$"
+                        [valor]="objParamAddProcedimento['padrao']['quantidadeDosePadrao']"
+                        (getValor)="$event && $event.valor ? objParamAddProcedimento['quantidadeDosePadrao'] = $event.valor : objParamAddProcedimento['quantidadeDosePadrao'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <entrada
+                        tipo="seleciona"
+                        nome="Gramagem Dose Padrão"
+                        objId="codigo"
+                        [opcoes]="dosePadrao"
+                        [valor]="objParamAddProcedimento['padrao']['dosePadrao']"
+                        (getValor)="$event && $event.valor ? objParamAddProcedimento['dosePadrao'] = $event.valor : null"
+                    ></entrada>
+                </div>    
+            </ng-container>
+
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-2">
+                <botao nome="Adicionar" (click)="salvarItemModeloPrescricao()"></botao>
+            </div>
+        </div>
+
+        <div>
+
+            <table *ngIf="produtosItemSelecionado && produtosItemSelecionado.length" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>PRODUTO</th>
+                        <th>MEDICAMENTO</th>
+                        <th>UNIDADE</th>
+                        <th>QUANTIDADE</th>
+                    </tr>
+                    <tr *ngFor="let produto of produtosItemSelecionado" class="link">
+                        <td>{{produto.produto.nome}}</td>
+                        <td>{{( produto?.produto?.medicamento ) ? produto.produto.medicamento.nome + ' - ' + produto.produto.medicamento.descricao : ''}}</td>
+                        <td>{{ produto.unidade ? produto.unidade.descricao + ' - ' + produto.unidade.unidadeMedida : ''}}</td>
+                        <td>{{produto.quantidade}}</td>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+
+    </moldura>
+
+</ng-template>
+
+<ng-template #modalEditaItem>
+
+    <item-prescricao
+        [idPrescricao]="itemSelecionado"
+    ></item-prescricao>
+
+</ng-template>
+
+
+<!-- #################################### CUSTOM FILTRO Diagnostico #################################### -->
+<ng-template #filtroDiagnostico>
+    <form class="filtro">
+        <div class="col">
+            <entrada
+                nome="Unidade Atendimento" 
+                tipo="seleciona"
+                [opcoes]="localAtendimento"
+                [valor]="requestDiagnostico['unidadeAtendimento']"
+                (getValor)="setFiltroModelo($event, 'unidade')"
+            ></entrada>
+        </div>
+
+        <div class="col">
+            <autocomplete 
+                titulo="CID" 
+                [placeholder]="'Digite para buscar CID'" 
+                [minimo]="3" 
+                [valor]="requestDiagnostico['cid']"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="filtroCidSelecionado" 
+                [fnSearch]="fnCfgModeloRemote.bind(this, 'cid')"
+                (fnOnSelected)="setFiltroModelo($event, 'cid')"
+            ></autocomplete>
+        </div>
+
+        <div class="col">
+            <autocomplete 
+                titulo="CIAP" 
+                [placeholder]="'Digite para buscar CIAP'"
+                [minimo]="3"
+                [valor]="requestDiagnostico['ciap']"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="filtroCiapSelecionado" 
+                [fnSearch]="fnCfgModeloRemote.bind(this, 'ciap')"
+                (fnOnSelected)="setFiltroModelo($event, 'ciap')"
+            ></autocomplete>
+        </div>
+    </form>
+</ng-template>
+
+<ng-template #customfiltroDiagnostico>
+    <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+        <botao 
+            nome="Limpar" 
+            classe="btn-default"
+            debounceClick 
+            [debounceTime]="200"
+            (debounceClick)="limparFiltros()" 
+        ></botao>
+    </div>
+</ng-template>
+
+<ng-template #bodyModalConfirm>
+    {{modalMensagem}}
+</ng-template>

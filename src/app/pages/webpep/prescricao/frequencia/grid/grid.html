@@ -1,0 +1,55 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+    </div>
+</div>
+
+
+<!-- 
+#############################################################################################
+                                        Base Pagina
+#############################################################################################
+-->
+<ng-template #tmplBasePagina let-c="close" let-d="dismiss">	
+	<div class="card-body">
+		<ng-template [ngTemplateOutlet]="tmplFrequencia"></ng-template>
+	</div>
+</ng-template>
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplAddFrequencia let-c="close" let-d="dismiss">
+	<div class="row" style="float: left;margin-right: 20px;">
+		<div class="col">
+			<button class="btn btn-primary" (click)="adicionaFrequencia()" >Adicionar</button>
+		</div>
+	</div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Tabela
+#############################################################################################
+-->
+<ng-template #tmplFrequencia let-c="close" let-d="dismiss">
+	<tabela
+		[titulo]="'Frequencias'"
+		[colunas]="variaveisDeAmbiente['colunasTabela']"
+		[registros]="variaveisDeAmbiente['tabela']['total']"
+		[linhas]="variaveisDeAmbiente['frequencia']"
+		[ordenacao]="variaveisDeAmbiente['ordenacao']"
+		[atualizaDados]="iniciaTabela.bind(this)"
+		[elementoAcoesMoldura]="tmplAddFrequencia"
+		[limparFiltros]="limparFiltros.bind(this)"
+		[linhaClick]="abreFrequencia.bind(this)"
+		[mostraFiltrar]="false"
+	>
+		<form class="filtro">
+			<div class="row"></div>
+		</form>
+	</tabela>
+</ng-template>

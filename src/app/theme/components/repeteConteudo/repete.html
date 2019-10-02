@@ -1,0 +1,20 @@
+<moldura *ngFor="let elemento of array; let pos = index">
+		
+		<div class="row">
+				<ng-content select=".conteudo"></ng-content>
+		</div>
+
+		<div 
+			*ngIf="pos == array.length - 1"
+			class="row"
+		>
+			<div class="col-md-3">
+				<botao 
+						nome="{{nomeBotao}}" 
+						[desabilitado]="validaDesabilitar(elemento)" 
+						(click)="novoElemento()"
+				></botao>
+			</div>
+		</div>
+
+</moldura>

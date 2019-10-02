@@ -1,0 +1,64 @@
+@import "../../../../styles";
+
+/*  ===============================================
+                    DATE PICKER
+    =============================================== */
+
+.calendar-grid, .calendar-header {
+    display: flex;
+}
+
+.calendar-head .col {
+    padding: 10px;
+    background-color: $roxo_escuro;
+}
+
+.calendar-grid .col {
+    flex: 1;
+    border-right: 1px solid $roxo_escuro;
+    border-bottom: 1px solid $roxo_escuro;
+}
+
+.col.old {
+    color: $roxo_escuro;
+}
+
+.mini-calendario .col.dia {
+    padding: 8px 5px;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+.mini-calendario .col.old {
+    background-color: initial;
+    color: $font_roxo_desabilitado;
+}
+
+.mini-calendario .col.dia {
+    height: 30px;
+    min-height: 30px;
+}
+
+.mini-calendario .col.dia.ativo {
+    background-color: $roxo_claro;
+}
+
+.float {
+    background-color: #fff;
+    position: absolute;
+    z-index: 9999;
+    border: thin solid #171435;
+    min-width: 200px;
+    width: auto;
+}
+
+.mesVisaoMiniCalendario {
+    text-transform: capitalize;
+    font-size: 14px !important;
+}
+
+.calendar-grid.calendar-head div.col {
+    padding: 5px;
+    vertical-align: middle !important;
+}

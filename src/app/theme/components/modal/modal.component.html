@@ -1,0 +1,25 @@
+<div class="modal-content">
+    <div class="modal-header" *ngIf="modalHeader">
+        <h4 class="modal-title">{{modalHeader}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="voltar()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body" id="modalBody">
+        <ng-container *ngIf="modalMensagem">{{modalMensagem}}</ng-container>
+        <ng-template [ngTemplateOutlet]="templateRefBody" [ngTemplateOutletContext]="contextObject"></ng-template>
+    </div>
+
+    <div class="modal-footer">
+        <ng-container *ngIf="!modalAlert; else alertBotoes">
+            <ng-template [ngTemplateOutlet]="templateBotoes" [ngTemplateOutletContext]="contextObject"></ng-template>
+            <button [ngClass]="(modalAdicionar) ? 'modalAdicionar' : ''" class="btn btn-default confirm-btn btn-raised" (click)="voltar()">Fechar</button>
+        </ng-container>
+
+        <ng-template #alertBotoes>
+            <button class="btn btn-primary confirm-btn btn-raised" (click)="confirm(true)">Confirmar</button>
+            <button class="btn btn-default confirm-btn btn-raised" (click)="cancel(false)">Cancelar</button>
+        </ng-template>
+    </div>
+</div>

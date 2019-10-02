@@ -1,0 +1,24 @@
+<moldura titulo="Leito">
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="status"></th>
+                <th>PRESTADOR</th>
+                <th>TIPO</th>
+                <th>DESCRIÇÃO</th>
+            </tr>
+            <tr *ngFor="let leito of leitos" (click)="atualizar(leito.id)">
+                <td *ngIf="leito.ativo === true" class="status verde"></td>
+                <td *ngIf="leito.ativo === false" class="status cinza"></td>
+                <td>{{leito.prestador.nome}}</td>
+                <td>{{leito.tipo}}</td>
+                <td>{{leito.descricao | uppercase}}</td>
+            </tr>
+        </thead>
+    </table>
+    <div class="row">
+        <div class="col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+</moldura>

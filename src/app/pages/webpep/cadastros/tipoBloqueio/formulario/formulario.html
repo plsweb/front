@@ -1,0 +1,57 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+
+    <div class="card-body">
+
+        <moldura [titulo]="(( idTipoBloqueio ) ? 'Editar' : 'Novo') + ' Tipo de Bloqueio'">
+            
+            <div class="row">
+
+                <div class="col-sm-8 col-md-8">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input 
+                            type="text" 
+                            name="descricao" 
+                            class="form-control" 
+                            placeholder="Informe a Descrição"
+                            [(ngModel)]="novoBloqueio['descricao']"
+                        />
+                    </div>
+                </div>
+        
+                <div class="col-sm-4 col-md-4">
+                    <div class="form-group">
+                        <label>Remunerado</label>
+                        <select class="form-control" placeholder="Selecione" [(ngModel)]="novoBloqueio['remunerado']">
+                            <option value="true">REMUNERADO</option>
+                            <option value="false">NÃO REMUNERADO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-4 col-md-4">
+                    <div class="form-group">
+                        <label>Ativo</label>
+                        <select class="form-control" placeholder="Selecione" [(ngModel)]="novoBloqueio['ativo']">
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <botao nome="Salvar Tipo de Bloqueio" (click)="salvarTipo()"></botao>
+                </div>
+                <div class="col-md-4">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+
+        </moldura>
+
+    </div>
+
+</div>

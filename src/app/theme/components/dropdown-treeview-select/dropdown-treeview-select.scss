@@ -1,0 +1,68 @@
+
+ngx-dropdown-treeview {
+
+    .dropdown,
+    .dropdown-menu{
+        display: inline-block !important;
+    }
+
+    label {
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    button.btn.dropdown-toggle.btn-outline-secondary:hover,
+    .btn-outline-secondary:active, .btn-outline-secondary.active, 
+    .show > .btn-outline-secondary.dropdown-toggle {
+        transform: initial !important;
+        background: #28235b;
+        border: none !important;
+        box-shadow: none;
+    }
+
+    .dropdown button{
+        background: #28235b;
+        color: white;
+        border: none !important;
+        margin-right: 0 !important;
+        height: 35px;
+        max-width: 190px;
+        overflow: hidden;
+        padding-left: 12px !important;
+    }
+
+    .dropdown-menu {
+        background: #443f7a;
+        color: white;
+        border: none !important;
+        max-width: 190px;
+        z-index: 1;
+    }
+
+    .form-check {
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+    
+
+    .form-check-label {
+        padding-left: 2px;
+    }
+
+    .treeview-item {
+        width: 105%;
+        padding: 5px !important;
+
+        .treeview-item{
+            margin-left: 17px !important;
+        }
+
+        .treeview-item:hover{
+            background: #3a3668;
+        }
+
+    }
+
+
+}
+

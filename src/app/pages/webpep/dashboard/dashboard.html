@@ -1,0 +1,106 @@
+<!-- <entrada
+    nome="Datepicker hora"
+    tipo="datepicker"
+    [hora]="true"
+    [valor]="'30/08/2020 10:20:30'"
+    (getValor)="getData($event)"
+></entrada>
+
+ <span> {{ 'teste 1' | replace: {'teste':''} }} </span> 
+ 
+ <uploader [descricao]="Teste" [style]="'icone'" [extensao]="['image/jpeg', 'image/png', 'image/gif']"></uploader>
+
+ <qrcode qrdata="paciente" [size]="256" [level]="'Q'"></qrcode>
+-->
+
+<!-- <progressBar
+    [maior]="15254"
+    [menor]="1400"
+    labelTitle="TESTE DASHBOARD"
+    [classe]="{
+        'bg-danger' :  (((160 || 0) / (15254) ) * 100) > 66,
+        'bg-warning':  ((((160 || 0) / (15254) ) * 100) <= 66) && (((160 || 0) / (15254)) * 100 > 33),
+        'bg-success':  (((160 || 0) / (15254) ) * 100) <= 33
+    }"
+></progressBar> -->
+
+<!-- <moldura titulo="teste compoennte prescrição">
+    <gridProcedimentos
+        [produtoId]="648"
+        [atendimentoTipoId]="undefined"
+    ></gridProcedimentos>
+</moldura> -->
+
+<moldura titulo="Início">
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <dashboardPieChart
+                *ngFor="let dash of dashboards" 
+                tamanho="grande-70" 
+                titulo="{{dash.titulo}}" 
+                subtitulo="{{dash.quantidade}}" 
+                percentual="{{dash.percentual}}"
+                icone="{{dash.icone | lowercase}}" 
+            ></dashboardPieChart>
+        </div>
+    </div>
+</moldura>
+
+<moldura titulo="Relatórios" *ngIf="relatoriosDados && relatoriosDados.length">
+    <div class="row">
+        <div 
+            *ngFor="let rel of relatoriosDados"
+            class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
+            (click)="navegaProRelatorio(rel)"
+        >
+            <pie-chart 
+                *ngIf="rel.tipo == 'pie'"
+                [data]="rel.dadosGrafico" 
+                [config]="rel.config" 
+                [elementId]="rel.elementId"
+            ></pie-chart>
+
+            <bar-chart 
+                *ngIf="rel.tipo == 'bar'"
+                [data]="rel.dadosGrafico" 
+                [config]="rel.config" 
+                [elementId]="rel.elementId"
+            ></bar-chart>
+
+            <line-chart 
+                *ngIf="rel.tipo == 'line'"
+                [data]="rel.dadosGrafico" 
+                [config]="rel.config" 
+                [elementId]="rel.elementId"
+            ></line-chart>
+        </div>
+    </div>
+</moldura>
+
+<ng-template #bodyModalConsult let-c="close" let-d="dismiss">
+    <entrada
+        nome="Unidade"
+        tema="popup"
+        tipo="seleciona"
+        [opcoes]="unidades"
+        (getValor)="getUnidade($event)"
+    ></entrada>
+    <entrada *ngIf="consultorios.length" nome="Consultório" [opcoes]="consultorios" tema="popup" tipo="seleciona" (getValor)="getConsultorio($event)"></entrada>
+</ng-template>
+
+<ng-template #templateBotoesConsult let-c="close" let-d="dismiss">
+    <button class="btn btn-primary confirm-btn btn-raised" (click)="salvar()">Ok</button>
+</ng-template>
+
+
+
+<!-- MODAL -->
+<ng-template #bodyModalSenha let-c="close" let-d="dismiss">
+    <entrada nome="Nova Senha" tipo="senha" id="novasenha" (getValor)="getNovaSenha($event)"></entrada>
+    <entrada nome="Confirmar Senha" tipo="senha" (getValor)="getConfirmacao($event)"></entrada>
+</ng-template>
+
+
+<ng-template #botoesModalSenha let-c="close" let-d="dismiss">
+    <botao nome="Salvar Senha" (click)="salvarSenha()"></botao>
+</ng-template>

@@ -1,0 +1,288 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+
+    <div *ngIf="tabelaApi" class="card-body">
+
+        <moldura [titulo]="(( idTabelaApi ) ? 'Editar' : 'Novo') + ' Tabela API'">
+
+            <moldura>
+                <div class="row">
+
+                    <div class="col-sm-6">
+                        <entrada nome="Nome Tabela API" [valor]="tabelaApi['nome']" (getValor)="($event) ? tabelaApi['nome'] = $event.valor : null"></entrada>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <entrada nome="Nome Banco" [valor]="tabelaApi['nomeBanco']" (getValor)="($event) ? tabelaApi['nomeBanco'] = $event.valor : null"></entrada>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <entrada nome="Nome JAVA" [valor]="tabelaApi['nomeJava']" (getValor)="($event) ? tabelaApi['nomeJava'] = $event.valor : null"></entrada>
+                    </div>
+
+                    <div class="col-md-12">
+                        <entrada nome="Descrição Tabela" tipo="area" [valor]="tabelaApi['descricao']" (getValor)="($event) ? tabelaApi['descricao'] = $event.valor : null"></entrada>
+                    </div>
+
+                </div>
+            </moldura>
+
+            <moldura *ngIf="tabelaApi['rests'] && tabelaApi['rests'].length; else adicionarRest" titulo="RESTS" oculto="true" podeOcultar="true">
+
+                <ng-template [ngTemplateOutlet]="adicionarRest"></ng-template>
+
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>TIPO</th>
+                            <th>URN</th>
+                            <th>AUTOCOMPLETE</th>
+                        </tr>
+                        <tr *ngFor="let rest of tabelaApi['rests']" (click)="atualizar(rest, 'Rest')">
+                            <td>{{rest.tipo}}</td>
+                            <td>{{rest.urn}}</td>
+                            <td>{{ (rest.autoComplete) ? 'SIM' : 'NÃO' }}</td>
+                        </tr>
+                    </thead>
+                </table>
+            </moldura>
+
+            <moldura *ngIf="tabelaApi['colunas'] && tabelaApi['colunas'].length; else adicionarColuna" titulo="COLUNAS" oculto="true" podeOcultar="true">
+
+                <ng-template [ngTemplateOutlet]="adicionarColuna"></ng-template>
+
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>NOME</th>
+                            <th>DESCRIÇÃO</th>
+                            <th>TIPO</th>
+                            <th>PK</th>
+                            <th>FILTRO</th>
+                            <th>TEXT</th>
+                            <th>GRID</th>
+                            <th></th>
+                            <!-- <th>PALAVRA CHAVE</th> -->
+                        </tr>
+                        <tr *ngFor="let coluna of tabelaApi['colunas']" (click)="atualizar(coluna, 'Coluna')">
+                            <td>{{ coluna.nome}}</td>
+                            <td>{{ coluna.descricao}}</td>
+                            <td>{{ coluna.tipo}}</td>
+                            <td>{{ (coluna.pk)  ? 'SIM' : 'NÃO'}}</td>
+                            <td>{{ (coluna.filtro)  ? 'SIM' : 'NÃO'}}</td>
+                            <td>{{ (coluna.text)  ? 'SIM' : 'NÃO'}}</td>
+                            <td>{{ (coluna.grid)  ? 'SIM' : 'NÃO'}}</td>
+                            <td>
+                                <icone nome="delete" (click)="excluirTabelaApi(coluna.id)"></icone>
+                            </td>
+                            <!-- <td>{{ (coluna.palavraChave)  ? coluna.palavraChave : ''}}</td> -->
+                        </tr>
+                    </thead>
+                </table>
+            </moldura>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <botao nome="Salvar" (click)="criarElemento(tabelaApi, '', idTabelaApi)"></botao>
+                </div>
+                <div class="col-md-4">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+
+        </moldura>
+
+    </div>
+
+</div>
+
+<!-- MODAL REST -->
+
+<ng-template #adicionarRest>
+    <moldura titulo="Adicionar Rest" oculto="true" podeOcultar="true">
+        <ng-template [ngTemplateOutlet]="formularioRestBody"></ng-template>
+        <ng-template [ngTemplateOutlet]="formularioRestBotoes"></ng-template>
+    </moldura>
+</ng-template>
+
+<ng-template #formularioRestBody>
+    <div class="row">
+
+        <div class="col-sm-8 col-md-8">
+            <div class="form-group">
+                <label>URN</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe a URN"
+                    [(ngModel)]="objParamsRest['urn']"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <entrada nome="Tipo" tipo="seleciona" [objId]="'codigo'" [opcoes]="tiposRest" [valor]="objParamsRest['tipo']" (getValor)=" ($event) ? objParamsRest['tipo'] = $event.valor : null "></entrada>
+        </div>  
+
+        <div class="col-sm-12 col-md-12">
+            <div class="form-group">
+                <label>JSON Exemplo:</label>
+                <textarea
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe um JSON Exemplo"
+                    [(ngModel)]="objParamsRest['jsonExemplo']"
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-md-12" style="margin-bottom: 25px;">
+            <div class="form-group">
+                <label class="label_check">É Autocomplete?</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="objParamsColuna['autoComplete']"
+                    (trocaEstado)="objParamsRest['autoComplete'] = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #formularioRestBotoes>
+    <botao nome="Salvar" (click)="criarElemento(objParamsRest, 'Rests', objParamsRest['id'])"></botao>
+</ng-template>
+
+<ng-template #adicionarColuna>
+    <moldura titulo="Adicionar Coluna" oculto="true" podeOcultar="true">
+        <ng-template [ngTemplateOutlet]="formularioColunaBody"></ng-template>
+        <ng-template [ngTemplateOutlet]="formularioColunaBotoes"></ng-template>
+    </moldura>
+</ng-template>
+
+<!-- MODAL COLUNAS -->
+<ng-template #formularioColunaBody>
+    <div class="row">
+
+        <div class="col-sm-4 col-md-4">
+            <div class="form-group">
+                <label>Nome</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe a Descrição"
+                    [(ngModel)]="objParamsColuna['nome']"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-8 col-md-8">
+            <div class="form-group">
+                <label>Descrição</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe a Descrição"
+                    [(ngModel)]="objParamsColuna['descricao']"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-2">
+            <entrada nome="Tipo" tipo="seleciona" [objId]="'codigo'" [opcoes]="tiposColuna" [valor]="objParamsColuna['tipo']" (getValor)="setTipoColuna($event)"></entrada>
+        </div>
+
+        <div class="col-md-4" *ngIf="objParamsColuna['tipo'] == 'CLASSE'">
+            <autocomplete
+                [titulo]="'Classe'"
+                [placeholder]="'Digite para buscar Classes'"
+                [minimo]="3"
+                [valor]="objTabelas"
+                [camposFiltro]="['descricao']"
+                [valorSelecionado]="tabelaSelecionada"
+                [fnSearch]="fnCfgTabelaApiRemote.bind(this)"
+                (fnOnSelected)="getTabelaApi($event)"
+            ></autocomplete>
+        </div>
+
+        <div class="col-md-4" *ngIf="objParamsColuna['tipo'] == 'ENUM'">
+            <div class="form-group">
+                <label>Enum</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe o nome do Enum"
+                    [(ngModel)]="objParamsColuna['enumClasse']"
+                />
+            </div>
+        </div>
+
+        <div class="col-sm-2 col-md-2" style="margin-bottom: 25px;">
+            <div class="form-group">
+                <label class="label_check">É Filtro?</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="objParamsColuna['filtro']"
+                    (trocaEstado)="objParamsColuna['filtro'] = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+
+        <div class="col-sm-2 col-md-2" style="margin-bottom: 25px;">
+            <div class="form-group">
+                <label class="label_check">É Grid?</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="objParamsColuna['grid']"
+                    (trocaEstado)="objParamsColuna['grid'] = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+
+        <div class="col-sm-2 col-md-2" style="margin-bottom: 25px;">
+            <div class="form-group">
+                <label class="label_check">É PK?</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="objParamsColuna['pk']"
+                    (trocaEstado)="objParamsColuna['pk'] = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+
+        <div class="col-sm-2 col-md-2" style="margin-bottom: 25px;">
+            <div class="form-group">
+                <label class="label_check">É Text?</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="objParamsColuna['text']"
+                    (trocaEstado)="objParamsColuna['text'] = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-6">
+            <div class="form-group">
+                <label>Palavra Chave</label>
+                <input 
+                    type="text" 
+                    name="palavraChave" 
+                    class="form-control" 
+                    placeholder="Informe uma Palavra Chave"
+                    [(ngModel)]="objParamsColuna['palavraChave']"
+                />
+            </div>
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #formularioColunaBotoes>
+    <div class="col-md-2" style="padding: 0;">
+        <botao nome="Salvar" (click)="criarElemento(objParamsColuna, 'Colunas', objParamsColuna['id'])"></botao>
+    </div>
+</ng-template>

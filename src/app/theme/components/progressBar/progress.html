@@ -1,0 +1,11 @@
+<div class="progress mb-2">
+    <div
+        role="progressbar"
+        class="progress-bar"
+        [style.width.%]="(( (menor || 0) ) / ( maior )) * 100"
+        [title]="(( ( (menor || 0) / (maior) ) * 100) | number:'1.0-0') + '% ' + labelTitle"
+        [ngClass]="classe"
+    >
+        {{ ( ( (menor || 0) / (maior) ) * 100) | number:'1.0-0' }}%
+    </div>
+</div>

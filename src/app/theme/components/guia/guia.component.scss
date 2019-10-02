@@ -1,0 +1,292 @@
+.acao{
+    margin-right: 5px;
+}
+
+.table:not(.not-margin){
+    margin-bottom: 10px;
+}
+
+span{
+    cursor: default;
+}
+
+.botoes {
+    float: left;
+    position: relative;
+}
+
+.text-truncate{
+    width: 380px !important; 
+    max-width: 380px !important;
+}
+
+.criticas{
+    cursor: pointer;
+    
+    span {
+        top: -6px;
+        position: relative;
+        text-transform: uppercase;
+    }
+
+    td.carencia {
+        color: #cc0505;
+        font-weight: 800;
+    }
+}
+
+.botoes botao {
+    float: left;
+    margin-right: 10px;
+    position: relative;
+    width: 30%;
+}
+
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+:host /deep/ inputAnexo {
+    top: 0px;
+    right: 30px;
+    position: absolute;
+}
+
+:host /deep/ .autocomplete autocomplete{
+    input{
+        width: 460px;
+        display: block !important;
+    }
+}
+
+:host /deep/ {
+
+    input-checkbox{
+
+        .control{
+            margin-bottom: 14px;
+            display: -webkit-inline-box;
+            display: inline-block;
+        }
+        
+        .aprovado{
+            background: #00995d !important;
+            
+            .checkbox_flag:after{
+                border-color: white !important;
+            }
+        }
+
+        .negado{
+            background: #ed1651 !important;
+
+            .checkbox_flag:after{
+                border-color: white !important;
+            }
+        }
+
+        .auditoria{
+            background: #f47920 !important;
+
+            .checkbox_flag:after{
+                border-color: white !important;
+            }
+        }
+    }
+
+    icone{
+
+        i{
+            top: 4px;
+            position: relative;
+            font-size: 22px;
+        }
+    }
+
+}
+
+td.status {
+    background: transparent;
+    position: relative;
+
+    &.cinza{
+        border-left: 5px solid #79787d !important;
+    }
+
+    &.verde{
+        border-left: 5px solid #006a6a !important;
+    }
+
+    &.amarelo{
+        border-left: 5px solid #f47920 !important;
+    }
+}
+
+:host /deep/ .send_icone{
+    top: 1px;
+    right: 10px;
+    position: absolute;
+    color: #fff;
+    background: #006a6a;
+    border-radius: 0px 5px 5px 0px;
+    width: 35px;
+    height: 36px;
+
+    i{
+        margin: 6px;
+    }
+}
+
+:host /deep/ .div_beneficiario entrada
+
+{
+    input {
+        cursor: pointer;
+    }
+}
+.parent-sinalizacao {
+    position: relative;
+    height: inherit;
+    width: inherit;
+}
+
+span.nome-anexo {
+    position: absolute;
+    top: 12px;
+    right: 150px;
+    width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#chatMsg {
+    padding-right: 200px;
+    width: calc(100% - 20px) !important;
+}
+
+.sinalizacao.verde{
+    background: #f47920;
+    color: #fff;
+}
+
+.sinalizacao {
+    height: 2em;
+    width: 2em;
+    display: inline-block;
+    display: -moz-inline-block;
+    border-radius: 50%;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+        box-shadow: 0px 0px 14px -4px #ffffff;
+    }
+}
+
+.desc-item {
+    position: fixed;
+    z-index: 9;
+    top: 280px;
+    left: 360px;
+    color: #000;
+    display: none;
+}
+
+.sigla {
+    position: relative;
+    right: 4px;
+    cursor: pointer;
+    top: -3px;
+}
+
+.criticas{
+    margin-bottom: 20px;
+    margin-top: -10px;
+}
+
+.itens label {
+    display: inline !important;
+}
+
+.itens .table > tbody > tr > td:not([colspan]):last-child {
+    display: table-cell;
+}
+
+.linha_critica th {
+    text-align: left !important;
+    font-weight: 800;
+}
+
+.linha_critica {
+    font-size: 12px;
+    margin-bottom: 0;
+}
+
+.linha_critica td {
+    height: 20px;
+    padding-left: 10px;
+}
+.linha_critica tr:last-child{
+    height: 37px !important
+}
+
+
+.linha_critica th {
+    height: 25px;
+    display: block;
+    border-top: none;
+    padding-top: 10px;
+}
+
+/*.linha_item:nth-child(odd) table tbody,
+.linha_item:nth-child(odd) table .card-body{
+    background: #443f7a !important;
+}
+
+.linha_item:nth-child(even) table tbody,
+.linha_item:nth-child(even) table .card-body{
+    background: #575287 !important;
+}*/
+
+.some_cabecalho{
+    visibility: collapse;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.img-chat {
+	height: 50px !important;
+    width: 50px !important;
+	border-radius: 50%;
+}
+
+:host /deep/ entrada{
+
+    input#QtdAutorizada {
+        min-width: 85px !important;
+    }
+
+}
+
+.titulo.link .table-responsive {
+    overflow-y: hidden;
+}

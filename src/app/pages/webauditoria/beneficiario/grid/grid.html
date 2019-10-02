@@ -1,0 +1,21 @@
+<tabela
+    [titulo]="'Beneficiário'"
+    [colunas]="colunasTabela"
+    [linhas]="beneficiarios"
+    [ordenacao]="ordenacao"
+    [atualizaDados]="atualizaDados.bind(this)"
+    [limparFiltros]="limparFiltros.bind(this)"
+    [linhaClick]="abrir.bind(this)"
+    [registros]="qtdItensTotal"
+    [mostraFiltrar]="false"
+>
+    <div>
+        <paginacao
+            (atualizaDados)="buscaBeneficiarioPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</tabela>

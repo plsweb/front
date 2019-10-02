@@ -1,0 +1,15 @@
+<moldura titulo="Início">
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <dashboardPieChart *ngFor="let pieChart of pieCharts" [titulo]="pieChart.tipo" [subtitulo]="pieChart.quantidade" [percentual]="pieChart.percentual"></dashboardPieChart>
+        </div>
+    </div>
+    <div class="row">
+        <ba-card class="col-xlg-6 col-xl-6 col-lg-12 col-sm-12 col-12" cardTitle="Leitos por Prestador">
+            <dashboardTrafficChart [dados]="trafficCharts"></dashboardTrafficChart>
+        </ba-card>
+        <ba-card class="col-xlg-6 col-xl-6 col-lg-12 col-sm-12 col-12" cardTitle="Evolução">
+            <dashboardLineChart></dashboardLineChart>
+        </ba-card>
+    </div>
+</moldura>

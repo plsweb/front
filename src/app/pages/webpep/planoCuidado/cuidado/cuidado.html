@@ -1,0 +1,48 @@
+<moldura 
+    [ngInit]="buscaAcoes.bind(this)"
+    titulo="Ações de Cuidado"
+    [pesquisar]="pesquisarAcoesSaude.bind(this)"
+    [registros]="qtdItensTotalAcoes"
+>
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+            <botao nome="Adicionar" (click)="abrir(null)"></botao>
+        </div>
+    </div>
+    <br>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Conflito</th>
+                <th>Resolução</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let acao of acoes; let pos = index" (click)="abrir(acao)">
+                <td>
+                    <icone nome="delete" (click)="removeAcao(acao)"></icone>
+                </td>
+                <td>{{acao.descricao}}</td>
+                <td>{{acao.tipo ? acao.tipo.descricao : ''}}</td>
+                <td>{{acao.conflito}}</td>
+                <td>{{(acao.resolucaoConflito) ? acao.resolucaoConflito : (( acao.conflito == 'OU' ) ? 'Falta resolução' : '')}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br class="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaAcoes($event)"
+            qtdItensTotal="{{qtdItensTotalAcoes}}"
+            paginaAtual="{{paginaAtualAcoes}}"
+            itensPorPagina="{{itensPorPaginaAcoes}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</moldura>

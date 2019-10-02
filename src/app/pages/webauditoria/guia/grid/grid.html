@@ -1,0 +1,26 @@
+<moldura
+    titulo="Buscar Guias" 
+>
+    <form (submit)="buscaGuiaPorImpressoOuId()">
+
+        <div class="row">
+        
+            <div class="col-md-10">
+                <entrada 
+                    nome="Buscar Guia" 
+                    [semTitulo]="true"
+                    (getValor)="numeroGuia = $event.valor"
+                ></entrada>
+            </div>
+
+            <div class="col">
+                <botao 
+                    nome="Buscar"
+                    (click)="buscaGuiaPorImpressoOuId()"
+                ></botao>
+            </div>
+        </div>
+
+    </form>
+
+</moldura>

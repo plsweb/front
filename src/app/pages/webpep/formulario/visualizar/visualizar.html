@@ -1,0 +1,56 @@
+<div *ngIf="formulario" baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <h3>{{formulario.titulo}}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-sm-6" *ngFor="let grupo of formulario.formularioGrupo">
+                    <moldura [titulo]="grupo.descricao" podeOcultar="true">
+                        <entrada 
+                            *ngFor="let pergunta of grupo.grupoPergunta"
+                            [tipo]="pergunta.pergunta.tipo"
+                            [opcoes]="pergunta.pergunta.opcoes"
+                            [nome]="pergunta.pergunta.descricao"
+                            [mascara]="pergunta.pergunta.mascara"
+                            [tabela]="pergunta.pergunta.tabela"
+                            [tabelaCampos]="pergunta.pergunta.tabelaCampos"
+                            (getValor)="getResposta($event, pergunta)"
+                        ></entrada>
+                    </moldura>
+                </div>
+
+                <div class="col-sm-6" *ngFor="let grupo of formulario.formularioGrupo">
+                    <moldura [titulo]="grupo.descricao" podeOcultar="true">
+                        <entrada
+                            *ngFor="let pergunta of grupo.grupoPergunta"
+                            [tipo]="pergunta.pergunta.tipo"
+                            [opcoes]="pergunta.pergunta.opcoes"
+                            [nome]="pergunta.pergunta.descricao"
+                            [mascara]="pergunta.pergunta.mascara"
+                            [tabela]="pergunta.pergunta.tabela"
+                            [tabelaCampos]="pergunta.pergunta.tabelaCampos"
+                            [valor]="pergunta.pergunta.valor"
+                            [readonly]="true"
+                            [bloqueado]="true"
+                            [opcoesBoolean]="false"
+                        ></entrada>
+                            <!--
+                            [grupoPergunta]="grupo"
+                            -->
+                    </moldura>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">
+                    <botao nome="Voltar" submit="true" (click)="voltar()" classe="btn-default"></botao>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

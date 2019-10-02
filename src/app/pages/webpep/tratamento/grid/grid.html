@@ -1,0 +1,65 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+    </div>
+</div>
+
+
+<!-- 
+#############################################################################################
+                                        Base Pagina
+#############################################################################################
+-->
+<ng-template #tmplBasePagina let-c="close" let-d="dismiss">
+	<!--div class="card-acoes">
+		<i class="material-icons acao salvar" (click)="abreModalRelatorioFiltro('Salvar')">save</i>
+	</div-->
+	
+	<ng-template [ngTemplateOutlet]="tmplTratamento"></ng-template>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Botão Ação Grid Tratamento
+#############################################################################################
+-->
+<ng-template #tmplAddTratamento let-c="close" let-d="dismiss">
+	<div class="row" style="float: left;margin-right: 20px;">
+		<div class="col">
+			<button class="btn btn-primary" (click)="adicionarTratamento()" >Adicionar</button>
+		</div>
+	</div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Tabela
+#############################################################################################
+-->
+<ng-template #tmplTratamento let-c="close" let-d="dismiss">
+	
+	<tabela
+		[titulo]="'Tratamentos'"
+		[colunas]="variaveisDeAmbiente['colunasTabela']"
+		[linhas]="variaveisDeAmbiente['tratamentos']"
+		[className]="'tabela_borda'"
+		[ordenacao]="variaveisDeAmbiente['ordenacao']"
+		[atualizaDados]="iniciaTabela.bind(this)"
+		[elementoAcoesMoldura]="tmplAddTratamento"
+		[limparFiltros]="limparFiltros.bind(this)"
+		[linhaClick]="abreTratamento.bind(this)"
+		[registros]="variaveisDeAmbiente['tabela']['total']"
+	>
+
+    <form class="filtro">
+        <div class="row">
+        </div>
+    </form>
+
+</tabela>
+
+
+</ng-template>
+

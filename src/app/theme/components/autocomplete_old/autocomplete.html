@@ -1,0 +1,55 @@
+
+<div class="form-group {{(custom_class)}}" *ngIf="!fnCfgRemote; else autocompleteRemote">
+    <label *ngIf="titulo">{{titulo}} </label><span *ngIf="requerido"> *</span>
+
+    <ng2-completer 
+        [(ngModel)]="searchStr" 
+        [datasource]="dataService"
+        [autofocus]="true"
+        [placeholder]="placeholder"
+        [clearUnselected]="true"
+        [initialValue]="initialValue"
+        [disableInput]="disableInput"
+        inputClass="form-control"
+        textNoResults="Sem resultados"
+        textSearching="Buscando..."
+        (opened)="open($event)" 
+        (selected)="onSelected($event)"
+        
+        (keypress)="setData()"
+        (keyup)="onSearch($event)"
+        
+        [minSearchLength]="minimo"
+    ></ng2-completer>
+
+</div>
+
+
+<ng-template #autocompleteRemote>
+    <div class="form-group {{custom_class}}">
+        <label *ngIf="titulo">{{titulo}} </label><span *ngIf="requerido"> *</span>
+        <ng2-completer
+            [(ngModel)]="searchStr"
+            [datasource]="remoteData"
+            [minSearchLength]="minimo"
+            [placeholder]="placeholder"
+            inputClass="form-control"
+            textSearching="Buscando..."
+            textNoResults="Sem resultados"
+            (ngModelChange)="teste($event)"
+
+            (opened)="openRemote($event)" 
+            (selected)="onSelected($event)"
+
+            [disableInput]="disableInput"
+            [initialValue]="initialValue"
+            [clearUnselected]="true"
+            [autofocus]="true"
+
+            (keydown)="setRemoteData(true)"
+            (keypress)="setRemoteData(false)"
+            (keyup)="setRemoteData(false)"
+        >
+        </ng2-completer>
+    </div>
+</ng-template>

@@ -1,0 +1,257 @@
+<ul class="al-msg-center clearfix" *ngIf="mostraPopup">
+    <li class="dropdown">
+        <a  class="dropdown-toggle" id="msg-dd1" data-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-bell-o"></i>
+            <!-- <span>5</span> -->
+            <div class="notification-ring"></div>
+        </a>
+    </li>
+    <li class="dropdown" customdropdown (click)="visualizouChats()">
+        <a  class="msg dropdown-toggle" id="msg-dd2" data-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-envelope-o"></i>
+            <span *ngIf="novosChats">{{novosChats}}</span>
+            <div class="notification-ring"></div>
+        </a>
+        <div class="top-dropdown-menu dropdown-menu dark_theme" aria-labelledby="msg-dd2">
+            <ng-container *ngIf="chats" (ngModelChange)="debounce.next($event)">
+                <div class="clearfix text-align-right dropdown">
+                    <div class="row">
+                        <div class="col">
+                            <autocomplete
+                                [titulo]="'Criar novo chat'"
+                                [placeholder]="'Digite para buscar um Usuário'"
+                                [minimo]="3"
+                                [valor]="objUsuario"
+                                [camposFiltro]="['nome']"
+                                [valorSelecionado]="usuarioSelecionado"
+                                [fnSearch]="fnCfgUsuarioRemote.bind(this)"
+                                (fnOnSelected)="getUsuario($event)"
+                            ></autocomplete>
+                        </div>
+                        <div class="col-md-2">
+                            <i class="material-icons add-destinatario" (click)="criarChat()" title="Adicionar chat">add</i>
+                        </div>
+                    </div>
+                </div>
+                <div class="msg-list">
+                    <a *ngFor="let chat of chats" class="clearfix" (click)="abrirChat(chat)">
+                        <div class="img-area">
+                            <img [ngClass]="{'photo-msg-item': !chat.image}" src="assets/img/no-photo.png">
+                        </div>
+                        <div class="msg-area">
+                            <div class="titulo_chat">{{ chat.nome || chat.data }}</div>
+                            <span>{{ (chat.mensagem && chat.mensagem.length) ? mostraUltimaMensagem(chat) : 'Sem mensagens'}}</span>
+                        </div>
+                    </a>
+                </div>
+                <a class="ver_todos">Ver Todos</a>
+            </ng-container>
+            <ng-container *ngIf="!chats">
+                <div class="msg-list">
+                    <a class="clearfix">
+                        <div class="msg-area">
+                            <div>Houve um erro ao carregar o chat. Tente novamente mais tarde</div>
+                        </div>
+                    </a>
+                </div>
+            </ng-container>
+        </div>
+    </li>
+</ul>
+
+<ng-container *ngIf="chatAbertos && chatAbertos.length">
+
+    <ng-container *ngFor="let objchat of chatAbertos; let pos = index">
+        
+        <ng-template 
+            [ngTemplateOutlet]="tmplChat" 
+            [ngTemplateOutletContext]="{ 
+                chat: objchat,
+                pos: pos
+            }"
+        ></ng-template>
+
+    </ng-container>
+
+</ng-container>
+
+<ng-container *ngIf="chatSelecionado">
+    <ng-template 
+        [ngTemplateOutlet]="tmplChat" 
+        [ngTemplateOutletContext]="{ 
+            chat: chatSelecionado,
+            pos: 1
+        }"
+    ></ng-template>
+</ng-container>
+
+
+<ng-template #tmplChat let-chat="chat" let-pos="pos">
+
+    <div 
+        [id]="chat.id"
+        class="ng-chat-window"
+        (dragenter)="uploadContainer=true"
+        (dragover)="uploadContainer=false"
+        [ngStyle]="{
+            'right.px': mostraPopup ? (250 * pos + 20) : null, 
+            'height.px': mostraPopup ? (chat.ativo ? 360 : 30) : null
+        }"
+        [ngClass]="{
+            chat_unico: !mostraPopup
+        }"
+    >
+        <div 
+            *ngIf="mostraPopup"
+            class="ng-chat-title list-inline"
+        >
+            <label (click)="abrirChat(chat)">
+                {{chat.nome || chat.data}}
+            </label>
+            <icone nome="close" classe="float-right" (click)="chat.ativo=false; fecharChat(chat, pos); init=false;"></icone>
+            <icone nome="{{chat.ativo ? 'expand_more' : 'expand_less'}}" classe="float-right" (click)="chat.ativo ? fecharChat(chat, pos) : abrirChat(chat); init=false;"></icone>
+        </div>
+        
+        <div class="configuracao" [ngClass]="{ adduser : init, inicial: !init }">
+
+
+            <ng-container *ngIf="!init">
+                <icone nome="settings" classe="float-right" (click)="opcoesChat(chat)"></icone>
+                <a  class="msg dropdown-toggle ml-1" id="msg-dd2" data-toggle="dropdown" aria-expanded="false">
+                    <icone nome="person_add" (click)="inserirDestinatario(chat); init=true;"></icone>
+                    <span>{{chat.destinatarios.length}}</span>
+                    <div class="notification-ring"></div>
+                </a>
+                <!-- delete_sweep -->
+            </ng-container>
+
+            <ng-container *ngIf="init">
+                <icone nome="close" classe="float-right" (click)="init= !init"></icone>
+
+                <autocomplete
+                    [minimo]="3"
+                    [titulo]="'Adicionar novo usuario'"
+                    [valor]="objUsuario"
+                    [camposFiltro]="['nome']"
+                    [valorSelecionado]="usuarioSelecionado"
+                    [fnSearch]="fnCfgUsuarioRemote.bind(this)"
+                    [placeholder]="'Digite para buscar um Usuário'"
+                    (fnOnSelected)="getUsuario($event, chat); init=false;"
+                ></autocomplete>
+            </ng-container>
+        </div>
+
+        <div *ngIf="chat.ativo" class="ng-chat-messages" id=index-{{pos}}>
+            <div 
+                *ngFor="let mensagens of chat.mensagem"
+                class="row px-4"
+                [ngClass]="{
+                        'justify-content-start': (usuarioGuid == mensagens?.remetente?.guid)
+                }">
+                <!-- 
+                [ngClass]="{
+                        'justify-content-start': !(usuarioGuid == mensagens?.remetente?.guid), 
+                        'justify-content-end':    (usuarioGuid == mensagens?.remetente?.guid)
+                }">
+                 -->
+                <div 
+                    *ngIf="!init" 
+                    class="ng-chat-message" 
+                    [ngClass]="{
+                        'ng-chat-message-send': (usuarioGuid == mensagens?.remetente?.guid),
+                        'ng-chat-message-receive': !(usuarioGuid == mensagens?.remetente?.guid),
+                        'py-3 px-3': !mostraPopup,
+                        'py-2 px-2': mostraPopup,
+                        'mw-200': mostraPopup
+                    }"
+                >
+                    <ng-template 
+                        *ngIf="!(usuarioGuid == mensagens?.remetente?.guid) && !mostraPopup"
+                        [ngTemplateOutlet]="imagem_usuario" 
+                        [ngTemplateOutletContext]="{
+                            guid: mensagens?.remetente?.guid
+                        }"
+                    ></ng-template>
+
+                    <div class="mensage">
+                        <p><small class="text-truncate">{{mensagens.envio}} {{mensagens.remetente?.nome}}</small></p>
+                        <i
+                            *ngIf="mensagens.arquivo"
+                            class="far fa-3x fa-file-{{extensaoAnexo(mensagens.arquivo.extensao)}}"
+                            (click)="abrirAnexo(mensagens.arquivo.id)"
+                        ></i>
+                        <p>{{mensagens.mensagem}}</p>
+                    </div>
+                    
+                    <ng-template 
+                        *ngIf="(usuarioGuid == mensagens?.remetente?.guid) && !mostraPopup"
+                        [ngTemplateOutlet]="imagem_usuario" 
+                        [ngTemplateOutletContext]="{
+                            guid: usuarioGuid
+                        }"
+                    ></ng-template>
+                    
+                </div>
+            </div>
+            <ul class="list-group" *ngIf="init && usuarioGuid !== destinatario?.usuario?.guid">
+                <li class="list-item" *ngFor="let destinatario of chat.destinatarios">
+                    
+                    <icone *ngIf="init" nome="close" classe="float-right" (click)="removerDestinatario(destinatario)"></icone>
+                    
+                    <div>
+                        <label>{{destinatario?.usuario?.nome}}</label>
+                        <p class="small">{{destinatario?.entrada}}</p>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="campo_send">
+            <!-- style="overflow: hidden;" -->
+            <form  class="form-inline" (submit)="enviarMensagem(chat, chat.novaMensagem, pos)">
+                <entrada
+                    *ngIf="chat.ativo && !arquivo" 
+                    semTitulo="true"
+                    classe="campo_enviar"
+                    nome="Digite a mensagem" 
+                    [valor]="chat.novaMensagem"
+                    (getValor)="chat.novaMensagem = $event.valor"
+                    class="{{chat.novaMensagem ? 'mensa' : 'anexo'}}"
+                ></entrada>
+
+                <entrada
+                    *ngIf="chat.ativo && arquivo" 
+                    semTitulo="true"
+                    bloqueado="false"
+                    classe="campo_enviar"
+                    [valor]="arquivo.name"
+                    nome="Digite a mensagem" 
+                    class="{{chat.novaMensagem ? 'mensa' : 'anexo'}}"
+                ></entrada>
+
+                <uploader
+                    *ngIf="!chat.novaMensagem" 
+                    [style]="'icone'"
+                    [descricao]="Teste"
+                    [(container)]="uploadContainer"
+                    (uploadInsert)="arquivo = $event"
+                    (uploadPost)="enviarAnexo($event, chat);container=false;"
+                ></uploader>
+
+                <div *ngIf="!arquivo" (click)="enviarMensagem(chat, chat.novaMensagem)">
+                    <i class="material-icons send_icone">send</i>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</ng-template>
+
+
+<!-- #################### BLOCO IMAGEM ####################### -->
+<ng-template #imagem_usuario let-guid="guid">
+    <div class="img-usuario col-md-1">
+        <img [src]="'http://localhost:8084/webresources/web/usuario/imagem/' + token + '/FOTO/' + guid">
+    </div>
+</ng-template>

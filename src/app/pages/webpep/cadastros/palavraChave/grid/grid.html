@@ -1,0 +1,135 @@
+<moldura>
+    <moldura podeOcultar="true" oculto="true"
+        titulo="Adicionar Palavra Chave">
+
+        <div class="row">
+
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <autocomplete
+                    [titulo]="'Coluna'"
+                    [placeholder]="'Digite para buscar Coluna'"
+                    [minimo]="3"
+                    [valor]="objColuna"
+                    [camposFiltro]="['nome', 'descricao']"
+                    [valorSelecionado]="colunaSelecionada"
+                    [fnSearch]="fnCfgColunasRemote.bind(this)"
+                    (fnOnSelected)="getColuna($event)"
+                ></autocomplete>
+            </div>
+
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <entrada 
+                    nome="Descrição"
+                    (getValor)="( $event['valor'] ) ? novaPalavrasChave['palavrasChave'] = $event.valor : novaPalavrasChave['palavrasChave'] = undefined"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <botao nome="Adicionar" (click)="adicionarPalavrasChave()"></botao>
+            </div>
+        </div>
+    </moldura>
+
+    <moldura
+        titulo="&nbsp;"
+        [registros]="qtdItensTotal" 
+        [pesquisar]="pesquisarPalavrasChave.bind(this)"
+    >
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>COLUNA</th>
+                    <th>NOME COLUNA</th>
+                    <th>TABELA</th>
+                    <th>DESCRIÇÃO</th>
+                    <th>TIPO</th>
+                    <th class="coluna_acoes"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let palavra of palavrasChave; let pos = index" class="link" [attr.data_edit]="'false'" [attr.data-index]="pos">
+                    <td>{{palavra.id}}</td>
+                    <td>{{palavra.coluna.nome}}</td>
+                    <td>{{palavra.coluna.descricao}}</td>
+                    <td>{{palavra.coluna.tabela.nomeBanco}}</td>
+                    <td>{{palavra.coluna.tipo}}</td>
+                    <td class="edit">
+                        <p>{{palavra.palavrasChave}}</p>
+                        <div id="edit-desc" class="col-sm-12 col-md-12 hide" >
+                            <div class="form-group">
+                                <input
+                                    type="text" 
+                                    name="descricao" 
+                                    class="form-control" 
+                                    placeholder="Informe a Descrição"
+                                    [(ngModel)]="palavra.palavrasChave"
+                                    (change)="editarTipo(palavra.palavrasChave, palavra.id, pos, true)"
+                                />
+                            </div>
+                        </div>
+                    </td>
+                    <td class="coluna_acoes">
+                        <botao icone="edit" (click)="editarTipo(palavra.palavrasChave, palavra.id, pos, false)"></botao>
+                        <botao icone="delete" (click)="removePalavrasChave(palavra.id)"></botao>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br class="all">
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscaPalavrasChave($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                paginaAtual="{{paginaAtual}}"
+                itensPorPagina="{{itensPorPagina}}"
+            ></paginacao>
+        </div>
+    </moldura>
+
+</moldura>
+
+
+<!-- <moldura 
+    titulo="Tipo de Bloqueio" 
+    [registros]="qtdItensTotal" 
+    [pesquisar]="pesquisar.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>DESCRIÇÃO</th>
+                        <th>REMUNERADO</th>
+                    </tr>
+                    <tr *ngFor="let tipo of tiposBloqueio" (click)="atualizar(palavra.id)">
+                        <td>{{palavra.palavrasChave}}</td>
+                        <td>{{palavra.remunerado ? 'SIM' : 'NÃO'}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaTiposBloqueioPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura> -->

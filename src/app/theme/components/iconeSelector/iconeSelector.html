@@ -1,0 +1,34 @@
+<div class="colors">
+    <div 
+    	*ngFor="let icon of icons" 
+    	(click)="trocaIcone($event, icon)"
+    	[ngClass]="{ 'iconeSelecionado' : (iconeSelecionado == icon) }" 
+    ></div>
+</div>
+
+<div class="dropdown" customdropdown>
+	<i class="material-icons" *ngIf="iconeSelecionado"
+		id="dropdownMenuButton" 
+		data-toggle="dropdown" 
+		aria-haspopup="true" 
+		aria-expanded="false"
+	>
+		{{iconeSelecionado}}
+	</i>
+	
+	<i class="material-icons" *ngIf="!iconeSelecionado"
+		id="dropdownMenuButton" 
+		data-toggle="dropdown" 
+		aria-haspopup="true" 
+		aria-expanded="false"
+	>
+		do_not_disturb_alt
+	</i>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+  	<div class="flex">
+  		<div class="col" *ngFor="let icon of icons" (click)="trocaIcone($event, icon)">
+	  		<i class="material-icons">{{icon}}</i>
+	  	</div>
+  	</div>
+  </div>
+</div>

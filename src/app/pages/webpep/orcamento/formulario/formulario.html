@@ -1,0 +1,242 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix" *ngIf="orcamento; else carregandoOrcamento">
+        <div class="cabecalho">
+            <div class="dados">
+                <div class="row">
+                    <div class="col-xs-9 col-md-9 text-truncate">
+                        <b>PACIENTE: </b>
+                        <span title="{{orcamento?.paciente?.nome}}">
+                            {{orcamento?.paciente?.nome}}
+                        </span>
+                    </div>
+
+                    <div class="col-xs-3 col-md-3 text-truncate">
+                        <b>TIPO: </b>
+                        <span title="{{orcamento?.empresa}}">
+                            {{orcamento?.empresa}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-9 col-md-9 text-truncate">
+                        <b>PRESTADOR: </b>
+                        <span title="{{orcamento?.prestador?.descricao}}">
+                            {{orcamento?.prestador?.descricao}}
+                        </span>
+                    </div>
+
+                    <div class="col-xs-3 col-md-3 text-truncate">
+                        <b>DATA: </b>
+                        <span title="{{orcamento?.data}}">
+                            {{orcamento?.data}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col text-truncate">
+                        <b>NUMERO: </b>
+                        <span title="{{orcamento?.id}}">
+                            {{orcamento?.id}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form *ngIf="orcamento">
+            <moldura titulo="Procedimentos" [podeOcultar]="true" [oculto]="false">
+
+                <moldura *ngIf="orcamento?.orcamentoStatus == 'EDITANDO'" titulo="Adicionar" [podeOcultar]="true" [oculto]="true">
+                    <ng-template 
+                        [ngTemplateOutlet]="adicionarProcedimento"
+                        [ngTemplateOutletContext]="{procedimento: novoItem, novo: true}"
+                    ></ng-template>
+                </moldura>
+
+                <div *ngFor="let item of orcamento?.itens; let pos = index" class="itens animated" zoom-in id="{{item.id}}">
+                    <div class="titulo link">
+                        <div class="table-responsive">
+                            <table class="table no-hover" style="margin-bottom: 0 !important;">
+                                <tbody>
+                                    <tr (click)="abreModalItem(item)">
+                                        <td *ngIf="orcamento?.orcamentoStatus == 'EDITANDO'">
+                                            <div class="row">
+                                                <botao 
+                                                    icone="edit"
+                                                    classe="transparente"
+                                                    tamanho="pequeno-16"
+                                                    (click)="abreModalItem(item)"
+                                                ></botao>
+    
+                                                <botao 
+                                                    icone="delete"
+                                                    classe="transparente"
+                                                    tamanho="pequeno-16"
+                                                    (click)="removeItem(item)"
+                                                ></botao>
+                                            </div>
+                                        </td>
+
+                                        <!--
+                                        <td colspan class="acoes">
+                                            <icone nome="date_range" title="Visualizar Histórico de Procedimento" (click)="visualizarHistorico( null, item?.procedimento?.codigo )"></icone>
+                                        </td>
+                                        -->
+
+                                        <td title="{{item?.procedimento?.descricao}}" class="nome_procedimento1">
+                                            {{item?.procedimento?.codigo}} - {{item?.procedimento?.descricao}}
+                                        </td>
+
+                                        <!-- <td style="width: 80px !important; display: table-cell;"> -->
+                                            <!-- {{item?.quantidade}} -->
+                                            <!--
+                                            <entrada 
+                                                tipo="numero" 
+                                                nome="Qtd Autorizada"
+                                                [semTitulo]="true" 
+                                                mascara="999" 
+                                                [valor]="item.quantidade"
+                                                [maximo]="item.quantidadeAutoditor" 
+                                                (getValor)="setQuantidadeSolicitada($event, item.id, item['posicao'], item)"
+                                            ></entrada>
+                                            -->
+                                        <!-- </td> -->
+
+                                        <td *ngIf="item.procedimento.altoCusto" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.altoCusto" class="sinalizacao alto verde col-md-3" (mouseover)="mostraDesc($event, item, 'altoCusto')"
+                                                    (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">P</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">Procedimento de Alto Custo</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.dut" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.dut" class="sinalizacao dut verde col-md-3" (mouseover)="mostraDesc($event, item, 'dut')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">D</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.dut}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.rac" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.rac" class="sinalizacao rac verde col-md-3" (mouseover)="mostraDesc($event, item, 'rac')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">R</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.rac}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-body composicoes">
+                            <table class="table linha_critica no-hover">
+                                <tbody>
+                                    <ng-container *ngIf="item?.composicoes?.length">
+                                        <tr
+                                            class="composicao"
+                                            *ngFor="let composicao of item.composicoes"
+                                            (click)="abreModalItem(composicao, 'Composicao', item.id)"
+                                        >
+                                            <td *ngIf="orcamento?.orcamentoStatus == 'EDITANDO'" class="acoes">
+                                                <div class="row">
+                                                    <botao 
+                                                        icone="edit"
+                                                        classe="transparente"
+                                                        tamanho="pequeno-16"
+                                                        (click)="abreModalItem(composicao, 'Composicao', item.id)"
+                                                    ></botao>
+    
+                                                    <botao 
+                                                        icone="delete"
+                                                        classe="transparente"
+                                                        tamanho="pequeno-16"
+                                                        (click)="removeItem(composicao, 'Composicao')"
+                                                    ></botao>
+                                                </div>
+                                            </td>
+
+                                            <td title="Participação"> 
+                                                {{composicao?.participacao?.descricao}}
+                                            </td>
+
+                                            <td title="Profissional"> 
+                                                {{composicao?.profissional?.nome}}
+                                            </td>
+
+                                            <td title="Prestador"> 
+                                                {{(composicao?.prestador?.codigo) ? (composicao?.prestador?.codigo + ' - ' + composicao?.prestador?.nome) : ''}}
+                                            </td>
+
+                                            <td title="Via de Acesso"> 
+                                                {{composicao?.dmTissViaAcesso?.descricao2}}
+                                            </td>
+
+                                            <td title="Unidade de Saude"> 
+                                                {{composicao?.unidadeSaude?.descricao}}
+                                            </td>
+
+                                            <td title="Valor"> 
+                                                <ng-container *ngIf="composicao?.valor"> R$ {{composicao?.valor}} </ng-container>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+
+                                    <tr *ngIf="orcamento?.orcamentoStatus == 'EDITANDO' && item?.procedimento?.tabelatipo?.codigo != 16" class="composicao">
+                                        <td colspan="100%">
+                                            <botao 
+                                                icone="add"
+                                                tamanho="medio"
+                                                classe="transparente"
+                                                nome="Adicionar Composição"
+                                                (click)="abreModalItem(novaComposicao, 'Composicao', item.id)"
+                                            ></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </moldura>
+        </form>
+
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <botao nome="Salvar Orçamento"></botao>
+            </div>
+    
+            <div class="col-md-3">
+                <botao nome="Voltar" classe="btn-default"></botao>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #carregandoOrcamento>
+    <ng-container *ngIf="!erro">
+        <icone tamanho="grande" nome="cached" [loading]="true"></icone>Carregando orçamento...
+    </ng-container>
+
+    <ng-container *ngIf="erro">
+        <div class="card-header clearfix">
+            <span>Houve um erro ao carregar a orçamento</span>
+        </div>
+    </ng-container>
+</ng-template>
+{{orcamento | json}}

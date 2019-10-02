@@ -1,0 +1,358 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+    </div>
+</div>
+
+
+<!-- 
+#############################################################################################
+                                        Base Pagina
+#############################################################################################
+-->
+<ng-template #tmplBasePagina let-c="close" let-d="dismiss">
+        <div class="card-body">
+            <ng-template [ngTemplateOutlet]="tmplListaEspera"></ng-template>
+        </div>
+
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplFiltro let-c="close" let-d="dismiss">
+	<div class="row">
+		<div class="col">
+			<ng-template [ngTemplateOutlet]="adicionarPacienteLista"></ng-template>
+		</div>
+	</div>
+</ng-template>
+
+
+
+<!-- 
+#############################################################################################
+                                        Info
+#############################################################################################
+-->
+<ng-template #tmplInfo let-c="close" let-d="dismiss">
+	<div class="row">
+		<div class="col">
+			<ul class="list">
+				<li><span class="badge" style="margin-right: 6px; background-color: black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Emergência</li>
+				<li><span class="badge" style="margin-right: 6px; background-color: #630808">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Urgência</li>
+				<li><span class="badge" style="margin-right: 6px; background-color: red">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Grave</li>
+				<li><span class="badge" style="margin-right: 6px; background-color: yellow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Moderado</li>
+				<li><span class="badge" style="margin-right: 6px; background-color: green">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Leve</li>
+
+				<li>
+					<icone nome="check"></icone>
+					Aplicar
+				</li>
+				<li>
+					<icone nome="edit"></icone>
+					Editar
+				</li>
+			</ul>
+		</div>
+	</div>
+</ng-template>
+
+
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplAddListaEspera let-c="close" let-d="dismiss">
+	<div class="row" style="float: left;margin-right: 20px;">
+		<div class="col">
+			<button class="btn btn-primary" (click)="abreModal()" >Adicionar</button>
+		</div>
+	</div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Tabela
+#############################################################################################
+-->
+<ng-template #tmplListaEspera let-c="close" let-d="dismiss">
+	
+	<tabela
+		[titulo]="'Lista de Espera'"
+		[colunas]="variaveisDeAmbiente['colunasTabela']"
+		[linhas]="variaveisDeAmbiente['listaEspera']"
+		[ordenacao]="variaveisDeAmbiente['ordenacao']"
+		[atualizaDados]="iniciaTabela.bind(this)"
+		[elementoAcoesMoldura]="tmplAddListaEspera"
+		[limparFiltros]="limparFiltros.bind(this)"
+		[linhaClick]="abreModal.bind(this)"
+		[mostraPesquisar]="false"
+		[mostraInfo]="true"
+		[registros]="variaveisDeAmbiente['tabela']['total']" 
+	>
+
+    <form class="filtro">
+		<ng-template [ngTemplateOutlet]="tmplFiltro"></ng-template>
+    </form>
+
+    <form class="info">
+		<ng-template [ngTemplateOutlet]="tmplInfo"></ng-template>
+    </form>
+
+</tabela>
+
+
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Editar Lista Espera Modal
+#############################################################################################
+-->
+<ng-template #bodyModalEditarListaEspera let-c="close" let-d="dismiss">
+
+	<div class="row">
+		<div class="col">
+			<entrada 
+				nome="Paciente"
+				[bloqueado]="true"
+                [valor]="variaveisDeAmbiente['esperaAtual'].paciente ? variaveisDeAmbiente['esperaAtual'].paciente.nome : ''"
+            ></entrada>
+		</div>
+	
+		<div 
+			class="col-xs-4 col-sm-4 col-md-4 col-lg-4" 
+			*ngIf="variaveisDeAmbiente['esperaAtual'] || variaveisDeAmbiente['esperaAtual'].grupoTema"
+		>
+			<!-- <entrada 
+                nome="Especialidade"
+                [valor]="variaveisDeAmbiente['esperaAtual'].especialidade ? 
+					variaveisDeAmbiente['esperaAtual'].especialidade.descricao : 
+				(variaveisDeAmbiente['esperaAtual'].grupoTema ? 
+					variaveisDeAmbiente['esperaAtual'].grupoTema.especialidade.descricao : 
+					''
+				)"
+            ></entrada> -->
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col" *ngIf="variaveisDeAmbiente['esperaAtual'].grupoTema">
+			<entrada 
+				nome="Grupo"
+				[bloqueado]="true"
+                [valor]="variaveisDeAmbiente['esperaAtual'].grupoTema ? variaveisDeAmbiente['esperaAtual'].grupoTema.descricao : ''"
+            ></entrada>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<entrada
+				tipo="area"
+				nome="Observacoes"
+				[bloqueado]="true"
+				[valor]="variaveisDeAmbiente['esperaAtual'].observacao ? variaveisDeAmbiente['esperaAtual'].observacao : ''"
+				(getValor)="getResposta.bind(this)($event, 'observacao')"
+			></entrada>
+		</div>
+	</div>
+
+</ng-template>
+
+<ng-template #templateBotoesModalEditarListaEspera let-c="close" let-d="dismiss">
+	<!-- APARENTEMENTE NAO PRECISA DA FUNÇÃO EDITAR PACIENTE DA LISTA DE ESPERA -->
+	<!-- <botao nome="Salvar" (click)="atualizarEspera('Editar', variaveisDeAmbiente['esperaAtual'])"></botao> -->
+</ng-template>
+
+
+
+<ng-template #bodyModalSalvarListaEspera let-c="close" let-d="dismiss">
+
+	<div class="row">
+		<div class="col-sm-3">
+			<entrada 
+				nome="Prioridade" 
+				tipo="seleciona"
+				[semTitulo]="true"
+				objId="codigo"
+				[opcoes]="variaveisDeAmbiente['prioridades']" 
+				(getValor)="getResposta.bind(this)($event, 'prioridade')"
+			></entrada>
+		</div>
+	</div>
+
+	<ng-template [ngTemplateOutlet]="adicionarPacienteLista"></ng-template>
+
+	<div class="row">
+		<div class="col-md-12">
+			<entrada 
+				nome="Observacoes" 
+				tipo="area"
+				(getValor)="getResposta.bind(this)($event, 'observacao')" 
+			></entrada>
+		</div>
+	</div>
+
+</ng-template>
+	
+<ng-template #templateBotoesModalSalvarListaEspera let-c="close" let-d="dismiss">
+	<botao nome="Salvar" (click)="atualizarEspera('Salvar')"></botao>
+</ng-template>
+
+
+<ng-template #adicionarPacienteLista>
+	<div class="row">
+		<div class="col-md-12">
+			<autocomplete
+				[placeholder]="'Digite para buscar Prestadores'"
+				[minimo]="3"
+				[titulo]="'Prestador'"
+				[valor]="variaveisDeAmbiente['servicePrestador']"
+				[camposFiltro]="['nome']"
+				[valorSelecionado]="respostas['prestador'] ? respostas['prestador'].valor.nome : ''"
+				[fnSearch]="fnCfgRemote.bind(this, 'servicePrestador', 'getPrestadorAtendimentoLike')"
+				(onClear)="setResposta($event, 'prestador')"
+				(fnOnSelected)="getResposta($event, 'prestador')"
+			></autocomplete>
+		</div>
+
+		<div class="col-md-12">
+			<autocomplete
+				[placeholder]="'Digite para buscar Pacientes'"
+				[minimo]="3"
+				[titulo]="'Paciente'"
+				[valor]="variaveisDeAmbiente['servicePaciente']"
+				[camposFiltro]="['nome', 'cpf']"
+				[valorSelecionado]="respostas['paciente'] ? respostas['paciente'].valor.nome : ''"
+				[fnSearch]="fnCfgRemote.bind(this, 'servicePaciente', 'getPacienteLike')"
+				(onClear)="setResposta($event, 'paciente')"
+				(fnOnSelected)="getResposta($event, 'paciente')"
+			></autocomplete>
+		</div>
+
+		<div class="col-md-6 datepicker_escuro">
+			<label>Data Inicial</label>
+			<datepicker
+				[inputForm]='true'
+				[semData]='true'
+				[fnOnChange]="getData.bind(this, 'dataInicio')"
+				(setInstancia)="getDataInicioInstancia($event)"
+				[(datas)]='dataInicio'
+			> </datepicker>
+		</div>
+		<div class="col-md-6 datepicker_escuro">
+			<label>Data Final</label>
+			<datepicker
+				[inputForm]='true'
+				[semData]='true'
+				[fnOnChange]="getData.bind(this, 'dataFim')"
+				(setInstancia)="getDataFimInstancia($event)"
+				[(datas)]='dataFim'
+			> </datepicker>
+		</div>
+
+		<div class="col-md-12">
+			<entrada 
+				nome="Status" 
+				tipo="seleciona"
+				objId="codigo"
+				[mostraOpcaoEmBranco]="true"
+				[opcoes]="variaveisDeAmbiente['statusEspera']" 
+				(getValor)="($event.valor) ? respostas['status'] = $event.valor : '' " 
+				[valor]="respostas['status']"
+			></entrada>
+		</div>
+
+		<div class="col-md-4">
+			<entrada 
+				nome="Especialidade" 
+				tipo="seleciona"
+				objId="id"
+				[mostraOpcaoEmBranco]="true"
+				[opcoes]="variaveisDeAmbiente['especialidades']" 
+				(getValor)="($event.valor) ? respostas['especialidade'] = $event.valor : null " 
+				[valor]="respostas['especialidade']"
+			></entrada>
+		</div>
+
+		<div class="col-md-8">
+			<autocomplete
+				[placeholder]="'Digite para buscar Grupos'"
+				[minimo]="3"
+				[titulo]="'Grupos'"
+				[valor]="variaveisDeAmbiente['serviceGrupo']"
+				[camposFiltro]="['descricao']"
+				[valorSelecionado]="respostas['grupo'] ? respostas['grupo'].valor.descricao : ''"
+				[fnSearch]="fnCfgRemote.bind(this, 'serviceGrupo', 'get')"
+				(onClear)="setResposta($event, 'grupo')"
+				(fnOnSelected)="getResposta($event, 'grupo')"
+			></autocomplete>
+		</div>
+	</div>
+</ng-template>
+
+
+<ng-template #bodyModalStatusListaEspera>
+	<div class="row">
+		<div class="col-sm-12">
+			<entrada 
+				nome="Status" 
+				tipo="seleciona"
+				objId="codigo"
+				[opcoes]="variaveisDeAmbiente['statusEspera']" 
+				(getValor)="( $event && $event.valor ) ? variaveisDeAmbiente['esperaMudaStatus']['novoStatus'] = $event.valor : variaveisDeAmbiente['esperaMudaStatus']['novoStatus'] = undefined"
+				[valor]="variaveisDeAmbiente['esperaMudaStatus']['status']"
+			></entrada>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<entrada 
+				nome="Tipo Saida" 
+				tipo="seleciona"
+				objId="codigo"
+				[opcoes]="variaveisDeAmbiente['statusSaida']" 
+				(getValor)="( $event && $event.valor ) ? variaveisDeAmbiente['esperaMudaStatus']['statusSaida'] = $event.valor : variaveisDeAmbiente['esperaMudaStatus']['statusSaida'] = undefined"
+				[valor]="'NORMAL'"
+			></entrada>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<entrada 
+				nome="Prioridade" 
+				tipo="seleciona"
+				objId="codigo"
+				[opcoes]="variaveisDeAmbiente['prioridades']" 
+				(getValor)="( $event && $event.valor ) ? variaveisDeAmbiente['esperaMudaStatus']['prioridade'] = $event.valor : variaveisDeAmbiente['esperaMudaStatus']['prioridade'] = undefined"
+				[valor]="variaveisDeAmbiente['esperaMudaStatus']['prioridade']"
+			></entrada>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<entrada 
+				nome="Observação"
+				tipo="area"
+				[valor]="variaveisDeAmbiente['esperaMudaStatus']['observacao']"
+				(getValor)="( $event && $event.valor ) ? variaveisDeAmbiente['esperaMudaStatus']['observacao'] = $event.valor : variaveisDeAmbiente['esperaMudaStatus']['observacao'] = undefined"
+			></entrada>
+		</div>
+	</div>
+</ng-template>
+
+<ng-template #templateBotoesModalStatusListaEspera >
+	<botao nome="Salvar" (click)="mudaStatusListaEspera('Salvar')"></botao>
+</ng-template>

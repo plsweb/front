@@ -1,0 +1,103 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+</head>
+
+<body>
+  <!--[if lte IE 9]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+
+  <div class="loading">
+    <img src="./img/unimed-uberaba.png">
+    <p>Carregando</p>
+  </div>
+  <div id="screenshot"></div>
+
+  <header>
+    <a href="http://www.unimeduberaba.com.br/">
+      <img src="./img/unimed-uberaba.png">
+    </a>
+  </header>
+
+  <!-- Add your site or application content here -->
+  <div class=" content container-fluid">
+
+    <div class="card">
+      <div class="card-body">
+        <p class="card-text"><b>Protocolo:</b> <span id="protocolo"></span></p>
+        <p class="card-text"><b>Guia:</b> <span id="guia"></p>
+      </div>
+    </div>
+
+    <div class="timeline-container">
+      
+      <div class="card">
+        <div class="card-body">
+
+          <ul id="timeline">
+
+            <!--li class="pendente">
+              <div class="dot"> <span class="barra"></span> </div>
+              <div class="evento">
+                <span class="data">30/05/2018 12:35</span>
+                <span class="conteudo">Autorização</span>
+              </div>
+            </li-->
+
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="itens-guia">
+
+      <table id="itens-guia" class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th> Item da Guia </th>
+            <th> Quantidade </th>
+            <th> Status </th>
+          </tr>
+        </thead>
+
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <script src="js/vendor/modernizr-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
+  <script src="js/plugins.js"></script>
+  <script src="js/vendor/html2canvas.min.js"></script>
+
+  <script src="js/main.js"></script>
+
+  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+  <script>
+    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+    ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+  </script>
+  <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+</body>
+
+</html>

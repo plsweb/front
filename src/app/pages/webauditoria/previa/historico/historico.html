@@ -1,0 +1,68 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <b>Guia: </b><span>{{guia ? guia.impresso : ''}}</span>
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <b>Autorização: </b><span>{{formataGuia(guia)}}</span>
+                    </div>
+
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-1">
+                        <b>RN: </b><span>{{guia.rn ? 'Sim' : 'Não'}}</span>
+                    </div>
+
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <b>Plano: </b><span>{{guia && guia.beneficiario ? guia.beneficiario.plano : ''}} </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
+                        <b>Beneficiário: </b><span>{{guia ? guia.beneficiario.codigo : ''}} - {{guia ? guia.beneficiario.nome : ''}} </span>
+                    </div>
+
+                    <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+                        <b>Nascimento: </b>{{guia ? guia.beneficiario.nascimento : ''}} - {{guia ? guia.beneficiario.idade : ''}}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <b>Tipo: </b><span>{{guia ? guia.tipo : ''}}</span>
+                    </div>
+
+                    <!-- <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <b>Status:</b> {{formataStatus(guia)}}
+                    </div> -->
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <b>Validade: </b>{{guia ? guia.validade : ''}}
+                    </div>
+
+                    <!-- <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <b>Autorização:</b> {{guia ? guia.ultimaAutorizacao : ''}}
+                    </div> -->
+                </div>
+
+                <!--div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <b>Indicação:</b> {{guia ? guia.indicacaoClinica : ''}}
+                    </div>
+                </div-->
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <mensagens
+            [guiaId]="id"
+            [historico]="true" 
+        ></mensagens>
+    </div>
+</div>

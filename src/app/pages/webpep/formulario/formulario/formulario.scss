@@ -1,0 +1,89 @@
+.acao{
+    margin-right: 5px;
+}
+
+.table{
+    margin-bottom: 10px;
+}
+
+span{
+    cursor: default;
+}
+
+.botoes {
+    float: left;
+    position: relative;
+}
+
+.botoes botao {
+    float: left;
+    margin-right: 10px;
+    position: relative;
+    width: 30%;
+}
+
+table.tabela thead th {
+    border-bottom: solid 1px white;
+}
+
+.ver_dependentes:before{
+    font-size: 22px;
+    top: 8px;
+    position: relative;
+}
+
+.botoesLadoDireito {
+    display: -webkit-inline-box;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+
+:host /deep/{
+    span.icones_sexo {
+        cursor: pointer;
+        display: inline-flex;
+
+        icone {
+
+            .ambos,
+            .ambos:hover{
+                color: white;
+                opacity: 0.75;
+
+                &.selecionado{
+                    border: 1px solid white;
+                }
+            }
+
+            .masculino,
+            .masculino:hover{
+                color: blue;
+                opacity: 0.75;
+
+                &.selecionado{
+                    border: 1px solid blue;
+                }
+            }
+
+            .feminino,
+            .feminino:hover{
+                color: #5e1a9c;
+                opacity: 0.75;
+
+                &.selecionado{
+                    border: 1px solid #5e1a9c;
+                }
+            }
+
+            .nao_selecionado {
+                opacity: 0.15;
+                color: white;
+            }
+
+            .selecionado{
+                opacity: 1;
+            }
+        }
+    }
+}

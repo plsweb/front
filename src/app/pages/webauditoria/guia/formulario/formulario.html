@@ -1,0 +1,222 @@
+<div *ngIf="beneficiario" baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                {{beneficiario.codigo}} - {{beneficiario.nome}}<br> {{beneficiario.nascimento}},
+                {{beneficiario.idade}} <br>
+                PLANO: {{beneficiario.plano}}
+            </div>
+            <div class="acoes">
+                <botao *ngIf="status === 'EMATENDIMENTO' || status === 'SALADEESPERA'" nome="Finalizar" (click)="finalizar()"></botao>
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('basico')" [ngClass]="{ativo: atual === 'basico'}">Geral</div>
+            <div (click)="navegar('evolucoes')" [ngClass]="{ativo: atual === 'evolucoes'}">Evolução</div>
+            <div (click)="navegar('diagnosticos')" [ngClass]="{ativo: atual === 'diagnosticos'}">Diagnósticos</div>
+            <div (click)="navegar('exames')" [ngClass]="{ativo: atual === 'exames'}">Exames</div>
+            <div (click)="navegar('guias')" [ngClass]="{ativo: atual === 'guias'}">Guias</div>
+            <div (click)="navegar('preexistencia')" [ngClass]="{ativo: atual === 'preexistencia'}">Pré-existência</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div *ngIf="atual === 'basico'">
+            <entrada nome="Nome" bloqueado = "true" [valor]="beneficiario.nome"></entrada>
+            <entrada nome="Contratante" bloqueado = "true" [valor]="beneficiario.contratante"></entrada>
+            <entrada nome="Estado Civil" bloqueado = "true"  [valor]="beneficiario.estadoCivil"></entrada>
+            <entrada nome="Endereço" bloqueado = "true" [valor]="beneficiario.endereco"></entrada>
+            <entrada nome="Telefone" bloqueado = "true" [valor]="beneficiario.telefone"></entrada>
+        </div>
+        <div *ngIf="atual === 'exames'">
+
+            <div>
+                <entrada nome="Filtro de exames" (getValor)="getFiltro($event)" semTitulo="true"></entrada>
+            </div>
+
+            <div *ngIf="examesFiltrados.length > 0" class="grid_exames">
+                <div *ngFor="let exame of examesFiltrados" class="exames animated fadeIn card link" zoom-in id="{{exame.guia}}"  style="cursor: pointer !important;">
+                    <div class="card-header clearfix" (click)="abrirAbaExame(exame.guia)">
+                        <div class="titulo link">
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="status"></th>
+                                        <th class="status"></th>
+                                        <th>GUIA</th>
+                                        <th>SOLICITANTE</th>
+                                        <th>DATA</th>
+                                        <th>EXECUTANTE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="status {{exame.status === true ? 'verde' : 'cinza'}}"></td>
+                                        <td><icone *ngIf="exame.chave" nome="folder_open" title="Ver exame" style="cursor: pointer !important;" (click)="abrirResultado(exame.exameId, exame.chave)"></icone></td>
+                                        <td>{{exame.guia}}</td>
+                                        <td>{{exame.solicitante}}</td>
+                                        <td>{{exame.data}}</td>
+                                        <td>{{exame.nome}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="fa {{idAbaAberta === exame.guia ? 'fa-angle-up' : 'fa-angle-down'}} seta-dropdown"></div>
+                    </div>
+                    <div class="card-body" [hidden]="idAbaAberta !== exame.guia">
+                        <ng-content></ng-content>
+                        <h4 class="link" *ngIf="exame.chave" (click)="abrirResultado(exame.exameId, exame.chave)"> Ver Exame</h4>
+                        <table class="table table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>PROCEDIMENTO</th>
+                                    <th>DESCRIÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr  *ngFor="let item of exame.exames">
+                                    <td>{{item.procedimento}}</td>
+                                    <td>{{item.descricao}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-md-4 align_right">
+                <button type="button" class="btn btn-primary form-control" (click)="adicionarExame()">Novo Exame</button>
+            </div> -->
+
+        </div>
+        <div *ngIf="atual === 'procedimentos'">
+            <table *ngIf="evolucoes" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th>PRESTADOR</th>
+                        <th>TIPO</th>
+                        <th>DESCRIÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let leito of leitos" (click)="atualizar(leito.id)">
+                        <td *ngIf="leito.ativo === true" class="status verde"></td>
+                        <td *ngIf="leito.ativo === false" class="status cinza"></td>
+                        <td>{{leito.prestador.nome}}</td>
+                        <td>{{leito.tipo}}</td>
+                        <td>{{leito.descricao | uppercase}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="atual === 'diagnosticos'">
+            <table *ngIf="cids" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>DESCRICAO</th>
+                        <th>DATA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cid of cids" (click)="atualizar(leito.id)">
+                        <td>{{cid.codigo}}</td>
+                        <td>{{cid.descricao}}</td>
+                        <td>{{cid.data}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="atual === 'evolucoes'">
+            <table *ngIf="evolucoes" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>FORMULÁRIO</th>
+                        <th>MÉDICO</th>
+                        <th>DATA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let evolucao of evolucoes" class="link">
+                        <td>{{evolucao.formulario.titulo}}</td>
+                        <td>{{evolucao.usuario ? evolucao.usuario.nome : evolucao.atendimento && evolucao.atendimento.prestador ? evolucao.atendimento.prestador.nome : "" | uppercase}}</td>
+                        <td>{{evolucao.data}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="atual === 'guias'">
+
+            <div *ngIf="guiasFiltrados.length > 0" class="grid_guias">
+
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="status"></th>
+                            <th>IMPRESSO</th>
+                            <th>STATUS</th>
+                            <th>PRESTADOR</th>
+                            <th>ESPECIALIDADE</th>
+                            <th>DATA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let guia of guiasFiltrados">
+                            <td class="status {{guia.status === 'Autorizada' ? 'verde' : 'cinza'}}"></td>
+                            <td>{{guia.impresso}}</td>
+                            <td>{{guia.status}}</td>
+                            <td>{{guia.prestador.nome}}</td>
+                            <td>{{guia.especialidade}}</td>
+                            <td>{{guia.digitacao}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscaGuiasPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                        paginaAtual="{{paginaAtual}}"
+                    ></paginacao>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="atual === 'preexistencia'">
+
+            <div class="grid_guias">
+
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>DATA</th>
+                            <th>CID</th>
+                            <th>DESCRIÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let preexistencia of preexistenciasFiltrados">
+                            <td>{{preexistencia.cid ? preexistencia.cid.data : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.codigo : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.descricao : ''}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscaPreExistenciasPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                        paginaAtual="{{paginaAtual}}"
+                    ></paginacao>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-3 botoes">
+            <botao nome="Voltar"     (click)="voltar()"     classe="btn-default"></botao>
+        </div>
+
+    </div>
+</div>

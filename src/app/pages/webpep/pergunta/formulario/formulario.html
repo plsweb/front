@@ -1,0 +1,447 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!id">Nova Pergunta</span>
+                <span *ngIf="id">Editar Pergunta - {{ descricaoValor }}</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div *ngIf="id && grupoPerguntaId" (click)="navegar('perguntasDependentes')" [ngClass]="{ativo: atual === 'perguntasDependentes'}">Dependentes</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div *ngIf="atual === 'geral'" [ngInit]="validaOpcoes.bind(this)">
+            
+            <form (ngSubmit)="submit()">
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <entrada 
+                            tipo="area"
+                            nome="Descrição"
+                            [valor]="descricaoValor"
+                            (getValor)="getDescricao($event)"
+                            tamanhoMaximo="2000"
+                        ></entrada>
+                    </div>
+
+                    <div class="col-md-12">
+                        <entrada 
+                            nome="Tipo" 
+                            tipo="seleciona" 
+                            [opcoes]="tipos" 
+                            [valor]="tipoValor" 
+                            [bloqueado]="id" 
+                            (getValor)="getTipo($event)"
+                        ></entrada>
+                    </div>
+
+                    <!-- <div
+                        *ngIf="tipo && tipo.valor == 'TEXTO'"
+                        class="col-md-12"
+                    >
+                        <input-checkbox 
+                            [estado]="expressaoRegular" 
+                            (trocaEstado)="expressaoRegular = $event"
+                        ></input-checkbox>
+                    </div> -->
+
+                    <div 
+                        *ngIf="tipo && tipo.valor == 'TEXTO'"
+                        class="col-sm-3 col-md-3" style="margin-bottom: 25px;"
+                    >
+                        <div class="form-group">
+                            <label class="label_check">Expressão Regular</label>
+                            <input-checkbox 
+                                [estado]="expressaoRegular" 
+                                (trocaEstado)="expressaoRegular = $event"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+
+                
+                    <div class="col-md-12">
+                        <entrada 
+                            nome="Máscara" 
+                            [valor]="mascaraValor" 
+                            (getValor)="getMascara($event)" 
+                            *ngIf="temMascara && !tipoFuncao"
+                        ></entrada>
+                    </div>
+
+                    <div *ngIf="tipoFuncao" class="col-md-12">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                <autocomplete
+                                    [titulo]="'Pergunta'"
+                                    [minimo]="3"
+                                    [valor]="objPerguntas"
+                                    [camposFiltro]="['descricao','tipo']"
+                                    [valorSelecionado]="perguntaSelecionada"
+                                    [placeholder]="'Digite para buscar Perguntas'"
+                                    [fnSearch]="fnCfgPerguntaRemote.bind(this)"
+                                    (fnOnSelected)="getPergunta($event)"
+                                ></autocomplete>
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <entrada nome="Operações" tipo="seleciona" [opcoes]="opcOperacoes" (getValor)="getOperador($event)"></entrada>
+                            </div>
+
+                        </div>
+
+                        <entrada nome="Fórmula" [valor]="mascaraValor" (getValor)="getMascara($event)" (change)="validaMascara($event)"></entrada>
+
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 opcoes">
+                        <botao nome="Salvar" [desabilitado]="!podeSalvar" submit="true"></botao>
+                        <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                    </div>
+                </div>
+            </form>
+            <br clear="all" />
+            <br clear="all" />
+            <div *ngIf="(id && temOpcoes)" class="col-md-12">
+                <div class="addOpcao">
+                    <entrada *ngIf="(!tipoFuncao && !possuiScores);else addScores" nome="Opção" (getValor)="getOpcao($event)" tamanhoMaximo="300" semTitulo="true"></entrada>
+
+                    <ng-template #addScores>
+
+                        <div class="addScore">
+
+                            <div class="col-xs-6 col-sm-12 col-md-9 comparadores">
+                                <div class="row">
+                                    <div *ngFor="let comp of scorecomp" (click)="addComparador(comp)" class="col-sm-2 col-md-2 itens">
+                                        <span>{{comp.descricao}}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-6 col-sm-12 col-md-9 operadores">
+                                <div class="row">
+                                    <div *ngFor="let oper of scoreoper" (click)="addOperador(oper)" class="col-sm-2 col-md-2 itens">
+                                        <span>{{oper.descricao}}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <entrada nome="Score" (keyup)="getScore($event)" [valor]="score" tamanhoMaximo="100" ></entrada>
+                        <entrada nome="Descricao" (change)="getDescScore($event)" [valor]="descricaoScore" tamanhoMaximo="200" ></entrada>
+
+                    </ng-template>
+
+                    <botao nome="Adicionar Opção" [ngClass]="(tipoFuncao && possuiScores) ? 'btnAddScore' : '' " (click)="addOpcao()"></botao>
+                </div>
+                <br clear="all" />
+                <moldura titulo="Opções" sub="true">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th>
+                                <th>OPÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let opcao of opcoes" class="link">
+                                <td><icone nome="close" class="acao" (click)="removerItem(opcao.id)"></icone></td>
+                                <td>{{opcao.descricao}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </moldura>
+            </div>
+            <div *ngIf="tipo['valor'] == 'TABELA'" class="filtros">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <autocomplete
+                            [titulo]="'Tabela'"
+                            [placeholder]="'Digite para buscar Tabelas'"
+                            [valor]="objTabelas"
+                            [camposFiltro]="[ 'nome' ]"
+                            [valorSelecionado]="objFiltroTabela['nomeTabela']"
+                            [minimo]="1"
+                            [fnSearch]="fnCfgGetTabelasRemote.bind(this)"
+                            (fnOnSelected)="objFiltroTabela['nomeTabela'] = $event.nome"
+                        ></autocomplete>
+
+                    </div>
+
+                    <!-- objCamposTabelas -->
+                    <div class="col-md-4">
+
+                        <autocomplete
+                            [titulo]="'Campos da Tabela'"
+                            [placeholder]="'Digite para buscar Campos da Tabela'"
+                            [valor]="objCamposTabelas"
+                            [camposFiltro]="[ 'nome' ]"
+                            [valorSelecionado]="objFiltroTabela['filtro']"
+                            [minimo]="1"
+                            [fnSearch]="fnCfgGetCamposTabelasRemote.bind(this)"
+                            (fnOnSelected)="objFiltroTabela['filtro'] = $event.nome"
+                        ></autocomplete>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <autocomplete
+                            [titulo]="'Filtro Adicional'"
+                            [placeholder]="'Digite para buscar Campos da Tabela'"
+                            [valor]="objCamposTabelas"
+                            [camposFiltro]="[ 'nome' ]"
+                            [valorSelecionado]="objFiltroTabela['filtroAdicional']"
+                            [minimo]="1"
+                            [fnSearch]="fnCfgGetCamposTabelasRemote.bind(this)"
+                            (fnOnSelected)="objFiltroTabela['filtroAdicional'] = $event.nome"
+                        ></autocomplete>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div *ngIf="atual === 'perguntasDependentes'" [ngInit]="buscarPerguntasCondicaoPaginado.bind(this)">
+
+            <moldura titulo="Adicionar Dependente" podeOcultar="true" oculto="true">
+                <ng-template [ngTemplateOutlet]="tmplFmrCondicao"></ng-template>
+            </moldura>
+
+            <moldura>
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="col-acoes"></th>
+                            <th>Filho</th>
+                            <th>Condição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let condicao of condicoes" class="link">
+                            <td>
+                                <icone nome="edit" tamanho="grande" (click)="abreModalEditarCondicao(condicao)" ></icone>
+                                <icone nome="cancel" classe="text-danger" tamanho="grande" (click)="abreModalRemoverCondicao(condicao)" ></icone>
+                            </td>
+                            <td>{{condicaoFilhoVisual(condicao)}}</td>
+                            <td>{{condicaoRespostaVisual(condicao)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br class="all">
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscarPerguntasCondicaoPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        paginaAtual="{{paginaAtual}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                    ></paginacao>
+                </div>
+            </moldura>
+
+        </div>
+    </div>
+</div>
+
+<div style="display: none;">
+    <div #elemScore class="content_score">
+        <div class="item_score">
+            <span> VALOR </span>
+        </div>
+        <input valida-input type="text" class="form-control">
+    </div>
+</div>
+
+
+<!--
+===================================================================
+                Formulario Condição
+===================================================================
+-->
+<ng-template #tmplFmrCondicao let-c="close" let-d="dismiss">
+    <form #frmCondicao name="frmCondicao" id="frmCondicao">
+        <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+              <entrada
+                  nome="Tipo de dependente"
+                  tipo="seleciona"
+                  [valor]="tipoDependente"
+                  [opcoes]="opcoesDependente"
+                  (getValor)="getValorTipoDependente($event)"
+              ></entrada>
+            </div>
+            <div class="col">
+
+                <autocomplete
+                    *ngIf="tipoDependente == 'pergunta' || tipoDependente == 'grupoPergunta'"
+                    [titulo]="'Pergunta'"
+                    [minimo]="3"
+                    [valor]="objPerguntas"
+                    [camposFiltro]="['descricao','tipo']"
+                    [valorSelecionado]="perguntaCondicaoSelecionada"
+                    [placeholder]="'Digite para buscar Perguntas'"
+                    [fnSearch]="fnCfgPerguntaRemote.bind(this)"
+                    (fnOnSelected)="getPerguntaCondicao($event)"
+                ></autocomplete>
+
+                <!-- 
+                <autocomplete
+					[placeholder]="'Digite para buscar Prestadores'"
+					[minimo]="3"
+					[titulo]="'Prestador'"
+					[valor]="variaveisDeAmbiente['todosprestadoresCODIGO']"
+					[camposFiltro]="['nome']"
+					[valorSelecionado]="respostas['prestador'] ? respostas['prestador'].valor.nome : ''"
+
+					(fnOnSelected)="getResposta($event, 'prestador')"
+				></autocomplete>
+                 -->
+
+                <!-- <autocomplete
+                    *ngIf="tipoDependente == 'grupoPergunta'"
+                    [titulo]="'Grupo de Perguntas'"
+                    [minimo]="3"
+                    [valor]="objGrupoPerguntas"
+                    [camposFiltro]="[ 
+                        { 
+                            name: 'pergunta.descricao',
+                            label: 'PERGUNTA' 
+                        },
+                        { 
+                            name: 'pergunta.tipo',
+                            label: 'TIPO' 
+                        }
+                    ]"
+                    [valorSelecionado]="gruposPerguntaSelecionado"
+                    [placeholder]="'Digite para buscar Grupos de Perguntas'"
+                    (fnOnSelected)="getGrupoPerguntaCondicao($event)"
+                ></autocomplete> -->
+                    <!-- [fnSearch]="fnCfgGrupoPerguntaRemote.bind(this)" -->
+
+                <autocomplete
+                    *ngIf="tipoDependente == 'formulario'"
+                    [titulo]="'Formulário'"
+                    [minimo]="3"
+                    [valor]="objFormulario"
+                    [camposFiltro]="['titulo']"
+                    [valorSelecionado]="formularioSelecionado"
+                    [placeholder]="'Digite para buscar Formulário'"
+                    [fnSearch]="fnCfgFormularioRemote.bind(this)"
+                    (fnOnSelected)="getFormularioCondicao($event)"
+                ></autocomplete>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada
+                    nome="Condição"
+                    tipo="seleciona"
+                    [opcoes]="scorecomp"
+                    [valor]="condicao"
+                    (getValor)="getCondicao($event)"
+                ></entrada>
+            </div>
+            <div class="col">
+                <entrada
+                    *ngIf="opcoes && opcoes.length"
+                    nome="Valor da Condição"
+                    tipo="seleciona"
+                    [valor]="valorCondicao"
+                    [opcoes]="opcoes"
+                    (getValor)="getValorCondicao($event)"
+                ></entrada>
+
+                <entrada
+                    *ngIf="!(opcoes && opcoes.length)"
+                    nome="Valor da Condição"
+                    [valor]="valorCondicao"
+                    (getValor)="getValorCondicao($event)"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada
+                    nome="Sexo"
+                    tipo="seleciona"
+                    [opcoes]="opcSexo"
+                    [valor]='condicaoSelecionada?.sexo'
+                    (getValor)="getDadosCondicao($event, 'sexo')"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada
+                    minimo="0"
+                    maximo="100"
+                    tipo="number"
+                    nome="Idade Inicio"
+                    [valor]="condicaoSelecionada?.idadeInicio"
+                    (getValor)="getDadosCondicao($event, 'idadeInicio')"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada
+                    minimo="0"
+                    maximo="100"
+                    tipo="number"
+                    nome="Idade Fim"
+                    [valor]="condicaoSelecionada?.idadeFim"
+                    (getValor)="getDadosCondicao($event, 'idadeFim')"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row" *ngIf="!bEditarCondicao">
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <botao nome="Adicionar" (click)="adicionarCondicao()"></botao>
+            </div>
+        </div>
+    </form>
+</ng-template>
+
+<!--
+===================================================================
+                Excluir Condição
+===================================================================
+-->
+<ng-template #modalRemoverCondicao let-c="close" let-d="dismiss">
+    <p>Deseja realmente excluir esta condição?</p>
+</ng-template>
+<ng-template #modalRemoverCondicaoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluirCondicao()"></botao>
+</ng-template>
+
+<!--
+===================================================================
+                Editar Condição
+===================================================================
+-->
+<ng-template #modalEditarCondicao let-c="close" let-d="dismiss">
+    <ng-template [ngTemplateOutlet]="tmplFmrCondicao"></ng-template>
+</ng-template>
+<ng-template #modalEditarCondicaoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="adicionarCondicao('put')"></botao>
+</ng-template>

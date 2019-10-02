@@ -1,0 +1,77 @@
+.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+.card-header {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.acoes {
+    float: right;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}
+
+.status {
+    padding-left: 0px;
+    padding-right: 0px;
+    width: 5px;
+}
+
+.verde {
+    background-color:#006a6a;
+}
+
+.cinza {
+    background-color:#79787d;
+}
+
+tr td {
+    cursor: default;
+    font-size: 12px;
+}
+
+.link,
+tr.link,
+tr.link td,
+tr.link td icone,
+tr.link td icone i,
+.material-icons,
+tr.link .material-icons {
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.exames .card-header {
+    cursor: pointer;
+}
+
+.exames .card-header .fa {
+    position: absolute;
+    right: 22px;
+    top: 9px;
+}
+
+.exames .card-header .titulo {
+    margin-bottom: 14px;
+}
+
+h4.link {
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.seta-dropdown{
+    padding: 15px;
+    font-size: 22px;
+}

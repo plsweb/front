@@ -1,0 +1,63 @@
+<div style="display: flex;">
+    <div class="mini-calendario-container hidden-sm-down">
+        <datepicker
+            habilitaMultiSelecao='true'
+            [(datas)]='datasSelecionadas'
+            [fnOnChange]="onDatePickerChange.bind(this)"
+            (setDatasSelecionadas)="getDatasSelecionadas($event)"
+        ></datepicker>
+
+        <div class="filtrosAgenda">
+            <entrada
+                semTitulo="true"
+                tipo="seleciona" 
+                objId="id"
+                [valor]="unidadeAtendimento"
+                [opcoes]="unidadesAtendimento" 
+                (getValor)="getUnidadeAtendimento($event)"
+            ></entrada>
+
+            <treeview
+                [grupoItems]="gruposTema"
+                [fnOnSelect]="getEspecialidade.bind(this)"
+                (setInstanciaTreeview)="getGrupoEspecialidade($event)"
+            ></treeview>
+        </div>
+    </div>
+
+    <div class="grid-calendario">
+        <div class="animated fadeIn">
+            <div class="card-body calendario-agenda">
+                <agenda
+                    (setInstanciaAgenda)="getInstanciaAgenda($event)"
+                    [(calendarioOpt)]='calendarioOpt'
+                    [(verDesmarcados)]='verDesmarcados'
+                    [(datas)]='datasSelecionadas'
+                    (setDatasSelecionadas)="setDatasSelecionadas($event)"
+                    (setDesmarcados)="fnVisualizaDesmarcados($event)"
+                    [fnInicializaBlocos]="fnInicializaBlocos.bind(this)"
+                    [elementoAcoes]="acoesAgendamentoGrupo"
+                    [onCreateAgenda]="fnOnUpdateBloco.bind(this,  agendamentoModalComplexa, botoesModalAgendamentoComplexa)"
+                ></agenda>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #acoesAgendamentoGrupo>
+    <icone 
+        tamanho="medium" 
+        nome="supervised_user_circle"
+        title="Grupos"
+        [ngClass]="'pointer agendamentoGrupo'"
+        (click)="router.navigate(['/webpep/agendamentogrupo/grupos'])"
+    ></icone>
+
+    <icone 
+        tamanho="medium" 
+        nome="bookmarks"
+        title="Temas"
+        [ngClass]="'pointer agendamentoGrupo'"
+        (click)="router.navigate(['/webpep/agendamentogrupo/temas'])"
+    ></icone>
+</ng-template>

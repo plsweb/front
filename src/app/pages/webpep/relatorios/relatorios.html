@@ -1,0 +1,1501 @@
+<div class="row">
+        <div class="col">
+            <ng-template [ngTemplateOutlet]="tmplBase"></ng-template>
+        </div>
+    </div>  
+    
+    <!-- 
+    #############################################################################################
+                                            Relatório
+    #############################################################################################
+    -->
+    <ng-template #tmplBase let-c="close" let-d="dismiss">
+        <moldura 
+            titulo="{{tituloRelatorio ? tituloRelatorio : 'Relatório'}}" 
+            [registros]="variaveisDeAmbiente['tabela'].qtdItensTotal" 
+        >   
+            <div 
+                *ngIf="podeVer"
+                class="card-acoes"
+            >
+                <i 
+                    *ngIf="podeCriar"
+                    class="material-icons acao" 
+                    (click)="abreModal('CamposDisponiveis', 'Campos Disponíveis')"
+                >
+                    info
+                </i>
+                <i 
+                    class="material-icons acao" 
+                    *ngIf="relatorioid" 
+                    (click)="abreModalGrafico()"
+                >
+                    pie_chart
+                </i>
+                <!--i class="material-icons acao" (click)="export()">cloud_download</i-->
+                <!--i class="material-icons acao" (click)="export()">print</i-->
+                <i 
+                    class="material-icons acao salvar" 
+                    *ngIf="colunasPrincipal && colunasPrincipal.length && podeCriar" 
+                    (click)="abreModal('SalvarRelatorio', 'Salvar Relatório')"
+                >
+                    save
+                </i>
+                <i 
+                    class="material-icons acao salvar" 
+                    *ngIf="dados && dados.length" 
+                    (click)="exportar()"
+                >
+                    cloud_download
+                </i>
+                <i 
+                    class="material-icons acao salvar" 
+                    (click)="abreModal('CfgRelatorio', '')"
+                >
+                    settings
+                </i>
+                <!--botao nome="Salvar Relatório" (click)="abreModalRelatorioFiltro('Salvar')"></botao-->
+            </div>
+    
+            <div *ngIf="podeVer || !relatorioid; else carregandoPermissoes" class="card-body">
+                <div>
+                    <ng-template 
+                        [ngTemplateOutlet]="tmplRelatorio" 
+                        [ngTemplateOutletContext]="{ 
+                            colunasRelatorio: colunasPrincipalVisiveis, 
+                            dadosRelatorio: dados, 
+                            colunasOperacoesRelatorio: colunasOperacoes,
+                            variavelPaginacao: variaveisDeAmbiente.tabela,
+                            fnPaginacao: pesquisar.bind(this),
+                            scrollPagination:true 
+                        }"
+                    ></ng-template>
+                    <div *ngIf="loading">
+                        <icone tamanho="grande" nome="cached" [loading]="true" ></icone>
+                    </div>
+                </div>
+            </div>
+
+            <ng-template #carregandoPermissoes>
+                <ng-container *ngIf="this.podeVer == undefined; else semPermissao">
+                    <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando permissoes do usuário...
+                </ng-container>
+
+                <ng-template #semPermissao>
+                    <span>Usuario sem permissão para visualizar o relatório</span>
+                </ng-template>
+            </ng-template>
+        </moldura>
+    
+    </ng-template>
+    
+    
+    <!-- 
+    #############################################################################################
+                                        Relatorios Salvos
+    #############################################################################################
+    -->
+    <ng-template 
+        #tmplRelatorio 
+        let-c="close" 
+        let-d="dismiss" 
+        let-scrollPagination="scrollPagination" 
+        let-colunasRelatorio="colunasRelatorio" 
+        let-dadosRelatorio="dadosRelatorio" 
+        let-colunasOperacoesRelatorio="colunasOperacoesRelatorio"
+        let-variavelPaginacao="variavelPaginacao"
+        let-fnPaginacao="fnPaginacao"
+    >
+        <div class="empty" *ngIf="!colunasRelatorio || !colunasRelatorio.length">
+            <p>Configuração de relatório não encontrado.</p>
+        </div>
+    
+        <table class="table table-striped table-responsive" *ngIf="colunasRelatorio && colunasRelatorio.length">
+            <thead class="thead-dark">
+                <tr>
+                    <th 
+                        *ngFor="let coluna of colunasRelatorio; let colunaIndex = index "
+                        [ngClass]="{ 'hidden': coluna.naoVisivel }"
+                        droppable="true"
+                        (drop)="onDrop($event, coluna)" 
+                        (dragover)="onDragOver($event)" 
+                    >
+                        
+                        <i 
+                            class="material-icons ordena-coluna" 
+                            *ngIf="!coluna.calculo"
+    
+                            (dragstart)="onDragStart($event, coluna)"
+                            draggable="true"
+                        >
+                            drag_indicator
+                        </i>
+    
+                        <ordenacao 
+                            *ngIf="ordenacao[coluna.campo]" 
+                            [ordem]="coluna.sort" 
+                            [ordenacao]="ordenacao[coluna.campo]"
+                        ></ordenacao>
+    
+                        <span 
+                            (dblclick)="ordenaTable($event, coluna)" 
+                            (blur)="trocaTitulo($event, coluna, colunaIndex)"
+                            contenteditable="true"
+                        >{{formataHeader(coluna, colunaIndex)}}</span>
+    
+                        <!-- <span *ngIf="coluna.calculo">
+                            {{formataHeader(coluna, colunaIndex)}}
+                        </span> -->
+    
+                        <i class="material-icons" *ngIf="coluna.sort && !coluna.calculo" (dblclick)="ordenaTable($event, coluna)" >
+                            {{coluna.sort == 'asc' ? 'expand_less' : 'expand_more'}}
+                        </i>
+    
+                    </th>
+                    <th *ngFor="let colunaOperacao of colunasOperacoesRelatorio; let indexOperacao = index">
+                        {{colunaOperacao.nome}}
+                    </th>
+                </tr>
+            </thead>
+    
+            <tbody>
+                <tr *ngFor="let dado of dadosRelatorio">
+                    <td 
+                        *ngFor="let coluna of colunasRelatorio; let colunaIndex = index "
+                        [ngClass]="{ 'hidden': coluna.naoVisivel }"
+                    >
+                        <div class="row">
+                            <div class="col text-truncate" style="width:auto;max-width:400px;" (click)="buscaDetalhesDashboard(dado, coluna, colunaIndex)">
+                                {{formataColuna(dado, coluna, colunaIndex)}}
+                            </div>
+                        </div>
+                    </td>
+                    <td *ngFor="let colunaOperacao of colunasOperacoes; let indexOperacao = index">
+                        {{formataResultadoOperacao(dado, colunaOperacao, indexOperacao)}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    
+        <br clear="all">
+    
+        <div *ngIf="relatorioid">
+            <paginacao
+                (atualizaDados)="fnPaginacao($event)"
+                qtdItensTotal="{{variavelPaginacao.qtdItensTotal}}"
+                itensPorPagina="{{variavelPaginacao.itensPorPagina}}"
+                paginaAtual="{{variavelPaginacao.paginaAtual}}"
+                [scrollPagination]="scrollPagination"
+            ></paginacao>
+        </div>
+    </ng-template>
+    
+    
+    
+    <!-- 
+    #############################################################################################
+                                    Modal Configurar Relatorio
+    #############################################################################################
+    -->
+    <ng-template #botoesModalSalvarRelatorio let-c="close" let-d="dismiss">
+    
+        <botao *ngIf="relatorioid && podeCriar" nome="Atualizar" classe="btn-primary" (click)="salvarRelatorio(true)"></botao>
+        <botao *ngIf="podeCriar" nome="{{relatorioid ? 'Duplicar' : 'Salvar'}}" classe="btn-primary" (click)="salvarRelatorio()"></botao>
+    
+    </ng-template>
+    
+    <ng-template #bodyModalSalvarRelatorio let-c="close" let-d="dismiss">
+        <div class="row">
+            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12">
+                <entrada 
+                    nome="Informe um titulo para o relatório"
+    
+                    (getValor)="getTituloRelatorio($event)" 
+                    [valor]="tituloRelatorio ? tituloRelatorio : ''"
+                ></entrada>
+            </div>
+
+            <div *ngIf="mostraCampoClasse" class="col-md-12">
+                <entrada 
+                    nome="Classe" 
+                    [valor]="classe"
+                    (getValor)="$event && $event.valor ? novaClasse = $event.valor : null"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6">
+                <entrada 
+                    nome="Unidade de Atendimento" 
+                    tipo="seleciona" 
+                    objId="id"
+                    [valor]="unidadeAtendimento"
+                    [opcoes]="unidadesAtendimento"
+                    [fnOnChange]="getUnidadeAtendimento.bind(this)"
+                ></entrada>
+            </div>
+            <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6">
+                <autocomplete
+                    [titulo]="'Especialidade'"
+                    [placeholder]="'Digite para buscar Especialidade'"
+                    [minimo]="2"
+                    [valor]="objEspecialidades"
+                    [camposFiltro]="['descricao']"
+                    [valorSelecionado]="especialidadeSelecionada"
+                    [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                    (fnOnSelected)="getEspecialidade($event)"
+                ></autocomplete>
+            </div>
+        </div>
+    
+        <div class="row" *ngIf="relatorioid">
+
+            <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6">
+                <moldura titulo="Permissões" [oculto]="true">
+                    
+                    <div class="row">
+                        <div class="col">
+                            <input-checkbox
+                                classe="check_tipodata"
+                                legenda="Usuario pode criar?"
+                                [estado]="true" 
+                                (trocaEstado)="bPodeCriar = $event"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <entrada nome="Selecione um papel" [opcoes]="papeis" tipo="seleciona" semTitulo="true" (getValor)="getPapelCriar($event)"></entrada>
+                        </div>
+                        <div class="col-sm-2 div_botoes_papeis">
+                            <button (click)="verUsuariosComPermissao('role')" class="btn btn-primary"><i class="material-icons">search</i></button>
+                            <button (click)="addPapelPermissao(bPodeCriar)" class="btn btn-primary">+</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <autocomplete
+                                [semTitulo]="true"
+                                [placeholder]="'Digite para buscar Usuário'"
+                                [minimo]="3"
+                                [valor]="objUsuario"
+                                [camposFiltro]="['nome']"
+                                [valorSelecionado]="valorUsuarioSelecionadoPermissao"
+                                [fnSearch]="fnCfgUsuarioRemote.bind(this)"
+    
+                                (fnOnSelected)="getUsuarioPermissao($event)"
+                            ></autocomplete>
+    
+                        </div>
+                        <div class="col-sm-2">
+                            <button (click)="addUserPermissaoRelatorio(bPodeCriar)" class="btn btn-primary">+</button>
+                        </div>
+                    </div>
+
+                    <div class="row table">
+                        <div class="col-sm-12">
+                            <div class="sub_div_card" *ngFor="let papel of permissoesUserRelatorios">
+                                <icone nome="close" class="acao" (click)="removerPapel(papel)"></icone>{{papel.usuario.nome}} - {{papel.tipo}}
+                            </div>
+                            <div *ngFor="let papel of permissoesRoleRelatorios" class="sub_div_card">
+                                <icone nome="close" class="acao" (click)="removerPapel(papel)"></icone>{{papel.papel.nome}} - {{papel.tipo}}
+                            </div>
+                        </div>
+                    </div>
+                </moldura>
+            </div>
+    
+            <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6">
+                <moldura titulo="Dashboard" [oculto]="true">
+                    
+                    <!-- <div class="row">
+                        <div class="col">
+                            <input-checkbox
+                                classe="check_tipodata"
+                                legenda="Usuario pode criar?"
+                                [estado]="false" 
+                                (trocaEstado)="bPodeCriarDash = $event"
+                            ></input-checkbox>
+                        </div>
+                    </div> -->
+
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <entrada 
+                                nome="visualizar" 
+                                tipo="seleciona" 
+                                semTitulo="true" 
+                                [opcoes]="papeis" 
+                                (getValor)="getPapelCriar($event)"
+                            ></entrada>
+                        </div>
+                        <div class="col-sm-2 div_botoes_papeis">
+                            <button (click)="verUsuariosComPermissao('dash')" class="btn btn-primary"><i class="material-icons">search</i></button>
+                            <!-- <button (click)="addPapel(bPodeCriarDash)" class="btn btn-primary">+</button> -->
+                            <button (click)="addPapel(bPodeCriarDash)" class="btn btn-primary">+</button>
+                        </div>
+                    </div>
+    
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <autocomplete
+                                [semTitulo]="true"
+                                [placeholder]="'Digite para buscar Usuário'"
+                                [minimo]="3"
+                                [valor]="objUsuario"
+                                [camposFiltro]="['nome']"
+                                [valorSelecionado]="valorUsuarioSelecionado"
+                                [fnSearch]="fnCfgUsuarioRemote.bind(this)"
+    
+                                (fnOnSelected)="getUsuario($event)"
+                            ></autocomplete>
+    
+                        </div>
+                        <div class="col-sm-2">
+                            <button (click)="addUser(bPodeCriarDash)" class="btn btn-primary">+</button>
+                        </div>
+                    </div>
+
+                    <div class="row table">
+                        <div class="col-sm-12">
+                            <div class="sub_div_card" *ngFor="let papel of permissoesUser">
+                                 <icone nome="close" class="acao" (click)="removerPapelDash(papel)"></icone>{{papel.usuario.nome}} 
+                                 <!-- - {{papel.tipo}} -->
+                            </div>
+                            <div class="sub_div_card" *ngFor="let papel of permissoesRole">
+                                <icone nome="close" class="acao" (click)="removerPapelDash(papel)"></icone>{{papel.papel.nome}}
+                                 <!-- - {{papel.tipo}} -->
+                            </div>
+                        </div>
+                    </div>
+    
+                </moldura>
+            </div>
+
+        </div>
+    </ng-template>
+    
+    
+    
+    <!-- 
+    #############################################################################################
+                                    Modal Configurar Relatorio
+    #############################################################################################
+    -->
+    <ng-template #botoesModalCamposDisponiveis let-c="close" let-d="dismiss"></ng-template>
+    
+    <ng-template #bodyModalCamposDisponiveis let-c="close" let-d="dismiss" let-naoMostraCampoTabela="naoMostraCampoTabela" let-fnAddColuna="fnAddColuna">
+        <div class="row">
+            <div 
+                *ngIf="!naoMostraCampoTabela"
+                class="col"
+            >
+                <entrada 
+                    nome="Tabelas Disponíveis" 
+                    tipo="seleciona"
+                    objId="codigo"
+                    [opcoes]="listaTabelasDisponives"
+                    (getValor)="getResposta($event, 'infoTabela')" 
+                    [valor]="respostas['infoTabela'] ? respostas['infoTabela'].valor : ''"
+                    [fnOnChange]="trocaTipoRelatorio.bind(this)"
+                ></entrada>
+            </div>
+        </div>
+    
+        <div *ngIf="variaveisDeAmbiente['descricaoTabelaApi'] && !naoMostraCampoTabela" class="row desc_tabela">
+            <div class="col">
+                <span> {{ variaveisDeAmbiente['descricaoTabelaApi'] }} </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th *ngIf="naoMostraCampoTabela"></th>
+                            <th> Campo </th>
+                            <th> Tabela </th>
+                            <th> Filtro </th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        <tr 
+                            *ngFor="let filtro of variaveisDeAmbiente['colunasPorTabela']" 
+                            (click)="adicionaColunaParaTabela(filtro, fnAddColuna)"
+                            
+                        >
+                            <td *ngIf="naoMostraCampoTabela" class="tabela_colunas_disponiveis"> 
+                                <!-- <icone 
+                                    nome="check_circle"
+                                ></icone> -->
+                                <i *ngIf="validaColunaDetalheRelatorio(filtro.id)" class="material-icons" title="Coluna selecionada">check_circle</i>
+                            </td>
+                            <td> {{ filtro.descricao }} </td>
+                            <td> {{ fnBTabela(filtro) ? 'Sim': 'Não' }} </td>
+                            <td> {{ filtro.filtro ? 'Sim': 'Não' }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+    </ng-template>
+    
+    <ng-template #tabelasEnvolvidas>
+        
+        <div class="div_elementos_formula tabelas_relacionadas">
+            <ng-container *ngFor="let tabela of variaveisDeAmbiente['tabelasDisponiveis']">
+                <div class="elementos_formula" (click)="mudaVisaoColunasDisponiveis(tabela.id)">
+                    <span><b>{{tabela.nome}}</b></span>
+                    <i class="material-icons clear" (click)="removeColunasDaTabela($event, tabela)">clear</i>
+                </div>
+            </ng-container>
+        </div>
+
+    </ng-template>
+    
+    <!-- 
+    #############################################################################################
+                                    Modal Configurar Relatorio
+    #############################################################################################
+    -->
+    <ng-template #botoesModalCfgRelatorio let-c="close" let-d="dismiss">
+        <botao 
+            nome="Aplicar" 
+            classe="btn-default" 
+            (click)="aplicarColunas()"
+        ></botao>
+        <botao 
+            *ngIf="relatorioid && podeCriar" 
+            nome="Atualizar" 
+            classe="btn-primary" 
+            (click)="salvarRelatorio(true)"
+        ></botao>
+        <botao *ngIf="podeCriar || mostraCampoClasse"
+            nome="Salvar Relatório" 
+            classe="btn-primary" 
+            (click)="abreModal('SalvarRelatorio', 'Salvar Relatório')"
+        ></botao>
+    </ng-template>
+    
+    <ng-template #bodyModalCfgRelatorio let-c="close" let-d="dismiss">
+    
+        <div class="row">
+            <div class="col">
+                <div class="navegacao">
+                    <div (click)="cfgRelatoriAtual = 'configuracao'" [ngClass]="{ativo: cfgRelatoriAtual === 'configuracao'}">Configuração</div>
+                    <div *ngIf="podeCriar" (click)="cfgRelatoriAtual = 'disponiveis'" [ngClass]="{ativo: cfgRelatoriAtual === 'disponiveis'}">{{ (!tipoRelatorio || tipoRelatorio == 'tabelas') ? 'Campos Disponíveis' : 'Perguntas Disponíveis'}}</div>
+                </div>
+            </div>
+        </div>
+    
+        <br>
+    
+        <div *ngIf="cfgRelatoriAtual === 'configuracao'">
+
+            <div 
+            class="row"
+            >
+            <!-- *ngIf="!relatorioid" -->
+                <div class="col">
+                    <entrada 
+                        nome="Tipo relatorio"
+                        tipo="seleciona"
+                        [bloqueado]="relatorioid"
+                        [opcoes]="opcoesTipoRelatorio"
+                        [valor]="tipoRelatorio"
+                        (getValor)="setTipoRelatorio($event)"
+                    ></entrada>
+                </div>
+            </div>
+
+            <ng-container>
+                <ng-template [ngTemplateOutlet]="cfgRelatorio"></ng-template>
+            </ng-container>
+        </div>
+    
+        <div *ngIf="cfgRelatoriAtual === 'disponiveis'">
+            <ng-container *ngIf="!tipoRelatorio || tipoRelatorio == 'tabelas'; else gridPerguntasPaginado">
+                <ng-template *ngIf="variaveisDeAmbiente['tabelasDisponiveis'] && variaveisDeAmbiente['tabelasDisponiveis'].length" [ngTemplateOutlet]="tabelasEnvolvidas"></ng-template>
+                <ng-template [ngTemplateOutlet]="bodyModalCamposDisponiveis"></ng-template>
+            </ng-container>
+        </div>
+    
+        <ng-template #cfgRelatorio let-c="close" let-d="dismiss">
+
+            <ng-container *ngIf="podeCriar">            
+                <ng-template 
+                    [ngTemplateOutlet]="adicionarColunasFiltro"
+                ></ng-template>
+            </ng-container>
+
+            <ng-container *ngIf="!podeCriar && podeVer">
+                <ng-template 
+                    *ngIf="tipoRelatorio == 'respostas'" 
+                    [ngTemplateOutlet]="cfgExtracaoRespostas"
+                    [ngTemplateOutletContext]="{
+                        modoVisualizacao:true
+                    }"
+                ></ng-template>
+            </ng-container>
+
+            <moldura
+                titulo="Visão da Tabela"
+            >
+                
+                <div *ngIf="(!colunas || !colunas.length) && ((!items || !items.length))">
+                    Nenhuma Coluna Selecionada
+                </div>
+    
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <moldura *ngIf="colunas && colunas.length">
+                            <div style="overflow-x: auto;">
+                                
+                                Fonte de Dados: <span>
+                                    {{formataFonteDeDados()}}
+                                    <ng-container *ngIf="!tipoRelatorio || tipoRelatorio == 'tabelas'">
+                                        <!-- <entrada 
+                                            tipo="seleciona"
+                                            objId="id"
+                                            [opcoes]="variaveisDeAmbiente['tabelasDisponiveis']" 
+                                            (getValor)="getTabelaDisponivel($event)" 
+                                            [valor]="tabelaDisponivel" 
+                                        ></entrada> -->
+                                        <!-- nome="Tabelas Disponíveis"  -->
+                                        <entrada 
+                                            tipo="seleciona"
+                                            objId="id"
+                                            [opcoes]="listaTabelasDisponives"
+                                            (getValor)="getTabelaDisponivel($event, true)" 
+                                            [valor]="tabelaDisponivel" 
+                                        ></entrada>
+                                    </ng-container>
+                                </span>
+    
+    
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th *ngFor="let coluna of colunas; let colunaIndex = index ">
+                                                <icone 
+                                                    *ngIf="podeCriar"
+                                                    nome="clear" 
+                                                    (click)="removeColuna(coluna, colunaIndex)"
+                                                ></icone> 
+                                                
+                                                <span>{{coluna.alias || coluna.coluna.descricao}} </span>
+                                                
+                                                <!-- <span *ngIf="coluna.apenasFiltro"> - </span> -->
+                                                
+                                                <small (click)="mudarVisibilidadeColuna(coluna, colunaIndex, false)"> 
+                                                    <icone *ngIf="coluna.naoVisivel || coluna.apenasFiltro"
+                                                        nome="visibility_off"
+                                                    ></icone>
+                                                </small>
+                                                <small (click)="mudarVisibilidadeColuna(coluna, colunaIndex, true)"> 
+                                                    <icone *ngIf="!coluna.apenasFiltro && !coluna.naoVisivel"
+                                                        nome="visibility"
+                                                    ></icone>
+                                                </small>
+                                            </th>
+                                        </tr>
+                                    </thead>
+    
+                                    <tbody>
+                                        <tr>
+                                            <td *ngFor="let coluna of colunas; let colunaIndex = index " (click)="adicionarFiltroRapido(coluna)">
+                                                <small *ngIf="!coluna.tipoPergunta">
+                                                    {{coluna && coluna.coluna && coluna.coluna.tabela && coluna.coluna.tabela.nome ? coluna.coluna.tabela.nome : ''}}.{{coluna && coluna.coluna && coluna.coluna.nome ? coluna.coluna.nome : ''}}
+                                                </small>
+                                                <small *ngIf="coluna.tipoPergunta">
+                                                    {{coluna.alias}}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </moldura>
+                    </div>
+    
+                    <ng-container *ngIf="!tipoRelatorio || tipoRelatorio == 'tabelas'" >
+
+                        <div class="col" >
+                            <moldura titulo="Cálculos" *ngIf="calculos && calculos.length">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr *ngFor="let calculo of calculos; let calculoIndex = index ">
+                                            <td> 
+                                                <!-- <icone nome="clear" (click)="removeCalculo(calculo, calculoIndex)"></icone>  -->
+                                                <i class="material-icons" (click)="removeCalculo(calculo, calculoIndex)">clear</i>
+                                            </td>
+                                            <td>{{formataCalculo(calculo.tipo)}}</td>
+                                            <td>{{calculo.campo}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+        
+                            <moldura titulo="Filtros" *ngIf="items && items.length">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th> Campo </th>
+                                            <th> Tipo </th>
+                                            <th> Valor </th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody>
+                                        <tr *ngFor="let item of items; let itemIndex = index " (click)="editarFiltro(item,itemIndex)">
+                                            <td> 
+                                                <icone nome="clear" (click)="removeFiltro(item, itemIndex)"></icone> 
+                                            </td>
+                                            <td>{{item.campo}}</td>
+                                            <td>{{item.tipo == 'IN' ? 'IGUAL' : item.tipo}}</td>
+                                            <td colspan>{{item.label || item.valor}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+
+                            <moldura titulo="Colunas de Cálculo" oculto="true">
+
+                                <moldura titulo="Nova Coluna" oculto="true">
+                                    
+                                    <div class="row grid_colunas_operacoes">
+                                    
+                                        <div class="col-md-8">
+                                            <entrada
+                                                [semTitulo]="true"
+                                                nome="Nome da Coluna"
+                                                (getValor)="objParamNovaOperacao['nome'] = $event.valor"
+                                            ></entrada>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="tipodata">
+                                                <input-checkbox
+                                                    classe="check_tipodata"
+                                                    [legenda]="'Calculo com datas'"
+                                                    [estado]="false" 
+                                                    (trocaEstado)="bData = $event"
+                                                ></input-checkbox>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <autocomplete
+                                                [semTitulo]="true"
+                                                [placeholder]="'Digite para buscar colunas'"
+                                                [minimo]="3"
+                                                [valor]="colunasPrincipalVisiveis"
+                                                [camposFiltro]="[{ name: 'coluna.descricao', label: 'COLUNA' }]"
+                                                [valorSelecionado]="valorColunasSelecionadas"
+                                                (fnOnSelected)="setElementoFormula($event)"
+                                            ></autocomplete>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <entrada
+                                                [semTitulo]="true"
+                                                nome="Operacao"
+                                                tipo="seleciona"
+                                                [opcoes]="opcoesOperacoes"
+                                                (getValor)="setOperacaoFormula($event)"
+                                            ></entrada>
+                                        </div>
+
+                                        <!-- <div class="col-md-12">
+                                            <entrada
+                                                nome="Formula"
+                                                [valor]="objParamNovaOperacao['label']"
+                                                (getValor)="($event && $event.valor) ? objParamNovaOperacao['label'] = $event.valor : ''"
+                                            ></entrada>
+                                        </div> -->
+
+
+                                    </div>
+
+                                    <div class="row grid_colunas_operacoes">
+                                        
+                                        <div class="col-md-12 div_elementos_formula ">
+                                            <ng-container *ngFor="let obj of objParamNovaOperacao['formula']; let idx = index">
+                                                <div *ngIf="obj.nome" class="elementos_formula">
+                                                    <span><b>{{obj.nome}}</b></span>
+                                                    <icone nome="clear" classe="pequeno" (click)="removeElementoFormula(obj, idx)"></icone> 
+                                                </div>
+                                            </ng-container>
+                                        </div>
+
+                                        <div *ngIf="bData" title="Data de Referência Cálculo" class="col-md-6 datepicker_escuro">
+                                            <div class="form-group">
+                                                <datepicker
+                                                    [inputForm]='true'
+                                                    [semData]='true'
+                                                    [fnOnChange]="getData.bind(this)"
+                                                    (setInstancia)="getDataInstancia($event)"
+                                                > </datepicker>
+                                            </div>
+                                        </div>
+
+                                        <div  class="col-md-6">
+                                            <entrada
+                                                [semTitulo]="true"
+                                                nome="Unidade de Retorno (datas)"
+                                                tipo="seleciona"
+                                                [opcoes]="opcoesRetorno"
+                                                (getValor)="setTipoRetornoFormula($event)"
+                                            ></entrada>
+                                        </div>
+
+                                    </div>
+
+
+                                    <br>
+
+                                    <div class="row grid_colunas_operacoes">
+                                        <div class="col-md-3">
+                                            <botao nome="Salvar" (click)="salvarColunaOperacao()"></botao>
+                                        </div>
+                                    </div>
+
+                                </moldura>
+
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th> Descricao </th>
+                                            <th> Cálculo </th>
+                                            <th> Retorno </th>
+                                        </tr>
+                                    </thead>
+        
+                                    <tbody>
+                                        <tr *ngFor="let coluna of colunasOperacoes; let itemIndex = index ">
+                                            <td> 
+                                                <icone nome="clear" (click)="removeColunaOperacao(coluna, itemIndex)"></icone> 
+                                            </td>
+                                            <td>{{ coluna.nome}}</td>
+                                            <td>{{ formataCampoFormula(coluna) }}</td>
+                                            <td>{{ formataCampoRetorno(coluna)}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </moldura>
+
+                        </div>
+
+                    </ng-container>
+                </div>
+            </moldura>
+    
+    
+            <moldura *ngIf="colunasVisiveis && colunasVisiveis.length">
+                <div class="row">
+                        
+                    <!--div class="col">
+                        <moldura>
+                            
+                        </moldura>
+                    </div>
+    
+                    <div class="col">
+                        <moldura>
+                            
+                        </moldura>
+                    </div-->
+    
+                </div>
+            </moldura>
+
+
+
+        </ng-template>
+
+    </ng-template>
+    
+    
+    
+<ng-template #cfgExtracaoRespostas let-modoVisualizacao="modoVisualizacao">
+
+    <ng-container *ngIf="!modoVisualizacao">
+        <autocomplete
+            [titulo]="'Formulário'"                    
+            [placeholder]="'Digite para buscar Formulários'"
+            [minimo]="3"
+            [valor]="objFormularios"
+            [camposFiltro]="['descricao', 'titulo']"
+            [valorSelecionado]="formularioSelecionado"
+            [fnSearch]="fnCfgFormularioRemote.bind(this)"
+            (onKeyUp)="idFormularioSelecionado = undefined"
+            (fnOnSelected)="getFormulario($event)"
+        ></autocomplete>
+
+        <moldura *ngIf="idFormularioSelecionado" titulo="{{formularioSelecionado}}" [oculto]="true" [podeOcultar]="true">
+            <formulario-grid
+                [id]="idFormularioSelecionado"
+                [modoSelecaoPerguntas]="true"
+                [perguntasSelecionadas]="perguntasSelecionadas"
+                (fnSelecionaPerguntas)="selecionaPergunta($event)"
+            ></formulario-grid>
+        </moldura>
+    </ng-container>
+
+    <moldura 
+        titulo="Filtros" 
+        [podeOcultar]="true"
+    >
+        <div class="row">
+            <div class="col-md-6">
+                <entrada
+                    nome="Data Inicio"
+                    tipo="datepicker"
+                    classe="top"
+                    [semData]="!variaveisDeAmbiente['dataInicial']"
+                    [valor]="variaveisDeAmbiente['dataInicial']"
+                    (getValor)="variaveisDeAmbiente['dataInicial'] = $event['valor']"
+                ></entrada>
+            </div>
+            <div class="col-md-6">
+                <entrada
+                    nome="Data Fim"
+                    tipo="datepicker"
+                    classe="top"
+                    [semData]="!variaveisDeAmbiente['dataFinal']"
+                    [valor]="variaveisDeAmbiente['dataFinal']"
+                    (getValor)="variaveisDeAmbiente['dataFinal'] = $event['valor']"
+                ></entrada>
+            </div>
+        </div>
+
+    </moldura>
+
+</ng-template>
+    <!-- 
+    #############################################################################################
+                                    Gráfico
+    #############################################################################################
+    -->
+    <ng-template #templateBotoesModalGrafico let-c="close" let-d="dismiss">
+        <botao *ngIf="relatorioid && podeCriar" nome="Atualizar" classe="btn-primary" (click)="salvarRelatorio(true)"></botao>
+    </ng-template>
+    
+    <ng-template #bodyModalGrafico let-c="close" let-d="dismiss">
+        
+        <div class="row">
+            <div class="col">
+                <div class="navegacao">
+                    <div (click)="navegarGrafico('config')" [ngClass]="{ativo: atualGrafico === 'config'}">Configurar</div>
+                    <div (click)="navegarGrafico('dados')" [ngClass]="{ativo: atualGrafico === 'dados'}">Definir Dados</div>
+                    <div (click)="navegarGrafico('grafico')" [ngClass]="{ativo: atualGrafico === 'grafico'}">Visualizar Gráfico</div>
+                </div>
+            </div>
+        </div>
+    
+        <br>
+    
+        <div *ngIf="atualGrafico == 'config'">
+            <div class="row">
+                <div class="col">
+                    <entrada 
+                        [nome]="'Titulo'"
+                        [valor]="(tituloGrafico) ? tituloGrafico : ''" 
+                        (getValor)="getTituloGrafico($event)" 
+                    ></entrada>
+                </div>
+    
+                <div class="col">
+                    <entrada 
+                        nome="Tipo de Gráfico" 
+                        tipo="seleciona"
+                        objId="id"
+                        [opcoes]="tiposGraficos" 
+                        (getValor)="getTipoGrafico($event)" 
+                        [valor]="tipoGrafico" 
+                    ></entrada>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <entrada 
+                        nome="Subtitulo 1"
+                        (getValor)="($event && $event.valor) ? subtitulo1 = $event.valor : null" 
+                        [valor]="subtitulo1" 
+                    ></entrada>
+                </div>
+
+                <div class="col" *ngIf="tipoGrafico && tipoGrafico != 'pie'">
+                    <entrada 
+                        nome="Subtitulo 2"  
+                        (getValor)="($event && $event.valor) ? subtitulo2 = $event.valor : null" 
+                        [valor]="subtitulo2" 
+                    ></entrada>
+                </div>
+            </div>
+
+            <ng-container
+                *ngIf="dados && dados.length"
+            >
+
+                <div class="container">
+                    <div class="row">
+
+
+                        <div class="col-12">
+                            <p>CORES LEGENDA</p>
+                        </div>
+                        <div 
+                            *ngFor="let legenda of dados; let pos = index"
+                            class="legendas"
+                        >
+                            <label>
+                                {{ legenda[chartLegendas] + ''}}
+                            </label>
+
+                            <div class="colorPicker">
+                                <colorPicker
+                                    direcao="right"
+                                    [id]="legenda[chartLegendas]"
+                                    [(default)]="objCoresDashboard[pos]" 
+                                    (setObjColorPicker)="setObjColorPicker($event, pos)"
+                                    [onColorChange]="trocaCor.bind(this, pos)"
+                                ></colorPicker>    
+                            </div>
+                                
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="row">
+
+                        <div class="col-12 align-self-center">
+                            <p class="text-center">COLUNAS PARA EXTRAIR RELATORIO DETALHADO DO GRÁFICO</p>
+                        </div>
+
+                        <div class="col-12 align-self-center">
+                            <p class="text-center">TABELA: {{formataFonteDeDados()}}</p>
+                        </div>
+            
+                        <div class="col-12 align-self-center">
+                            <ng-template [ngTemplateOutlet]="bodyModalCamposDisponiveis" [ngTemplateOutletContext]="{ naoMostraCampoTabela: true, fnAddColuna: fnAddColunaGrafico.bind(this) }"></ng-template>
+                        </div>
+
+                    </div>
+                </div>
+
+            </ng-container>
+        </div>
+    
+        <div *ngIf="atualGrafico == 'dados'">
+            <div class="row">
+                <div class="col-md-12">
+                    <entrada 
+                        objId="id"
+                        nome="Legendas" 
+                        tipo="seleciona"
+                        retornarObjetoFull="true"
+                        [fnAttrDsc]="formataHeader.bind(this)"
+                        [opcoes]="colunasPrincipalTemp" 
+                        (getValor)="getChartLegendas($event)" 
+                        [valor]="chartLegendas" 
+                    ></entrada>
+                </div>
+                <ng-container *ngFor="let legenda of chartValores; let pos = index">
+                    <div class="col-md-10">
+                        <entrada 
+                            objId="id"
+                            nome="Valores"
+                            tipo="seleciona"
+                            retornarObjetoFull="true"
+                            [fnAttrDsc]="formataHeader.bind(this)"
+                            [opcoes]="colunasPrincipalTemp" 
+                            (getValor)="getChartValores($event, false, pos)" 
+                            [valor]="legenda" 
+                        ></entrada>
+                    </div>
+                    <div class="col-md-1">
+                        <botao 
+                            title="Remover coluna"
+                            icone="delete" 
+                            classe="transparente"
+                            [botao_lateral]="true"
+                            (click)="getChartValores({id: legenda}, true)"
+                        ></botao>
+                    </div>
+                </ng-container>
+            </div>
+            <div class="row">
+                <botao
+                    title="Adicionar coluna"
+                    icone="add" 
+                    classe="transparente"
+                    (click)="chartValores.push(null)"
+                ></botao>
+            </div>
+        </div>
+    
+        <div *ngIf="atualGrafico == 'grafico'">
+            <div class="row">
+                <div class="col" [ngInit]="iniciaChartModal()">
+                    <pie-chart 
+                        *ngIf="tipoGrafico == 'pie'"
+                        [data]="dadosGrafico" 
+                        [config]="config1" 
+                        [elementId]="elementId1"
+                    ></pie-chart>
+    
+                    <bar-chart 
+                        *ngIf="tipoGrafico == 'bar'"
+                        [data]="dadosGrafico" 
+                        [config]="config1" 
+                        [elementId]="elementId1"
+                    ></bar-chart>
+    
+                    <line-chart 
+                        *ngIf="tipoGrafico == 'line'"
+                        [data]="dadosGrafico" 
+                        [config]="config1" 
+                        [elementId]="elementId1"
+                    ></line-chart>
+    
+    
+                    <!--area-chart 
+                        *ngIf="respostas['tipoGrafico'] && respostas['tipoGrafico'].valor == 'area'"
+                        [data]="dadosGrafico" 
+                        [config]="config1" 
+                        [elementId]="elementId1"
+                    ></area-chart-->
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #BodyModalUsuariosPapel let-tipo="tipo">
+
+        <moldura 
+            titulo=""
+            [pesquisar]="pesquisaUsuariosComPapel.bind(this)"
+        >
+    
+            <div *ngIf="usuariosComPapelFiltro.length" class="row">
+                <div class="col">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nome</th>
+                            </tr>
+                        </thead>
+    
+                        <tbody>
+                            <tr *ngFor="let usuario of usuariosComPapelFiltro" (click)="adicionarUsuarioPermissao(usuario, tipo)" >
+                                <td> 
+                                    {{ usuario.username }}
+                                </td>
+                                <td> 
+                                    {{ usuario.nome }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    
+            <div *ngIf="!usuariosComPapelFiltro.length" class="row">
+                <h4>Sem resultados</h4>
+            </div>
+    
+        </moldura>
+    
+    </ng-template>
+
+
+<ng-template #adicionarColunasFiltro let-item='item'>
+    <ng-container *ngIf="!tipoRelatorio || tipoRelatorio == 'tabelas'; else cfgExtracaoRespostas" >
+
+        <div 
+            class="row"
+        >
+            <ng-container 
+                *ngIf="!item"
+            >
+
+                <div class="col">
+                    <autocomplete
+                        [placeholder]="'Digite para buscar Colunas'"
+                        [minimo]="2"
+                        [titulo]="'Colunas'"
+                        [valor]="variaveisDeAmbiente['serviceTabelaApi']"
+                        [camposFiltro]="['descricao', {label: 'Tabela', name: 'tabela.nome'}]"
+                        [valorSelecionado]="respostas['serviceTabelaApi'] ? respostas['serviceTabelaApi'].valor.descricao : ''"
+                        [fnSearch]="fnCfgRemote.bind(this, 'serviceTabelaApi', 'getColunas')"
+
+                        (fnOnSelected)="getResposta($event, 'serviceTabelaApi', true)"
+                    ></autocomplete>
+                </div>
+                <div 
+                    class="col-xs-2 col-sm-2 col-md-2 col-lg-2" 
+                    *ngIf="respostas['serviceTabelaApi'] && respostas['serviceTabelaApi'].valor && respostas['serviceTabelaApi'].valor.id"
+                >
+                    <label> Apenas Filtro </label>
+                    <!--input id="apenasFiltro" type="checkbox" name="apenasFiltro"-->
+                    <input-checkbox
+                        classe="check_todasSessoes"
+                        
+                        [estado]="respostas['apenasFiltro']" 
+                        (trocaEstado)="alteraApenasFiltro($event)"
+                    ></input-checkbox>
+                    <!--entrada 
+                        nome="Apenas Filtro" 
+                        tipo="seleciona"
+                        
+                        [opcoes]="listaBoolean" 
+                        (getValor)="getResposta.bind(this)($event, 'apenasFiltro')" 
+                        [valor]="getValor('apenasFiltro') ? getValor('apenasFiltro').valor : ''"
+                    ></entrada-->
+                </div>
+            </ng-container>
+        </div>
+
+        <moldura titulo="Filtrar" 
+            *ngIf="respostas['serviceTabelaApi'] && (colunas && colunas.length)"
+        >
+            <ng-container 
+                *ngIf="!item"
+            >
+                <div class="row" *ngIf="!variaveisDeAmbiente['temFonteDados']">
+                    <div class="col"><p>Sem opções para filtro</p></div>
+                </div>
+            </ng-container>
+
+            <div class="row" *ngIf="variaveisDeAmbiente['temFonteDados']">
+                <div class="col" *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'BOOLEAN'">
+                    <entrada
+                        tipo="simnao"
+                        (getValor)="getBoolean($event)" 
+                        [valor]="boolean" 
+                    ></entrada>
+                </div>
+
+                <div class="col" *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'CLASSE' && variaveisDeAmbiente['objValoresAPI'] && variaveisDeAmbiente['objValoresAPI'].campos">
+                    
+                    <autocomplete
+                        [placeholder]="'Digite para buscar Valores'"
+                        [minimo]="3"
+                        
+                        [valor]="variaveisDeAmbiente['serviceColunas']"
+                        [camposFiltro]="variaveisDeAmbiente['objValoresAPI']?.campos"
+                        [valorSelecionado]="respostas['serviceColunas'] && !item ? (respostas['serviceColunas']?.valor?.descricao || respostas['serviceColunas']?.valor?.nome) : item ? ( item?.label || item?.valor || ( item.coluna ? ( item?.coluna?.valor?.descricao || item?.coluna?.valor?.nome ) : '' ) ) : ''"
+                        [fnSearch]="fnCfgRemoteDinamico.bind(this)"
+
+                        (fnOnSelected)="getResposta($event, 'serviceColunas')"
+                    ></autocomplete>
+                    
+                </div>
+
+                <div class="col" *ngIf="
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATA' || 
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATAHORA'
+                ">
+                    <entrada 
+                        nome="Tipo de Data" 
+                        tipo="seleciona"
+                        objId="id"
+                        
+                        [opcoes]="listaTipoData" 
+                        (getValor)="getTipoData($event)" 
+                        [valor]="tipoData" 
+                    ></entrada>
+                </div>
+
+                <!--div class="col" *ngIf="
+                    (
+                        (
+                            respostas['serviceTabelaApi'].valor.tipo == 'DATA' || 
+                            respostas['serviceTabelaApi'].valor.tipo == 'DATAHORA'
+                        ) &&
+                        tipoData && tipoData == 'ATUAL'
+                    )
+                ">
+                </div-->
+
+                <div class="col" *ngIf="((
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATA' || 
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATAHORA'
+                    ) &&
+                    tipoData && (tipoData == 'ULTIMO' || tipoData == 'ANTERIOR')
+                )">
+                    <entrada
+                        tipo="numero"
+                        (getValor)="getUltimoDataQuantidade($event)" 
+                        [valor]="ultimoDataQuantidade" 
+                    ></entrada>
+                </div>
+
+                <div class="col" *ngIf="((
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATA' || 
+                    respostas['serviceTabelaApi'].valor.tipo == 'DATAHORA'
+                    ) &&
+                    tipoData && (tipoData == 'ULTIMO' || tipoData == 'ATUAL' || tipoData == 'ANTERIOR')
+                )">
+                    <entrada
+                        tipo="seleciona"
+                        objId="id"
+                        
+                        [opcoes]="listaUltimoDataPeriodo" 
+                        (getValor)="getUltimoDataPeriodo($event)" 
+                        [valor]="ultimoDataPeriodo" 
+                    ></entrada>
+                </div>
+
+                <div class="col" *ngIf="
+                    (
+                        (
+                            respostas['serviceTabelaApi'].valor.tipo == 'DATA' || 
+                            respostas['serviceTabelaApi'].valor.tipo == 'DATAHORA'
+                        ) &&
+                        tipoData && tipoData == 'INTERVALO'
+                    ) ||
+                    respostas['serviceTabelaApi'].valor.tipo == 'INTEGER' ||
+                    respostas['serviceTabelaApi'].valor.tipo == 'DOUBLE' 
+                ">
+                    
+                    <div class="row">
+                        <div class="col">
+                            <!-- {{respostas['serviceTabelaApi'].valor.tipo}} -->
+                            <entrada 
+                                nome="{{!item ? 'Valor Inicial' : 'Valor'}}" 
+                                [tipo]="respostas['serviceTabelaApi'].valor.tipo"
+                                [incluirMascara]="true"
+
+                                (getValor)="getResposta($event, 'intervaloInicio')" 
+                                [valor]="respostas['intervaloInicio'] ? respostas['intervaloInicio'].valor : ''"
+                            ></entrada>
+                        </div>
+
+                        <div 
+                            *ngIf="!item"
+                            class="col"
+                        >
+                            <entrada 
+                                nome="Valor Final" 
+                                [tipo]="respostas['serviceTabelaApi'].valor.tipo"
+                                [incluirMascara]="true"
+
+                                (getValor)="getResposta($event, 'intervaloFim')" 
+                                [valor]="respostas['intervaloFim'] ? respostas['intervaloFim'].valor : ''"
+                            ></entrada>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col" *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'ENUM'">
+                    <entrada 
+                        nome="Selecione um valor para filtrar" 
+                        tipo="seleciona"
+                        objId="codigo"
+                        
+                        [opcoes]="listaEnums"
+
+                        (getValor)="getResposta($event, 'serviceColunas')" 
+                        [valor]="respostas['serviceColunas'] ? respostas['serviceColunas'].valor : ''"
+                    ></entrada>
+                </div>
+
+                <div class="col" *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'STRING'">
+                    <entrada 
+                        nome="Informe um valor para pesquisa" 
+                        [tipo]="respostas['serviceTabelaApi'].valor.tipo"
+
+                        (getValor)="getResposta($event, 'serviceColunas')" 
+                        [valor]="respostas['serviceColunas'] ? respostas['serviceColunas'].valor : ''"
+                    ></entrada>
+                </div>
+
+                <ng-container 
+                    *ngIf="!item"
+                >
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <label>
+                            &nbsp;
+                            <!--span> {{respostas['serviceTabelaApi'].valor.tipo}} </span-->
+                        </label>
+                        <botao nome="Adicionar" (click)="adicionaItem()" classe="btn-primary"></botao>
+                    </div>
+                </ng-container>
+
+                <!-- *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'DATA'" -->
+                
+                <div 
+                    class="col-xs-12 col-sm-12 col-md-12 col-lg-12" 
+                    *ngIf="
+                        respostas['serviceTabelaApi'].valor.tipo != 'DATA' &&
+                        respostas['serviceTabelaApi'].valor.tipo != 'DATAHORA' &&
+                        respostas['serviceTabelaApi'].valor.tipo != 'INTEGER' &&
+                        respostas['serviceTabelaApi'].valor.tipo != 'DOUBLE' &&
+                        respostas['serviceTabelaApi'].valor.tipo != 'BOOLEAN'
+                    "
+                >
+                    <div class="row">
+                        <div class="col">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'NAONULO')">
+                            Não Nulo
+                        </div>
+                        <div class="col">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'NULO')">
+                            Nulo
+                        </div>
+                        
+                        <div class="col">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'IGUAL')">
+                            Igual
+                        </div>
+                        <div class="col" *ngIf="respostas['serviceTabelaApi'].valor.tipo == 'STRING'">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'LIKE')">
+                            Like
+                        </div>
+                        <div class="col">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'DIFERENTE')">
+                            Diferente
+                        </div>
+                        <div class="col">
+                            <input type="radio" name="tipoFiltro" (change)="alteraItens($event, 'ENTRE')">
+                            Entre
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </moldura>
+    <!-- *ngIf="!tipoRelatorio || tipoRelatorio == 'tabelas'" -->
+        <ng-container 
+            *ngIf="!item"
+        >
+            <moldura *ngIf="respostas['serviceTabelaApi']">
+                <div class="row">
+                    <!--div class="col">
+                        <input type="checkbox" name="" (change)="alteraItens($event, 'Ordenar')"> Ordenar
+                    </div-->
+                    <div class="col">
+                        <entrada 
+                            nome="Cálculos" 
+                            tipo="seleciona"
+                            objId="id"
+                            
+                            [opcoes]="tiposCalculo" 
+                            (getValor)="getResposta($event, 'calculoSelecionado')" 
+                            [valor]="respostas['calculoSelecionado'] ? respostas['calculoSelecionado'].valor : ''"
+                        ></entrada>
+                        
+        <!--
+                        =={{formataObjeto(getValor('calculoSelecionado'))}}==
+        -->
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <label> &nbsp; </label>
+                        <botao nome="Adicionar" (click)="adicionaCalculo()" classe="btn-primary"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <div 
+                class="row" 
+                *ngIf="
+                    respostas['serviceTabelaApi'] && 
+                    respostas['serviceTabelaApi'].valor && 
+                    respostas['serviceTabelaApi'].valor.tipo != 'ARRAY' && 
+                    respostas['serviceTabelaApi'].valor.id"
+            >
+            <!-- respostas['serviceTabelaApi'].valor.tipo != 'CLASSE' &&  -->
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <botao nome="Adicionar Coluna" (click)="adicionaColuna()" classe="btn-primary"></botao>
+                </div>
+            </div>
+        </ng-container>
+
+        <br *ngIf="respostas['serviceTabelaApi']">
+
+    </ng-container>
+</ng-template>
+
+<ng-template #botoesAdicionarColunasFiltro>
+    <botao nome="Editar Filtro" (click)="salvarFiltroEdita()"></botao>
+</ng-template>
+
+
+<ng-template #gridPerguntasPaginado>
+
+    <moldura
+        titulo="" 
+        [registros]="totalPerguntas" 
+        [pesquisar]="pesquisarPerguntas.bind(this)"
+    >
+        <div class="col">
+
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th> Pergunta </th>
+                        <th> Tipo </th>
+                        <th> Tabela </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let pergunta of perguntasPaginado" (click)="clickPerguntaTabela(pergunta)">
+                        <td>
+                            <icone *ngIf="validaPerguntaInserida(pergunta.id)"
+                                nome="check_circle"
+                            ></icone>
+                        </td>
+                        <td> {{ pergunta.descricao }} </td>
+                        <td> {{ converteTipoPergunta(pergunta) }} </td>
+                        <td> {{ pergunta.tabela }} </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div>
+                <paginacao 
+                    (atualizaDados)="getPerguntasPaginado($event)"
+                    qtdItensTotal="{{totalPerguntas}}" 
+                    itensPorPagina="{{itensPorPaginaPerguntas}}"
+                    paginaAtual="{{paginaAtualPerguntas}}"
+                ></paginacao>
+            </div>
+
+        </div>
+
+    </moldura>
+
+</ng-template>
+
+
+
+<!-- MODAL DETALHES DASHBOARD -->
+<ng-template #bodyModalDetalheDash>
+    <ng-template 
+        [ngTemplateOutlet]="tmplRelatorio" 
+        [ngTemplateOutletContext]="{
+            colunasRelatorio: colunasDetalhe, 
+            dadosRelatorio: dadosDetalheDash,
+            colunasOperacoesRelatorio: [], 
+            variavelPaginacao: variaveisDeAmbiente.tabelaSubRelatorio,
+            fnPaginacao: buscaDetalhesDashboardPaginacao.bind(this),
+            scrollPagination: false 
+        }"
+    ></ng-template>
+</ng-template>

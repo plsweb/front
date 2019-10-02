@@ -1,0 +1,29 @@
+<moldura titulo="Internação">
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="status"></th>
+                <th>PRESTADOR</th>
+                <th>BENEFICIÁRIO</th>
+                <th>LEITO</th>
+                <th>TIPO</th>
+                <th>PERMANÊNCIA</th>
+            </tr>
+            <tr *ngFor="let internacao of internacoes" (click)="atualizar(internacao.id)">
+                <td *ngIf="internacao.saida" class="status verde"></td>
+                <td *ngIf="!internacao.saida" class="status cinza"></td>
+                <td>{{internacao.prestador.nome}}</td>
+                <td>{{internacao.nome}}</td>
+                <td *ngIf="internacao.leitoAtual">{{internacao.leitoAtual.descricao}}</td>
+                <td *ngIf="!internacao.leitoAtual"></td>
+                <td>{{internacao.tipoInternacao.descricao}}</td>
+                <td>{{internacao.dias}} dias</td>
+            </tr>
+        </thead>
+    </table>
+    <div class="row">
+        <div class="col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+</moldura>

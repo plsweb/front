@@ -1,0 +1,300 @@
+<moldura [titulo]="(( idPrescricao ) ? 'Editar' : 'Novo') + ' Kit de Prescrição'">
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            <div class="form-group">
+                <label>Nome</label>
+                <input 
+                    type="text" 
+                    name="descricao" 
+                    class="form-control" 
+                    placeholder="Informe a Descrição"
+                    [(ngModel)]="novaPrescricao['nome']"
+                />
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                nome="Via de Acesso"
+                tipo="seleciona"
+                [valor]="novaPrescricao?.viaAcesso"
+                objId="codigo"
+                [opcoes]="opcoesViaAcesso"
+                (getValor)="($event && $event.valor && $event.valor != '0') ? novaPrescricao['viaAcesso'] = $event.valor : null"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                nome="Frequência Padrão"
+                tipo="seleciona" 
+                [valor]="novaPrescricao?.frequencia?.id" 
+                [opcoes]="opcoesFrequencia" 
+                (getValor)="($event && $event.valor && $event.valor != '0' ) ? novaPrescricao['frequencia'] = { id : $event.valor } : null"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                tipo="seleciona"
+                nome="Frequência Mínima"
+                mostraOpcaoEmBranco="true"
+                [valor]="novaPrescricao?.frequenciaMinima?.id"
+                [opcoes]="opcoesFrequencia"
+                (getValor)="($event && $event.valor && $event.valor != '0' ) ? novaPrescricao['frequenciaMinima'] = { id : $event.valor } : null"
+            ></entrada>
+        </div>
+    
+        <div class="col-md-3 col-sm-3">
+            <entrada 
+                nome="Frequência Máxima" 
+                tipo="seleciona" 
+                [valor]="novaPrescricao?.frequenciaMaxima?.id" 
+                [opcoes]="opcoesFrequencia" 
+                (getValor)="($event && $event.valor && $event.valor != '0' ) ? novaPrescricao['frequenciaMaxima'] = { id : $event.valor } : null"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                tipo="hora"
+                tipoRetorno="mm"
+                nome="Tempo de Infusão Mínimo"
+                [valor]="converteHora(novaPrescricao?.infusaoMinimo)"
+                (getValor)="$event?.valorSimples ? novaPrescricao['infusaoMinimo'] = $event?.valorSimples : ''"
+            ></entrada>
+        </div>
+            
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                tipo="hora"
+                tipoRetorno="mm"
+                nome="Tempo de Infusão Máximo"
+                [valor]="converteHora(novaPrescricao?.infusaoMaximo)"
+                (getValor)="$event?.valorSimples ? novaPrescricao['infusaoMaximo'] = $event?.valorSimples : ''"
+            ></entrada>
+        </div>
+
+        <div class="col-md-6 col-sm-6">
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+                    <entrada
+                        nome="Dose Máxima"
+                        tipo="numero"
+                        [valor]="novaPrescricao['doseMaximaValor']"
+                        (getValor)="novaPrescricao['doseMaximaValor'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-8 col-sm-8">
+                    <entrada
+                        nome="&nbsp;"
+                        tipo="seleciona"
+                        objId="id"
+                        mostraOpcaoEmBranco="true"
+                        [opcoes]="opcoesDmTissUnidadeMedica"
+                        [valor]="novaPrescricao['doseMaximaUnidade'] ? novaPrescricao['doseMaximaUnidade'].id : ''"
+                        (getValor)="$event?.valor && $event?.valor != '0' ? novaPrescricao['doseMaximaUnidade'] = { id: $event.valor } : ''"
+                    ></entrada>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-3">
+            <entrada 
+				nome="Quantidade Dose Padrão"
+				expressaoRegular="^[\d]+([\.]?[\d]{1,2})?$"
+				[valor]="novaPrescricao['quantidadeDosePadrao']"
+				(getValor)="$event && $event.valor ? novaPrescricao['quantidadeDosePadrao'] = $event.valor : novaPrescricao['quantidadeDosePadrao'] = undefined"
+			></entrada>
+        </div>
+    
+        <div class="col-md-3 col-sm-3">
+            <entrada
+                nome="Gramagem Dose Padrão"
+                tipo="seleciona"
+                objId="codigo"
+                [opcoes]="dosePadrao"
+                mostraOpcaoEmBranco="true"
+                [valor]="novaPrescricao['dosePadrao']"
+                (getValor)="$event?.valor ? novaPrescricao['dosePadrao'] = $event.valor : ''"
+            ></entrada>
+        </div>
+
+        <div class="col-md-12 col-sm-12">
+            <entrada 
+                nome="Orientação" 
+                tipo="area" 
+                [tamanhoMaximo]="250"
+                [valor]="novaPrescricao['orientacaoPadrao']" 
+                (getValor)="novaPrescricao['orientacaoPadrao'] = $event.valor"
+            ></entrada>
+        </div>
+    </div>
+
+    <ng-container *ngIf="idPrescricao">
+        <moldura titulo="Produtos" [podeOcultar]="true">
+            <ng-template [ngTemplateOutlet]="addNovoProduto"></ng-template>
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th> NOME </th>
+                        <!-- <th> MEDICAMENTO </th> -->
+                        <th> UNIDADE </th>
+                        <th> QUANTIDADE </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let produto of novaPrescricao['produtos']" (click)="abrir(produto)" class="link">
+                        <td class="acao"><icone nome="delete" class="acao" (click)=removerProduto(produto)></icone></td>
+
+                        <td> {{produto.produto.nome}} </td>
+
+                        <!-- <td> {{( produto.produto.medicamento ) ? produto.produto.medicamento.nome + ' - ' + produto.produto.medicamento.descricao : ''}} </td> -->
+
+                        <td (click)="editaUnidade(produto)">
+                            <div class="edit" *ngIf="qtdEdita['id'] == produto.id">
+                                <entrada nome="Unidade" class="entrada qnts" semTitulo="true" tipo="seleciona" valor="{{produto.unidade ? produto.unidade.id : undefined}}" [opcoes]="opcoesUnidadeMedida" minimo="1" id="unid{{produto.id}}" [fnOnChange]="salvarUnidade.bind(this)"></entrada>
+                            </div>
+
+                            <span *ngIf="qtdEdita['id'] != produto.id">{{ produto.unidade ? produto.unidade.descricao + ' - ' + produto.unidade.unidadeMedida : ''}}</span>
+                        </td>
+
+                        <td (click)="editaQuantidade(produto)">
+                            <div class="edit" *ngIf="produtoEdita['id'] == produto.id">
+                                <entrada
+                                    minimo="1"
+                                    tipo="numero"
+                                    semTitulo="true"
+                                    nome="Quantidade"
+                                    class="entrada qnts"
+                                    id="qnt{{produto.id}}"
+                                    valor="{{produto.quantidade}}"
+                                    [fnOnChange]="salvarQuantidade.bind(this)"
+                                ></entrada>
+                            </div>
+
+                            <span *ngIf="produtoEdita['id'] != produto.id">{{produto.quantidade}}</span>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </moldura>
+
+        <moldura titulo="Unidades de Atendimento" sub="true" [podeOcultar]="true">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="unidadeAtendimento">
+                        <div *ngFor="let unidade of unidadesAtendimento">
+                            <input-checkbox
+                                classe="check_todasSessoes"
+                                [legenda]="unidade.descricao"
+                                [estado]="validaCheck(unidade)" 
+                                (trocaEstado)="salvarUnidadeAtendimento($event, unidade)"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </moldura>
+
+        <moldura titulo="Especialidades" [podeOcultar]="true">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th>
+                                <th>CODIGO</th>
+                                <th>DESCRIÇÃO</th>
+                            </tr>
+
+                            <tr *ngFor="let especialidade of novaPrescricao['especialidades']">
+                                <td class="acao"><icone nome="delete" class="acao" (click)=deleteEspecialidades(especialidade)></icone></td>
+                                <td>{{especialidade.especialidade ? especialidade.especialidade.codigo : especialidade.codigo}}</td>
+                                <td>{{especialidade.especialidade ? especialidade.especialidade.descricao : especialidade.descricao}}</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+                <div class="col-md-4 botao-centro">
+                    <botao nome="Adicionar" (click)="adicionarEspecialidade(bodyModalEspecialidades)" classe="btn-info center"></botao>
+                </div>
+            </div>
+        </moldura>
+    </ng-container>
+
+    <div class="row">
+        <botao nome="Salvar" [ngClass]="'col-md-3'" (click)="salvarPrescricao()"></botao>
+        <botao nome="Voltar" [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+    </div>
+</moldura>
+
+
+<ng-template #addNovoProduto>
+    <moldura titulo="Adicionar Produto" podeOcultar="true" oculto="true">
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+                <autocomplete
+                    [titulo]="'Produtos'"
+                    [placeholder]="'Digite para buscar Produtos'"
+                    [minimo]="3"
+                    [valor]="objProdutos"
+                    [camposFiltro]="['nome']"
+                    [valorSelecionado]="valorProdutoSelecionado"
+                    [fnSearch]="fnCfgProdutoRemote.bind(this)"
+                    (fnOnSelected)="setObjParamProduto($event)"
+                ></autocomplete>
+            </div>
+
+
+            <div class="col-md-2 col-sm-2">
+                <entrada
+                    nome="Quantidade"
+                    tipo="numero"
+                    (getValor)="objParamAddProduto['quantidade'] = $event.valor"
+                ></entrada>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <entrada
+                    nome="Unidade"
+                    tipo="seleciona"
+                    [opcoes]="opcoesUnidadeMedida"
+                    (getValor)="objParamAddProduto['unidade'] = { id: $event.valor }"
+                ></entrada>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <botao nome="Adicionar" (click)="salvarProdutoPrescricao()"></botao>
+            </div>
+        </div>
+    </moldura>
+</ng-template>
+
+
+<!-- MODAL ESPECIALIDADES-->
+<ng-template #bodyModalEspecialidades let-c="close" let-d="dismiss">
+    <entrada nome="Descrição" tema="popup" (getValor)="getEspecialidade($event)"></entrada>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>NOME</th>
+                <th>DESCRIÇÃO</th>
+            </tr>
+            <tr *ngFor="let especialidade of especialidades" class="link" id="linha{{especialidade.id}}">
+                <td class="acao"><icone nome="add_circle" class="acao" (click)=selecionaEspecialidade(especialidade)></icone></td>
+                <td>{{especialidade.codigo}}</td>
+                <td>{{especialidade.descricao}}</td>
+            </tr>
+        </thead>
+    </table>
+</ng-template>

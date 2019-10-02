@@ -1,0 +1,168 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-body">
+        
+        <moldura [titulo]="(( idAgenda ) ? 'Editar' : 'Nova') + ' Agenda Coletiva'">
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <entrada 
+                        nome="Nome" 
+                        [valor]="novaAgenda['nome']" 
+                        (getValor)="novaAgenda['nome'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3">
+                    <autocomplete
+                        [titulo]="'Especialidade'"
+                        [placeholder]="'Digite para buscar Especialidade'"
+                        [minimo]="3"
+                        [valor]="objEspecialidades"
+                        [camposFiltro]="['descricao']"
+                        [valorSelecionado]="especialidadeSelecionada"
+                        [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                        (fnOnSelected)="getEspecialidade($event)"
+                    ></autocomplete>
+                </div>
+
+                <div class="col-md-3">
+                    <entrada 
+                        nome="Leitos" 
+                        tipo="numero"
+                        [valor]="novaAgenda['quantidadeLeitos']" 
+                        (getValor)="novaAgenda['quantidadeLeitos'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-2">
+                    <entrada nome="Ativo" [valor]="novaAgenda['ativo']" tipo="simnao" (getValor)="novaAgenda['ativo'] = $event.valor"></entrada>
+                </div>
+
+                <div class="col-md-4">
+                    <botao nome="Salvar Agenda Coletiva" (click)="salvarAgenda()"></botao>
+                </div>
+                <div class="col-md-4">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+
+        </moldura>
+
+        <ng-container *ngIf="idAgenda">
+            
+            <moldura oculto="true" titulo="Adicionar Local">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <entrada nome="Unidades" tipo="seleciona" [opcoes]="unidades" (getValor)="getUnidade($event)"></entrada>
+                    </div>
+
+                    <div class="col-md-4" *ngIf="consultorios.length > 0">
+                        <entrada nome="Consultorios" tipo="seleciona" [opcoes]="consultorios" (getValor)="getConsultorio($event)"></entrada>
+                    </div>
+    
+                    <div class="col-md-2">
+                        <botao 
+                            nome="Salvar Local" 
+                            [botao_lateral]="true"
+                            (click)="salvarLocal()"
+                        ></botao>
+                    </div>
+                </div>
+                
+            </moldura>
+
+            <div class="" oculto="false" podeOcultar="true">
+            
+                <moldura titulo="Locais">
+                    <div *ngFor="let local of novaAgenda['locais']" class="exames animated fadeIn card link" zoom-in id="{{local.id}}" style="cursor: pointer !important;">
+                        <div class="card-header clearfix locais" (click)="abrirAbaLocal(local.id)">
+                            <div class="titulo link">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>UNIDADE</th>
+                                            <th>CONSULTÓRIO</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{{local.unidadeAtendimento.descricao}}</td>
+                                            <td>{{(local.guiche) ? local.guiche.descricao : ''}}</td>
+                                            <td class="coluna_acoes">
+                                                <botao icone="delete" (click)="removeItem(local.id, local.descricao, 'local')"></botao>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="fa {{idAbaAberta === local.id ? 'fa-angle-up' : 'fa-angle-down'}} seta-dropdown"></div>
+                        </div>
+                        <div class="card-body" [hidden]="idAbaAberta !== local.id">
+
+                            <moldura oculto="true" titulo="Adicionar Usuario ao local">
+                                <div class="row">
+                                    <!-- <div class="col-md-4">
+                                        <botao nome="Adicionar Usuario" (click)="trocaAddUser(local.id)"></botao>
+                                    </div> -->
+
+                                    <div class="col-md-9">
+
+                                        <div class="add_usuario">
+
+                                            <autocomplete
+                                                [titulo]="'Profissional'"
+                                                [placeholder]="'Digite para buscar um Profissional'"
+                                                [minimo]="1"
+                                                [valor]="objProfissionais"
+                                                [camposFiltro]="['nome']"
+                                                [valorSelecionado]="profissionalSelecionado"
+                                                [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                                                (fnOnSelected)="getProfissional($event)"
+                                            ></autocomplete>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <botao 
+                                            nome="Salvar Usuario" 
+                                            [botao_lateral]="true"
+                                            (click)="adicionarProfissional(local.id)"
+                                        ></botao>
+                                    </div>
+
+                                </div>
+                            </moldura>
+
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>NOME</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let usuario of local.usuarios">
+                                        <td>{{usuario.usuario.nome}}</td>
+                                        <td class="coluna_acoes">
+                                            <botao icone="delete" (click)="removeItem(usuario.id, usuario.usuario.nome, 'profissional')"></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                </moldura>
+
+            </div>
+            
+        </ng-container>
+
+    </div>
+
+</div>

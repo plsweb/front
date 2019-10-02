@@ -1,0 +1,67 @@
+/*
+BAIXA(1),
+    MEDIA(2),
+    ALTA(3),
+    MAXIMA(4),
+    EXTREMA(5);
+
+*/
+
+:host /deep/ tabela {
+
+    td.status-tabela[data-name]{
+        border-left-width: 10px;
+        border-left-style: solid;
+    }
+
+    td.status-tabela[data-name="BAIXA"] {
+        border-left-color: green;
+    }
+
+    td.status-tabela[data-name="MEDIA"] {
+        border-left-color: yellow;
+    }
+
+    td.status-tabela[data-name="ALTA"] {
+        border-left-color: red;
+    }
+
+    td.status-tabela[data-name="MAXIMA"] {
+        border-left-color: rgb(99, 8, 8);
+    }
+
+    td.status-tabela[data-name="EXTREMA"] {
+        border-left-color: black;
+    }
+
+    .table > tbody > tr > td:last-child{
+        display: table-cell !important;
+    }
+
+}
+
+:host /deep/ icone {
+
+    .text-danger{
+        font-size: 25px !important;
+    }
+
+    .text-success{
+        font-size: 25px !important;
+    }
+
+}
+
+:host /deep/ .filtro label{
+    color: black !important;
+}
+
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 10px;
+}
+
+.list li span, :host /deep/ datepicker .calendar-head {
+    color: #fff !important;
+}

@@ -1,0 +1,247 @@
+b.titulo label {
+    font-weight: 600;
+}
+
+icone {
+    font-size: 24px;
+}
+
+.popup label {
+	color: #FFF;
+}
+
+.popup .form-control {
+	background-color: rgba(0, 0, 0, 0.15);
+}
+
+.erro_mascara{
+
+    .form-control{
+        border-color: red !important;
+    }
+    
+}
+
+.popup .form-control option {
+	color: #FFF;
+	background-color: #4a4673;
+}
+
+.tamanho20 {
+	width: 20%;
+}
+
+.tamanho30 {
+	width: 30%;
+}
+
+.tamanho40 {
+	width: 40%;
+}
+
+.tamanho50 {
+	width: 50%;
+}
+
+.tamanho60 {
+	width: 60%;
+}
+
+.tamanho70 {
+	width: 70%;
+}
+
+.tamanho80 {
+	width: 80%;
+}
+
+.tamanho90 {
+	width: 90%;
+}
+
+.form-group.checkbox {
+    margin-bottom: 0;
+    height: 20px;
+}
+
+.form-group.checkbox label {
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.form-group.checkbox input {
+    cursor: pointer;
+    float: left;
+    margin: 12px 5px 5px 5px;
+    height: 13px !important;
+    position: relative;
+    width: 13px;
+}
+
+.form-group.checkbox .form-check {
+    position: absolute !important;
+}
+
+.selecao {
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.selecao .opcoes {
+    float: left;
+    margin-bottom: 5px;
+    min-height: 12px;
+    position: relative;
+    width: 100%;
+    display: -webkit-inline-flex;
+}
+
+.selecao .opcoes label {
+    cursor: pointer;
+    float: left;
+    margin: 0 0 0 25px;
+    position: relative;
+}
+
+.selecao .opcoes input {
+    cursor: pointer;
+    float: left;
+    margin: 12px 5px;
+    position: absolute;
+}
+
+.campo_hora:not(.somenteHora) {
+    padding-left: 0;
+    margin-left: -2px;
+}
+
+.campos_data {
+    padding-right: 0;
+}
+
+:host /deep/ {
+
+    app-ngx-editor {
+        text-transform: none !important;
+    }
+
+    inputAnexo .nome_arquivo {
+        top: initial !important;
+        right: initial !important;
+        left: 50px !important;
+        width: initial !important;
+    }
+
+    inputAnexo icone {
+        position: initial !important;
+        right: initial !important;
+        top: initial !important;
+    }
+
+    imageEdit icone {
+        position: initial !important;
+        right: initial !important;
+        top: initial !important;
+    }
+
+    .img-preview {
+        height: 100px !important;
+        width: 100px !important;
+        border-radius: 5px !important;
+        margin-right: 5px;
+    }
+
+    .download {
+        color: #fff !important;
+        text-decoration: underline !important;
+    }
+
+    datepicker{
+
+        .mini-calendario {
+            line-height: 1em !important;
+        }
+
+    }
+
+    .somente-visualizacao{
+
+        autocomplete{
+    
+            .form-control {
+                background: transparent;
+                outline: none;
+                cursor: default;
+                resize: none;
+                height: auto;
+                pointer-events: none;
+            }
+    
+        }
+    
+    }
+
+    .top{
+    
+        datepicker{
+
+            .datepicker.float {
+                top: -17em;
+            }
+
+        }
+
+    }
+
+}
+
+input[type="edicao"] {
+    display: none;
+}
+
+.somente-visualizacao .form-control,
+.somente-visualizacao .opcoes,
+.somente-visualizacao .selecao{
+    
+    background: transparent;
+    outline: none;
+    cursor: default;
+    resize: none;
+    height: auto;
+    pointer-events: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+    margin: 0 !important;
+
+    .opcoes.some{
+        display: none;
+    }
+
+    &::-webkit-outer-spin-button{
+        -webkit-appearance: none; 
+        margin: 0;    
+    }
+
+}
+
+.somente-visualizacao .selecao input,
+.somente-visualizacao .selecao input:not(:checked),
+.somente-visualizacao .selecao input:not(:checked) + .paragrafo,
+.somente-visualizacao .selecao input:not(:checked) + label{
+    display: none;
+}
+
+.somente-visualizacao .titulo{
+    font-weight: 800;
+}
+
+.somente-visualizacao .textarea-somente-visualizar{
+    white-space: pre-wrap;
+}
+// .somente-visualizacao .selecao .opcoes:has(input:not(:checked)){
+//     display: none;
+// }

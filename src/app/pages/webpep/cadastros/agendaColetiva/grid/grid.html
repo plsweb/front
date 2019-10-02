@@ -1,0 +1,53 @@
+<moldura
+    titulo="Agendas Coletivas"
+    [registros]="qtdItensTotal"
+    [customFiltro]="filtroFormulario"
+    [pesquisar]="pesquisar.bind(this)"
+    [filtrar]="pesquisar.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th>NOME</th>
+                        <th>ESPECIALIDADE</th>
+                    </tr>
+                    <tr *ngFor="let agenda of agendasColetiva" (click)="atualizar(agenda.id)">
+                        <td *ngIf="agenda.ativo == true" class="status verde"></td>
+                        <td *ngIf="agenda.ativo == false" class="status cinza"></td>
+                        <td>{{agenda?.nome}}</td>
+                        <td>{{agenda?.especialidade?.descricao}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaAgendaColetivaPaginado($event.paginaAtual)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</moldura>
+
+<ng-template #filtroFormulario>
+    <entrada
+        nome="Situação"
+        tipo="seleciona"
+        [valor]="' '"
+        (getValor)="situacao($event)" 
+        [opcoes]="[{id: 'true', nome: 'Ativos'}, {id: 'false', nome: 'Inativos'}, {id: ' ', nome: 'Todos'}]"
+    ></entrada>
+</ng-template>

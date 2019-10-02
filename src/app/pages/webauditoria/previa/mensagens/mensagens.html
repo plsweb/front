@@ -1,0 +1,38 @@
+<div class="row"  
+    *ngFor="let mensagem of mensagens"
+    [ngClass]="{'justify-content-start': mensagem.posicao == 'left', 'justify-content-center': mensagem.posicao == 'center', 'justify-content-end': mensagem.posicao == 'right'}"
+>
+    <div *ngIf="mensagem.posicao == 'left'" class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+        <img class="img-chat" src="{{pegaFotoImagem(mensagem)}}">
+    </div>
+    <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5 chat">
+        <div class="mensagem">
+            <span *ngIf="!eAnexo(mensagem.descricao)">{{mensagem.descricao}}</span>
+            <span *ngIf="eAnexo(mensagem.descricao)">
+                <span *ngFor="let anexo of mensagem.arquivos">
+                    <a 
+                        class="link" 
+                        download 
+                        target="_new" 
+                        href="{{serverUrl}}web/auditoria/guiaDownload/{{token}}/{{mensagem.guia.impresso}}/{{anexo}}" 
+                        title="{{anexo}}">
+                        {{getNomeAnexo(anexo)}}
+                        <icone nome="attach_file" tamanho="medio"></icone>
+                    </a>
+                </span>
+            </span>
+        </div>
+        <div class="footer" *ngIf="mensagem.nome">
+            <small>{{mensagem.nome}}, {{mensagem.data}}</small>
+        </div>
+    </div>
+    <div *ngIf="mensagem.posicao == 'right'" class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+        <img class="img-chat" src="{{pegaFotoImagem(mensagem)}}">
+    </div>
+</div>
+
+<div class="row" *ngIf="mostraBotaoVoltar">
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+    </div>
+</div>

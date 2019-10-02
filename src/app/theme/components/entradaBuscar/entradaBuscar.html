@@ -1,0 +1,80 @@
+<div class="" *ngIf="inline">
+    <div id="{{id}}" class="entradaBuscar form-group">
+        <div class="row">
+            <div class="col-sm-3 col-md-3">
+                <label *ngIf="legenda">{{placeholders[0]}}</label>
+                <input type="text" class="form-control id" placeholder="{{placeholders[0]}}" (change)="atualizaId()">
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <label *ngIf="legenda">{{placeholders[1]}}</label>
+                <input type="text" class="form-control desc" placeholder="{{placeholders[1]}}" >
+            </div>
+            <div class="col-sm-3 col-md-3 text-center">
+                <label *ngIf="legenda"></label>
+                <div class="botoes_acao">
+                    <botao icone="search" tamanho="medio" (click)="eventoClique(bodyModal)"></botao>
+                    <botao *ngIf="elementoModalAdd" icone="add" tamanho="medio" (click)="adicionarRegistro()"></botao>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="" *ngIf="!inline">
+    <div id="{{id}}" class="entradaBuscar form-group">
+        <div class="row">
+            <div class="col">
+                <label *ngIf="legenda">{{placeholders[0]}}</label>
+                <input type="text" class="form-control id" placeholder="{{placeholders[0]}}"  (change)="atualizaId()" (keyup)="pesquisaPorId($event)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label *ngIf="legenda">{{placeholders[1]}}</label>
+                <input type="text" class="form-control desc" placeholder="{{placeholders[1]}}" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">
+                <label *ngIf="legenda"></label>
+                <botao icone="search" tamanho="medio" (click)="eventoClique(bodyModal)"></botao>
+                <botao *ngIf="elementoModalAdd" icone="add" tamanho="medio" (click)="adicionarRegistro()"></botao>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #bodyModal let-c="close" let-d="dismiss">
+
+    <div class="row">
+        <entrada class="col-md-10" nome="Descrição" tema="popup" [valor]="descCalor" (getValor)="getDataSearch($event)" semTitulo="true"></entrada>
+        <botao class="col-md-1 botaoSearch" icone="search" tamanho="medio" (click)="search($event)"></botao>
+    </div>
+
+    <div class="div_table_modal">
+        <table class="table table-modal">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="coluna_add"></th>
+                    <th class="coluna_label" *ngFor="let col of params">{{ col.toUpperCase() }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let itemLista of lista" class="link" id="linha{{itemLista[params[0]]}}" (click)=clickLinha(itemLista)>
+                    <td class="coluna_add"><icone nome="add_circle" class="acao" tamanho="medio" (click)=clickLinha(itemLista)></icone></td>
+                    <td *ngFor="let col of params"> {{ itemLista[col] }} </td>
+                </tr>
+            </tbody>            
+        </table>
+    </div>
+    <div>
+        <paginacao
+            (atualizaDados)="buscaPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+        ></paginacao>
+    </div>
+    
+</ng-template>

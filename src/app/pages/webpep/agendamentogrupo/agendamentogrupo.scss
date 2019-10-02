@@ -1,0 +1,156 @@
+@import "../../../../styles";
+@import "../atendimento/grid/grid";
+
+
+.minuto {
+	min-height: 20px !important;
+}
+
+.calendar-grid.horario .col {
+	max-height: 80px !important;
+}
+
+.col.horario {
+	text-align: center;
+    line-height: 5.8;
+    font-size: 14px;
+}
+
+.minuto:not(.bloqueado):hover {
+	background-color: $roxo_claro;
+}
+
+.minuto.ativo {
+	background-color: $roxo_claro;
+}
+
+
+.calendar-grid.horario .col {
+	padding: 0px;
+}
+
+div.bloco-agendado {
+	background-color: #fcc;
+	position: absolute !important;
+}
+
+/*div.bloco-agendado:hover {
+	overflow: visible !important;
+    height: initial !important;
+    z-index: 2 !important;
+}*/
+
+
+div.bloqueado {
+	background-color: rgba(0, 0, 0, 0.2);
+    cursor: no-drop;
+}
+
+label {
+	font-size: 13px;
+}
+
+.filtrosAgenda {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.filtrosAgenda div {
+    // width: 49%;
+    // display: -webkit-inline-box;
+    padding: 0px;
+}
+
+.filtrosAgenda .elemFiltro{
+	margin: 15px 0px;
+}
+
+.elemFiltro div input {
+	display: -webkit-inline-box;
+	width: auto;
+}
+
+.agendamento {
+    margin-bottom: 0px !important;
+}
+
+.col.recorrencia-col.active {
+	background-color: $roxo_escuro;
+	color: $branco;
+}
+.col.recorrencia-col {
+    flex: 1;
+    border-right: 1px solid $roxo_escuro;
+    border-top: 1px solid $roxo_escuro;
+    border-bottom: 1px solid $roxo_escuro;
+    cursor: pointer;
+}
+.col.recorrencia-col:first-child{
+    border-left: 1px solid $roxo_escuro;
+}
+.col.recorrencia-col.active:hover {
+	color: $roxo_escuro;
+	background-color: $roxo_claro;
+}
+.col.recorrencia-col:not(.active):hover {
+	background-color: $roxo_escuro;
+	color: $roxo_claro;
+
+}
+.lista_espera,
+.log {
+    top: -27px;
+    position: relative;
+}
+.card-header.header_agenda{
+    display: inline-flex;
+}
+.card-header div.label{
+    width: 100%;
+}
+.card-header div.div_header{
+    display: -webkit-inline-box;
+    height: 20px;
+    margin-right: 20px;
+    left: 20px;
+}
+.div_header.log {
+    top: -7px;
+}
+.div_header.log button {
+    height: 35px !important;
+}
+
+.treeview {
+    min-height: 172px;
+}
+
+.grid-calendario {
+    margin-top: 0px;
+    // position: fixed;
+    display: block;
+    max-height: 87vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+icone.agendamentoGrupo{
+    margin-left: 10px !important; 
+}
+
+:host /deep/ icone.selecionado {
+    color: #006a6a;
+    i.small {
+        font-weight: bold !important;
+    }
+}
+
+@media only screen and (max-width: 1500px) {
+    
+    :host /deep/{
+        .grid-calendario{
+            max-height: 87vh !important;
+        }
+    }
+
+}

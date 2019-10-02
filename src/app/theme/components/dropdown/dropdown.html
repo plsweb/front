@@ -1,0 +1,13 @@
+<div class="componente_dropdown">
+  <label>{{title}}</label>
+  <div class="{{ (someAoClicar) ? 'form-control' : '' }} pointer {{ (relative) ? 'relative_div' : ''}}" (click)="toggle($event)">
+    <ng-content select=".selected"></ng-content>
+    <i *ngIf="someAoClicar" class="material-icons right {{ (relative) ? 'relative_icone' : ''}}">arrow_drop_down</i>
+  </div>
+
+  <div class="dropdown opcoes" [ngClass]="{'none': hidden}">
+    <div class="opt">
+      <ng-content select=".opcoes"></ng-content>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,92 @@
+<div class="animated fadeIn card">
+    <div class="card-header header_agenda">
+        <div class="row">
+            <div class="col">
+                <div class="label">
+                    Grupos
+                </div>
+            </div>
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <button 
+                    type="button" 
+                    (click)="abrir(null)"
+                    class="btn btn-primary form-control"
+                >
+                    Adicionar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+
+        <moldura
+            [pesquisarKeydown]="fnCfgGrupoRemote.bind(this)"
+            [customFiltro]="filtroGrupo"
+            [filtrar]="buscaListaGrupos.bind(this)"
+        >
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th>NOME</th>
+                        <th>TEMA</th>
+                        <th>ESPECIALIDADE</th>
+                        <th>PACIENTES</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let grupo of grupos; let pos = index" (click)="abrir(grupo)" class="link">
+                        <td [style.background]="( grupo.encerramento ) ? '#5a5a5a' : '#006b35'" ></td>
+                        <td>{{grupo.descricao}}</td>
+                        <td>{{grupo.tema.descricao}}</td>
+                        <td>{{grupo.tema.especialidade.descricao}}</td>
+                        <td>{{(grupo.qtdMaxPaciente) ? grupo.qtdMaxPaciente : '' }}</td>
+                        <td class="coluna_acoes">
+                            <botao icone="delete" (click)="removeGrupo(grupo.id, pos, $event)"></botao>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br class="all">
+
+            <div>
+                <paginacao
+                    (atualizaDados)="buscaListaGrupos($event)"
+
+                    qtdItensTotal="{{qtdItensTotal}}"
+                    paginaAtual="{{paginaAtual}}"
+                    itensPorPagina="{{itensPorPagina}}"
+                    scrollPagination="true"
+                    contaRegistro="true"
+                ></paginacao>
+
+            </div>
+        </moldura>
+
+        <br clear="all">
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 
+#############################################################################################
+                                FILTRO Formulario
+#############################################################################################
+-->
+
+<ng-template #filtroGrupo>
+    <entrada
+        nome="Situação"
+        tipo="seleciona"
+        [valor]="'false'"
+        (getValor)="situacao($event)" 
+        [opcoes]="[{id: 'false', nome: 'Ativos'}, {id: 'true', nome: 'Encerrados'}, {id: ' ', nome: 'Todos'}]"
+    ></entrada>
+</ng-template>

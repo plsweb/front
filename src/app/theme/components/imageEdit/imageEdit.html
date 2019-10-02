@@ -1,0 +1,53 @@
+<moldura>
+	<div class="row">
+		<div id="area-assinatura" class="col area-assinatura {{bDesenho ? 'desenho' : ''}}">
+			<canvas id="assinatura" width="437" height="393">
+				<p>
+					Infelizmente, seu navegador não suporta este recurso.
+				</p>
+			</canvas>
+		</div>
+		<div class="desenho-control" *ngIf="bDesenho">
+
+			<h1 *ngFor="let cor of cores">
+				<a 
+					(click)="mudaCor(cor)" 
+					class="badge badge-pill pointer" 
+					[style.background-color]="cor"
+				>
+					<span *ngIf="corAtual != cor">&nbsp;</span>
+					<span *ngIf="corAtual == cor">
+						<icone nome="check" tamanho="grande"></icone>
+					</span>
+				</a>
+			</h1>
+
+		</div>
+	</div>
+	<br>
+
+	<div class="row">
+		<div class="col">
+			<div class="row">
+				<div class="col">
+					<button class="btn btn-success" (click)="confirmar($event)">Confirmar</button>
+					<button class="btn btn-danger" (click)="limpar($event)">Limpar</button>
+
+					<span class="uploadBotao">
+						<!--inputAnexo 
+							name="chat_mensagem" 
+							(onFileUploadCompleted)="uploadArquivo.bind(this)($event)"
+							[ocultaNomeArquivo]="true"
+							[uploadIcon]="'insert_photo'"
+						></inputAnexo-->
+
+						<input type="file" name="imageEditFile" id="imageEditFile" class="imageEditFile" />
+						<label for="imageEditFile">
+							<icone class="atatch" nome="insert_photo" tamanho="grande"></icone>
+						</label>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</moldura>

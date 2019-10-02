@@ -1,0 +1,605 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!riscoId">Novo Risco</span>
+                <span *ngIf="riscoId">Editar Risco</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div *ngIf="riscoId" (click)="navegar('niveisderisco')" [ngClass]="{ativo: atual === 'niveisderisco'}">Níveis de Risco</div>
+            <div *ngIf="riscoId" (click)="navegar('perguntas')" [ngClass]="{ativo: atual === 'perguntas'}">Perguntas</div>
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <moldura 
+            *ngIf="atual === 'geral'"
+        >
+            <div class="row">
+                <div class="col-md-10 col-sm-10 col-lg-10">
+                    <entrada 
+                        nome="Nome" 
+                        [valor]="(risco.nome) ? risco.nome : ''" 
+                        (getValor)="getNome($event)" 
+                    ></entrada>
+                </div>
+
+                <div class="col-md-2 col-sm-2 col-lg-2">
+                    <label>Icone</label>
+                    <iconeSelector
+                        [(default)]='risco.icone'
+                        (setObjIconeSelector)="setObjIconeSelector($event)"
+                        [onIconChange]="trocaIcone.bind(this)"
+                    ></iconeSelector>
+                </div>
+
+                <div class="col-md-12 col-sm-12 col-lg-12">
+                    <entrada 
+                        nome="Fórmula Feminina" 
+                        [valor]="(risco.formulaFeminino) ? risco.formulaFeminino : ''" 
+                        (getValor)="getFormulaFeminino($event)" 
+                    ></entrada>
+                </div>
+
+                <div class="col-md-12 col-sm-12 col-lg-12">
+                    <entrada 
+                        nome="Fórmula Masculina" 
+                        [valor]="(risco.formulaMasculino) ? risco.formulaMasculino : ''" 
+                        (getValor)="getFormulaMasculino($event)" 
+                    ></entrada>
+                </div>
+            </div>
+            
+        </moldura>
+
+
+        <moldura
+            *ngIf="atual === 'niveisderisco'" [ngInit]="buscarNiveisRiscosSaudePaginado.bind(this)"
+        >
+            <moldura titulo="Adicionar Nível de Risco" podeOcultar="true" oculto="true">
+                <ng-template [ngTemplateOutlet]="tmplFmrNivelRisco"></ng-template>
+                <div class="row">
+                    <div class="col-md-2 col-sm-2 col-lg-2">
+                        <label>&nbsp;</label>
+                        <botao nome="Adicionar" (click)="salvarNivelRisco()"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <!--moldura 
+                titulo="&nbsp;"
+                [pesquisar]="pesquisarNiveisRiscosSaude.bind(this)"
+            -->
+            <moldura 
+                titulo="&nbsp;"
+            >
+                
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="status"></th>
+                            <th></th>
+                            <th> Nome </th>
+                            <th> Sexo </th>
+                            <th> Minimo </th>
+                            <th> Máximo </th>
+                            <th> % </th>
+                            <th> Cor </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let nivelRisco of riscosGrauSaude">
+                            <td></td>
+                            <td>
+                                <icone nome="edit" class="m-2" tamanho="grande" (click)="abrirModalEditarNivelRisco(nivelRisco)" ></icone>
+                                <icone nome="local_hospital" class="m-2" tamanho="grande" (click)="abrirModalCfgCuidadoNivelRisco(nivelRisco)" ></icone>
+                                <icone nome="cancel" class="m-2 text-danger" tamanho="grande" (click)="abrirModalExcluirNivelRisco(nivelRisco)" ></icone>
+                            </td>
+                            <td> {{nivelRisco && nivelRisco.descricao ? nivelRisco.descricao : ''}} </td>
+                            <td> {{nivelRisco && nivelRisco.sexo ? formataSexo(nivelRisco.sexo) : 'Ambos'}} </td>
+                            <td> {{nivelRisco && ''+nivelRisco.minimo ? nivelRisco.minimo : ''}} </td>
+                            <td> {{nivelRisco && ''+nivelRisco.maximo ? nivelRisco.maximo : ''}} </td>
+                            <td> {{nivelRisco && ''+nivelRisco.percentual ? nivelRisco.percentual : ''}} </td>
+                            <td>
+                                <span *ngIf="nivelRisco && nivelRisco.cor" class="badge badge-secondary" [ngStyle]="{ 'background-color': nivelRisco.cor}">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                 <br class="all">
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscarNiveisRiscosSaudePaginado($event)"
+                        qtdItensTotal="{{qtdItensTotalNiveis}}"
+                        paginaAtual="{{paginaAtualNiveis}}"
+                        itensPorPagina="{{itensPorPaginaNiveis}}"
+                    ></paginacao>
+                </div>
+
+            </moldura>
+        </moldura>
+
+
+        <moldura
+            *ngIf="atual === 'perguntas'" [ngInit]="buscarPerguntasPaginado.bind(this)"
+        >
+            <!--moldura titulo="Adicionar Pergunta" podeOcultar="true" oculto="true">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <ng-template [ngTemplateOutlet]="tmplAutoCompletePergunta"></ng-template>
+                    </div>
+                    
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <form #formPergunta>
+                            <moldura *ngIf="pergunta && (pergunta.tipo == 'RADIO' || pergunta.tipo == 'SELECAO') ">
+                            </moldura>
+                            <moldura *ngIf="pergunta && (pergunta.tipo == 'BOOLEAN') ">
+
+                            </moldura>
+                            <moldura *ngIf="pergunta && (pergunta.tipo == 'NUMERO') ">
+                                <div class="row">
+                                    <div class="col">Inicial</div>
+                                    <div class="col">Final</div>
+                                    <div class="col">Opção</div>
+                                    <div class="col">Masculino</div>
+                                    <div class="col">Feminino</div>
+                                    <div class="col"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <input type="text" name="inicial" class="form-control">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="final" class="form-control">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="opcao" class="form-control">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="masculino" class="form-control">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="feminino" class="form-control">
+                                    </div>
+                                    <div class="col">
+                                        <icone 
+                                            nome="add_circle" 
+                                            tamanho="grande" 
+                                            (click)="adicionaParametro()" 
+                                        ></icone>
+                                    </div>
+                                </div>
+                                
+                            </moldura>
+
+                            <br>
+                            <div class="row" *ngIf="pergunta && (pergunta.tipo == 'NUMERO') ">
+                                <div class="col">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Inicial</th>
+                                                <th>Final</th>
+                                                <th>Opção</th>
+                                                <th>Masculino</th>
+                                                <th>Feminino</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let pergunta of perguntasRisco; let i = index" [attr.data-index]="i">
+                                                <td>{{pergunta.inicial}}</td>
+                                                <td>{{pergunta.final}}</td>
+                                                <td>{{pergunta.opcao}}</td>
+                                                <td>{{pergunta.masculino}}</td>
+                                                <td>{{pergunta.feminino}}</td>
+                                                <td>
+                                                    <icone 
+                                                        nome="remove_circle" 
+                                                        tamanho="grande" 
+                                                        (click)="removePergunta(i, pergunta)" 
+                                                    ></icone>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <br>
+                        <div class="row">
+                            <div class="col-sm-2 col-md-2 col-lg-2">
+                                <botao nome="Adicionar" (click)="adicionarPerguntaRisco()"></botao>
+                            </div>
+                            <div class="col-sm-2 col-md-2 col-lg-2">
+                                <botao nome="Cancelar" classe="btn-info" (click)="limparNovaParametrizacao()"></botao>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </moldura-->
+
+            <div class="row">
+                <div class="col-sm-2 col-md-2 col-lg-2">
+                    <botao nome="Adicionar" (click)="adicionarCalculoRisco()"></botao>
+                </div>
+            </div>
+            <br>
+
+            <moldura 
+                titulo="&nbsp;"
+                [registros]="qtdItensTotal"
+                [pesquisar]="pesquisarNiveisRiscosSaude.bind(this)"
+            >
+                
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="min-width:100px;"></th>
+                            <th> Pergunta </th>
+                            <th> Resposta </th>
+                            <th> Sexo </th>
+                            <th> Peso </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let perguntaRisco of perguntasRisco">
+                            <td>
+                                <icone nome="edit" class="mr-2" tamanho="grande" (click)="abrirModalEditarRiscoCalculo(perguntaRisco)" ></icone>
+                                <icone nome="cancel" class="m-2 text-danger" tamanho="grande" (click)="abrirModalExcluirRiscoCalculo(perguntaRisco)" ></icone>
+                            </td>
+                            <td> {{ perguntaRisco.pergunta.descricao}} </td>
+                            <td> {{ perguntaRisco.perguntaOpcao ? perguntaRisco.perguntaOpcao.descricao : formataResposta(perguntaRisco)}} </td>
+                            <td> {{ perguntaRisco.sexo ? formataSexo(perguntaRisco.sexo) : 'Ambos' }} </td>
+                            <td> {{ perguntaRisco.peso }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                 <br class="all">
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscarPerguntasPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        paginaAtual="{{paginaAtual}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                    ></paginacao>
+                </div>
+
+            </moldura>
+        </moldura>
+
+    </div>
+
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-sm-6 botoes">
+                <div class="row">
+                    <div class="col">
+                        <botao nome="Salvar" (click)="salvarRisco()"></botao>
+                    </div>
+                    <div *ngIf="riscoId" class="col">
+                        <botao nome="Excluir" classe="btn-danger" (click)="abrirModalExcluir()"></botao>
+                    </div>
+                    <div class="col">
+                        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--    
+##################################################################################
+                        AutoComplete Pergunta
+##################################################################################     
+-->
+<ng-template #tmplAutoCompletePergunta let-c="close" let-d="dismiss">
+    <autocomplete
+        [titulo]="'Pergunta'"
+        [placeholder]="'Digite para buscar Pergunta'"
+        [minimo]="3"
+        [valor]="objPerguntas"
+        [camposFiltro]="['descricao','tipo']"
+        [valorSelecionado]="perguntaSelecionada"
+        [fnSearch]="fnCfgPerguntaRemote.bind(this)"
+        (fnOnSelected)="getPergunta($event)"
+    ></autocomplete>
+</ng-template>
+
+<!--    
+##################################################################################
+                        Remover Risco
+##################################################################################     
+-->
+<ng-template #bodyModalRemoverRisco let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>Você esta removendo o Risco "{{risco.nome}}.</p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalRemoverRisco let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluir()"></botao>
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Remover Nivel de Risco
+##################################################################################     
+-->
+<ng-template #bodyModalRemoverNivelRisco let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>Você esta removendo o Nível de Risco "{{nivelRisco.descricao}}".</p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalRemoverNivelRisco let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluirNivelRisco()"></botao>
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Remover Nivel de Risco
+##################################################################################     
+-->
+<ng-template #bodyModalcfgCuidadoNivelRisco let-c="close" let-d="dismiss">
+    <form>
+        <div class="row">
+            <div class="col-sm-5 col-md-5 col-lg-5">
+                <autocomplete
+                    [titulo]="'Cuidado'"
+                    [placeholder]="'Digite para buscar o Cuidado'"
+                    [minimo]="3"
+                    [valor]="objCuidados"
+                    [camposFiltro]="['descricao']"
+                    [valorSelecionado]="cuidadoSelecionado"
+                    [fnSearch]="fnCfgCuidadoRemote.bind(this)"
+                    (fnOnSelected)="getCuidado($event)"
+                ></autocomplete>
+            </div>
+
+            <div class="col-sm-3 col-md-3 col-lg-3">
+                <entrada
+                    nome="Frequência (dias)" 
+                    [valor]="(novoCuidadoRiscoGrau.frequencia) ? novoCuidadoRiscoGrau.frequencia : ''" 
+                    (getValor)="getNovoCuidadoRiscoGrauFrequencia($event)" 
+                ></entrada>
+            </div>
+
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <label>Repetir</label>
+                <input-checkbox 
+                    classe="check_principal"
+                    [estado]="novoCuidadoRiscoGrau.repetir" 
+                    (trocaEstado)="trocaEstadoNovoCuidadoRiscoGrauPaciente($event, pergunta)"
+                ></input-checkbox>
+            </div>
+            
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <label>&nbsp;</label>
+                <botao nome="Adicionar" (click)="salvarCfgCuidadosNivelRisco()"></botao>
+            </div>
+        </div>
+    </form>
+
+    <br>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <table class="table table-stripped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th> Cuidado </th>
+                        <th> Frêquencia </th>
+                        <th> Repetir </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cuidadoRiscoGrau of cuidadosRiscoGrau">
+                        <td> 
+                            <icone 
+                                nome="cancel" 
+                                class="text-danger" 
+                                tamanho="grande" 
+                                (click)="excluirCuidadoRiscoGrau(cuidadoRiscoGrau)" 
+                            ></icone>
+                        </td>
+                        <td> {{cuidadoRiscoGrau.cuidado ? cuidadoRiscoGrau.cuidado.descricao : ''}} </td>
+                        <td> 
+                            À cada {{cuidadoRiscoGrau.frequencia}} Dia<span *ngIf="cuidadoRiscoGrau.frequencia > 1">s</span>
+                        </td>
+                        <td>
+                            {{cuidadoRiscoGrau.repetir ? "Sim" : "Não"}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalcfgCuidadoNivelRisco let-c="close" let-d="dismiss">
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Remover Risco de Calculo
+##################################################################################     
+-->
+<ng-template #bodyModalRemoverRiscoCalculo let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>
+                Você esta removendo o Cálculo "{{riscoCalculo.pergunta.descricao}}" - "{{riscoCalculo.perguntaOpcao ? riscoCalculo.perguntaOpcao.descricao : ''}}".
+            </p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalRemoverRiscoCalculo let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluirRiscoCalculo()"></botao>
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Editar Nivel de Risco
+##################################################################################     
+-->
+<ng-template #footerModalEditarNivelRisco let-c="close" let-d="dismiss">
+    <botao nome="Salvar" (click)="salvarNivelRisco()"></botao>
+</ng-template>
+
+<!--    
+##################################################################################
+                        Frm Nivel de Risco
+##################################################################################     
+-->
+<ng-template #tmplFmrNivelRisco  let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col">
+            <entrada
+                nome="Nível de Risco" 
+                [valor]="(nivelRisco.descricao) ? nivelRisco.descricao : ''" 
+                (getValor)="getNivelRiscoDescricao($event)" 
+            ></entrada>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <entrada 
+                nome="Valor Minimo" 
+                tipo="numero"
+                [valor]="(nivelRisco.minimo || nivelRisco.minimo == 0) ? nivelRisco.minimo : ''" 
+                (getValor)="getNivelRiscoMinimo($event)" 
+            ></entrada>
+        </div>
+        <div class="col">
+            <entrada 
+                nome="Valor Máximo" 
+                tipo="numero"
+                [valor]="(nivelRisco.maximo) ? nivelRisco.maximo : ''" 
+                (getValor)="getNivelRiscoMaximo($event)" 
+            ></entrada>
+        </div>
+        <div class="col">
+            <entrada 
+                nome="Valor percentual" 
+                tipo="numero"
+                [valor]="(nivelRisco.percentual) ? nivelRisco.percentual : ''" 
+                (getValor)="getNivelRiscoPercentual($event)" 
+            ></entrada>
+        </div>
+        <div class="col">
+            <entrada 
+                nome="Sexo" 
+                tipo="seleciona" 
+                [valor]="(nivelRisco.sexo) ? nivelRisco.sexo : ''"
+                [opcoes]="sexoOpcoes"
+                (getValor)="getNivelRiscoSexo($event)" 
+            ></entrada>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8 col-md-8 col-lg-8 form-group">
+            <label>Cor</label>
+            <colorPicker
+                [(default)]='nivelRisco.cor'
+                (setObjColorPicker)="setObjColorPicker($event)"
+                [onColorChange]="trocaCor.bind(this)"
+            ></colorPicker>
+        </div>
+    </div>
+</ng-template>
+
+
+<!--    
+##################################################################################
+                        Frm Cálculo de Risco
+##################################################################################     
+-->
+<ng-template #tmplFmrCalculoRisco  let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-8 col-md-8 col-lg-8">
+            <ng-template [ngTemplateOutlet]="tmplAutoCompletePergunta"></ng-template>
+        </div>
+        <div class="col-sm-4 col-md-4 col-lg-4">
+            <entrada 
+                nome="Sexo"
+                tipo="seleciona"
+                [valor]="riscoCalculo.sexo"
+                [opcoes]="sexoOpcoes"
+                (getValor)="getSexo($event)"
+            ></entrada>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 col-md-8 col-lg-8">
+            <!--ng-template [ngTemplateOutlet]="campoValor"></ng-template-->
+            
+            <!--ng-template #campoValor-->
+                <!-- <div *ngIf="pergunta && pergunta.opcoes && pergunta.opcoes.length; else campoValorCalculoRiscoRange"> -->
+                <div *ngIf="validaCampoPergunta(pergunta); else campoValorCalculoRiscoRange"> 
+                    <entrada 
+                        *ngIf="pergunta.opcoes"
+                        nome="Valor" 
+                        tipo="seleciona" 
+                        [opcoes]="pergunta.opcoes" 
+                        [valor]="(riscoCalculo.valor) ? riscoCalculo.valor : ''" 
+                        (getValor)="getPerguntaOpcao($event)"
+                    ></entrada>
+                </div>
+
+                <ng-template #campoValorCalculoRiscoRange>
+                    <entrada 
+                        nome="Valor Inicial" 
+                        [valor]="(riscoCalculo.valorInicial && riscoCalculo.valorInicial) ? riscoCalculo.valorInicial : ''" 
+                        (getValor)="getValorInicial($event)" 
+                    ></entrada>
+
+                    <entrada 
+                        nome="Valor Final" 
+                        [valor]="(riscoCalculo.valorFinal && riscoCalculo.valorFinal) ? riscoCalculo.valorFinal : ''" 
+                        (getValor)="getValorFinal($event)" 
+                    ></entrada>
+                </ng-template>
+            <!--/ng-template-->
+        </div>
+
+        <div class="col-sm-4 col-md-4 col-lg-4">
+            <entrada 
+                nome="Peso" 
+                [valor]="(riscoCalculo.peso && riscoCalculo.peso) ? riscoCalculo.peso : ''" 
+                (getValor)="getPeso($event)" 
+            ></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalEditarCalculoRisco  let-c="close" let-d="dismiss">
+    <botao nome="Salvar" (click)="salvarCalculoRisco()"></botao>
+</ng-template>

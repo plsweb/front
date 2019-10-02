@@ -1,0 +1,60 @@
+.area-assinatura {
+    min-height: 100px;
+}
+
+canvas {
+    cursor: crosshair;
+    margin-left: 40px;
+    background-color: rgba(0,0,0,.05);
+}
+
+.area-assinatura:not(.desenho) {
+    border: thin solid;
+}
+
+.desenho-control {
+    position: absolute;
+    top: 10px;
+}
+
+.uploadBotao {
+    float: left;
+    position: absolute;
+}
+
+:host /deep/ inputAnexo icone {
+    right: initial !important;
+    top: initial !important;
+}
+
+
+:host /deep/ {
+  icone.atatch {
+    position: absolute;
+    right: 20px;
+    top: 7px;
+  }
+}
+
+.imageEditFile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.nome_arquivo{
+    position: absolute;
+    top: 12px;
+    right: 50px;
+
+    width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#mensagem {
+    padding-right: 200px;
+}

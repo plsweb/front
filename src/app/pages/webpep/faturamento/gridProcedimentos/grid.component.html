@@ -1,0 +1,28 @@
+<moldura 
+    titulo="Procedimentos" 
+    [podeOcultar]="true" 
+    [oculto]="false"
+>
+    <ng-container>
+
+        <gridAdicionarProcedimento
+            [codigo]="codigo"
+            [labelId]="labelIdAdd"
+            [service]="service"
+            (onSave)="retornoPrescricao($event)"
+        ></gridAdicionarProcedimento>
+
+    </ng-container>
+
+    <listaProcedimentos
+        [filtros]="filtroProcedimento"
+        [service]="service"
+        [codigo]="codigo"
+        [modoSelecao]="modoSelecao"
+        [labelIdAdd]="labelIdAdd"
+        [labelIdList]="labelIdList"
+        [novoProcedimento]="novosProcedimentos"
+        [paginacaoScroll]="false"
+    ></listaProcedimentos>
+
+</moldura>

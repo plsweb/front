@@ -1,0 +1,26 @@
+.grande-70{
+  font-size: 70px !important;
+}
+.grande{
+  font-size: 24px !important;
+}
+.medio{
+  font-size: 18px !important;
+}
+.pequeno-16{
+  font-size: 16px !important;
+}
+.pequeno{
+  font-size: 13px !important;
+}
+i.material-icons{
+  cursor: pointer;
+  transition: 0.5 ease-out;
+  border-radius: 50%;  
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: -moz-none;
+}
+.loading {
+    animation: fa-spin 0.5s infinite linear;
+}

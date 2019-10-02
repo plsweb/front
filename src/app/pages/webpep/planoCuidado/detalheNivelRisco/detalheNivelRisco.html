@@ -1,0 +1,160 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!riscoId">Novo Nivel de Risco</span>
+                <span *ngIf="riscoId">Editar Nivel Risco</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <!--div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div *ngIf="riscoId" (click)="navegar('listaespera')" [ngClass]="{ativo: atual === 'listaespera'}">Lista de Espera</div>
+        </div-->
+    </div>
+    <div class="card-body">
+        
+        <moldura>
+            <div class="row">
+                <div class="col">
+                    <entrada 
+                        [ngClass]="'col-sm-4'" 
+                        nome="Nome" 
+                        [valor]="(risco.nome) ? risco.nome : ''" 
+                    ></entrada>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label>Cor</label>
+                    <colorPicker
+                        [(default)]='risco.cor'
+                        [onColorChange]="trocaCor.bind(this)"
+                    ></colorPicker>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <entrada 
+                        [ngClass]="'col-sm-4'" 
+                        nome="Peso" 
+                        [valor]="(risco.peso) ? risco.peso : ''" 
+                    ></entrada>
+                </div>
+            </div>
+
+            
+        </moldura>
+
+    </div>
+
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-sm-6 botoes">
+                <div class="row">
+                    <div class="col">
+                        <botao nome="Salvar" (click)="salvar()"></botao>
+                    </div>
+                    <div *ngIf="riscoId" class="col">
+                        <botao nome="Excluir" classe="btn-info" (click)="excluir()"></botao>
+                    </div>
+                    <div class="col">
+                        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #bodyModalAdicionarAoGrupo let-c="close" let-d="dismiss">
+
+    <p>Selecione um grupo para adicionaro beneficiário</p>
+
+    <div class="col-sm-12 col-md-12">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="col-checkbox"></th>
+                    <th>Nome</th>
+                    <th class="col-numero">Vagas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let grupo of gruposDisponiveis">
+                    <tr>
+                        <td>
+                            <input type="radio" name="grupo" [value]="grupo.id"  [(ngModel)]="grupoSelecionado">
+                        </td>
+                        <td>{{grupo.descricao}}</td>
+                        <td>{{grupo.vagasDisponiveis}}</td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                    </tr>
+                    <tr *ngIf="grupoSelecionado == grupo.id">
+                        <td colspan="3" class="no_padding">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <td *ngFor="let diaDaSemana of grupo.recorrencias">
+                                            {{momentjs().weekday(diaDaSemana.diaDaSemana).format(formatosDeDatas.diaDaSemana)}}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td *ngFor="let diaDaSemana of grupo.recorrencias">{{diaDaSemana.horaInicio}}</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesAdicionarAoGrupo let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="adicionarAoGrupo()"></botao>
+</ng-template>
+
+
+
+<ng-template #bodyModalRemoverDalistaDeEspera let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>
+                Você esta removendo o Beneficiário "{{pacienteSelecionado.paciente.nome}} - {{pacienteSelecionado.paciente.codigo}}"" da lista de espera.
+            </p>
+            <p>Por favor informe o motivo dessa exclusão</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            
+            <textarea
+                name="Motivo" 
+                class="form-control" 
+                placeholder="Motivo"
+                [(ngModel)]="observacao"
+            ></textarea>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesModalRemoverDalistaDeEspera let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="removerdaLista()"></botao>
+</ng-template>
+

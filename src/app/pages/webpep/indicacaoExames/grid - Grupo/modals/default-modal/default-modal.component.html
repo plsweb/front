@@ -1,0 +1,24 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">{{modalHeader}}</h4>
+    </div>
+    <div class="modal-body" id="modalBody">
+        <form>
+            <entrada nome="Beneficiário" tema="popup" valor="{{atendimento.paciente.nome}}" bloqueado="true"></entrada>
+            <entrada nome="Prestador"    tema="popup" valor="{{atendimento.prestador.nome}}"    bloqueado="true"></entrada>
+            <entrada nome="Local"        tema="popup" tipo="seleciona" (getValor)="getLocal($event)" [opcoes]="locais"></entrada>
+            <entrada nome="Data/Hora"    tema="popup" tipo="datahora"  (getValor)="getDataHora($event)"></entrada>
+            <entrada nome="Oberservação" tema="popup" valor="{{atendimento.observacao}}" tipo="area" bloqueado="true"></entrada>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-sucess confirm-btn btn-primary" (click)="salvar()">Salvar</button>
+        <button class="btn btn-default confirm-btn btn-raised" (click)="voltar()">Fechar</button>
+    </div>
+</div>
+<style type="text/css">
+    .popup .form-control,
+    .form-control {
+        text-transform: uppercase;
+    }
+</style>

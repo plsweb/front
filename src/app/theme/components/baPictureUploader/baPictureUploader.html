@@ -1,0 +1,48 @@
+<div class="picture-group" [ngClass]="{uploading: uploadInProgress}">
+
+  <div class="camera-wrapper" *ngIf="cameroOn">
+    <video id="bgvid" autoplay width="200" height="200"></video>
+  </div>
+  
+  <div class="picture-wrapper" (click)="bringFileSelector();" *ngIf="!cameroOn">
+    <img [src]="picture" *ngIf="picture">
+    <img [src]="defaultPicture" *ngIf="!!!picture && !!defaultPicture">
+
+    <div class="loading" *ngIf="uploadInProgress">
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+    </div>
+  </div>
+  
+  <i class="ion-ios-close-outline" (click)="removePicture();" *ngIf="picture && canDelete"></i>
+  
+  <a *ngIf="ableTakePhoto && !cameroOn" href class="change-picture take-photo" (click)="bringTakePhotoSelector();">
+    Tirar foto
+  </a>
+  
+  <a href class="change-picture" (click)="bringFileSelector();" *ngIf="!cameroOn">
+    Alterar foto
+  </a>
+
+  <div href class="camera-actions-container" *ngIf="cameroOn">
+    <div class="row no_margin">
+      <div class="col">
+        
+        <i class="material-icons display-block" (click)="takeAPhoto();">camera_alt</i>
+        
+      </div>
+      <div class="col">
+        
+        <i class="material-icons display-block" (click)="cancelAPhoto();">cancel</i>
+        
+      </div>
+    </div>
+  </div>
+  
+  <input #fileUpload ngFileSelect [options]="uploaderOptions"
+    (onUpload)="_onUpload($event)"
+    (beforeUpload)="beforeUpload($event)"
+    type="file" hidden="true">
+</div>

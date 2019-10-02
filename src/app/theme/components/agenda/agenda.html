@@ -1,0 +1,504 @@
+<ng-template #agendaHeader>
+    <div class="calendar-header static-bar fixed-bar-header" style="min-height:63px;">
+        <div class="col container-fluid">
+            <icone
+                #botao_anterior
+                tamanho="grande"
+                nome="keyboard_arrow_left"
+                [ngClass]="'pointer'"
+                (click)="clicaAlterarPeriodo('subtract')"
+            ></icone>
+
+            <icone
+                #botao_posterior
+                tamanho="grande"
+                nome="keyboard_arrow_right"
+                [ngClass]="'pointer'"
+                (click)="clicaAlterarPeriodo('add')"
+            ></icone>
+
+            <label class="mesAtualVisao">{{headerMesesSelecionados()}}</label>
+
+            <icone
+                #botao_anterior
+                tamanho="grande"
+                nome="zoom_out"
+                [ngClass]="'pointer'"
+                (click)="clicaZoom(zoomStep * -1)"
+            ></icone>
+
+            <icone
+                #botao_posterior
+                tamanho="grande"
+                nome="zoom_in"
+                [ngClass]="'pointer'"
+                (click)="clicaZoom(zoomStep)"
+            ></icone>
+
+            <icone
+                #botao_posterior
+                tamanho="grande"
+                nome="cached"
+                [loading]="loading"
+                [ngClass]="'pointer'"
+                (click)="rebuild(false)"
+            ></icone>
+        </div>
+
+        <div class="col text-right container-fluid">
+            <ul class="list-inline visaoCalendario">
+                <li class="list-inline-item visao">
+                    <icone
+                        #botao_anterior 
+                        *ngIf="true"
+                        nome="block"
+                        tamanho="small"
+                        title="{{!!agendaAcoes ? 'Visualizar Desmarcados' : 'Visualizar Encerrados'}}"
+                        [ngClass]="{'selecionado': verDesmarcados}"
+                        (click)="visualizaDesmarcados($event)"
+                    ></icone>
+                </li>
+
+                <li class="list-inline-item visao"
+                    [ngClass]="{'selecionado': calendarioOpt.visao == 'day'}"
+                    (click)="trocaTipoCalendario('day')"
+                >Dia</li>
+
+                <li class="list-inline-item visao"
+                    [ngClass]="{'selecionado': calendarioOpt.visao == 'week'}"
+                    (click)="trocaTipoCalendario('week')"
+                >Semana</li>
+
+                <!-- <li class="list-inline-item visao"
+                    [ngClass]="{'selecionado': calendarioOpt.visao == 'month'}"
+                    (click)="trocaTipoCalendario('month')"
+                >Mês</li> -->
+
+                <li class="list-inline-item visao"
+                    [ngClass]="{'selecionado': calendarioOpt.visao == 'list'}"
+                    (click)="trocaTipoCalendario('list')"
+                >Lista</li>
+            </ul>
+            <ng-template [ngTemplateOutlet]="elementoAcoes"></ng-template>
+        </div>
+    </div>
+</ng-template>
+
+<div *ngIf="calendarioOpt.visao == 'day' || calendarioOpt.visao == 'week'">
+    <div
+        style="position:relative;"
+        class="grid-content visao-dia" 
+        (resize)="aaa($event)"
+        (mouseover)="agendaMouseOver($event)" 
+        (mousemove)="agendaMouseMove($event)" 
+        (mouseup)="agendaMouseUp($event)"
+    >
+        <div id="aaaa"></div>
+        <div id="ocultar" class="fixed fixed-bar"></div>
+
+        <div class="fixed fixed-bar" [ngStyle]="{'width': getWidthFixedHeader(), 'left': getLeftFixedHeader() }">
+            <ng-template [ngTemplateOutlet]="agendaHeader" [ngTemplateOutletContext]="contextObject"></ng-template>
+            <div>
+                <div class="calendar-grid calendar-head static-bar fixed-bar-dias">
+                    <div class="col horario"></div>
+
+                    <div class="col" *ngFor="let data of datas; let index = index; trackBy: trackByFn">
+                        <p *ngIf="calendarioOpt.visao == 'week'">
+                            <span 
+                                [attr.data-first]="(index == 0) ? 'first' : ''" 
+                                [attr.data-last]="(index == (datas.length-1)) ? 'last' : ''"
+                            >{{momentjs(data).date()}}</span>
+                            {{momentjs(data).format(formatosDeDatas.diaDaSemanaCompleto).replace('-feira','')}}
+                        </p>
+                    </div>
+                </div>
+                <nouislider [(ngModel)]="horas || someKeyboard2" [tooltips]="true" (ngModelChange)="debounce.next($event)"></nouislider>
+            </div>
+        </div>
+
+        <div class="horarios">
+            <div 
+                class="calendar-grid horario" 
+                *ngFor="let horario of horarios; trackBy: trackByFn"
+                [ngStyle]="{ 'height': ((60 * zoom) + 'px') }"
+            >
+                <div id='{{horario}}' class="col horario unselectable">
+                    {{horario}}
+                </div>
+
+                <div 
+                    id="{{horario}}{{momentjs(data).format(formatosDeDatas.htmlDataFormato)}}" 
+                    *ngFor="let data of datas; trackBy: trackByFn" 
+                    class="col cel-horario unselectable" 
+                    droppable="true"
+
+                    (mousedown)="horarioMouseDown($event, data)" 
+
+                    (drop)="drop($event, data)"
+                    (dragenter)="dragenter($event, data)"
+                    (dragleave)="dragleave($event, data)"
+                    (dragover)="dragover($event, data)"
+                >
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ################################################################################ -->
+        <!--                            Bloco                                                 -->
+        <!-- ################################################################################ -->
+        <div 
+            class="parent-bloco" 
+            *ngFor="let blocoCfg of blocosCfg; trackBy: trackByFn" 
+            [attr.data-recorrencia]="blocoCfg?.dado?.recorrencia"
+            [attr.data-identificador]="blocoCfg?.dado?.dataInicio"
+        >
+            <div 
+                id="{{blocoCfg.bloco.id}}"
+                draggable="false"
+                class="bloco bloco-cfg unselectable {{blocoCfg.class}} {{blocoCfg.draggable}}"
+                title="{{(blocoCfg.dado && blocoCfg.dado.atendimentoTipo) ? blocoCfg.dado.atendimentoTipo.descricao : ''}}"
+                [ngClass]="{'bloco-draggable': blocoCfg.draggable, 'BLOQUEADO': blocoCfg.bloqueado}"
+
+                [ngStyle]="{ 'width': blocoCfg?.style?.width, 'height': blocoCfg?.style?.height, 'background-color': blocoCfg?.style?.bgColor, 'top': blocoCfg?.style?.top, 'left': blocoCfg?.style?.left }"
+
+
+                (mousedown)="configuracaoMouseDown($event, blocoCfg, false)"
+
+                (mousemove)="configuracaoMouseMove($event, blocoCfg, false)"
+
+                (mouseleave)="configuracaoMouseLeave($event, blocoCfg)"
+
+                (drop)="agendaDrop($event, blocoCfg)"
+                (dragenter)="dragenter($event, blocoCfg)"
+                (dragleave)="dragleave($event, blocoCfg)"
+                (dragover)="dragover($event, blocoCfg)"
+
+                (contextmenu)="abreContextMenuBloco($event, blocoCfg, true)"
+            >
+                {{blocoCfg.dado.horaInicio}} - {{blocoCfg.dado.horaFim}}
+            </div>
+
+            <ul class="list-group menu-context" (mouseleave)="escondeContextMenu()">
+                <ng-container *ngFor="let acao of blocosAcoes">
+                    <li 
+                        class="list-group-item" 
+                        *ngIf="contextmenuValida(acao, blocoCfg)"
+                    >
+                        <span (click)="contextmenuClickBloco(acao, blocoCfg)"> 
+                            {{acao.nome}}
+
+                            {{acao.fn ? 'aaaa' : 'bbbb'}}
+                        </span>
+                    </li>
+                </ng-container>
+            </ul>
+
+            <div
+                class="acoes"
+                [ngStyle]="{ 'top': blocoCfg?.style?.top, 'left': blocoCfg?.style?.left }"
+            >
+
+                <div class="move"
+                    draggable="true"
+                    (dragstart)="onDragStart($event, blocoCfg)"
+                    *ngIf="!blocoCfg.bloqueado && mostraMover"
+                >
+                    <icone 
+                        nome="zoom_out_map"
+                        tamanho="grande"
+                        [ngClass]="'move'"
+                    ></icone>
+                </div>
+                <div class="edit"
+                    *ngIf="!blocoCfg.bloqueado && mostraEditar"
+                >
+                    <icone 
+                        nome="mode_edit"
+                        tamanho="grande"
+                        (click)="clicaBloco($event, blocoCfg, false)"
+                    ></icone>
+                </div>
+                <div class="edit"
+                    *ngIf="!blocoCfg.bloqueado && mostraDeletar"
+                >
+                    <icone 
+                        nome="delete"
+                        tamanho="grande"
+                        (click)="removeBloco($event, blocoCfg, false)"
+                    ></icone>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ################################################################################ -->
+    <!--                            Agenda                                                -->
+    <!-- ################################################################################ -->
+    <div class="agendamentos" style="position: relative;" [style.top.px]="getHeightHorarios()">
+        <div
+            class="agenda-bloco" 
+            *ngFor="let agenda of agendas; let pos = index; trackBy: trackByFn" 
+            (contextmenu)="abreContextMenu($event, agenda, true)"
+        >
+
+            <ng-container *ngIf="eAgrupado(agenda, pos)">
+                <div
+                    id="{{agenda.objAgendados[0].id}}"
+                    class="agenda unselectable"
+                    [ngStyle]="{ 
+                        'width': agenda.objAgendados[0]?.style?.width, 
+                        'height': agenda.objAgendados[0]?.style?.height, 
+                        'background': agenda.objAgendados[0]?.style?.bgColor,
+                        'top': agenda.objAgendados[0]?.style?.top, 
+                        'left': agenda.objAgendados[0]?.style?.left 
+                    }"
+
+                    title="{{formatTitleGrouped(agenda.objAgendados)}}"
+                    (click)="detalhaAgendaColetiva(agenda)"
+                >
+                
+                    <p>{{formatTitleGrouped(agenda.objAgendados)}}</p>
+                </div>
+
+            </ng-container>
+
+            <ng-container *ngIf="!eAgrupado(agenda, pos)">
+
+                <ul class="list-group menu-context" (mouseleave)="escondeContextMenu()">
+                    <ng-container *ngFor="let acao of agendaAcoes">
+                        <li 
+                            class="list-group-item" 
+                            (click)="contextmenuClick(acao, agenda)"
+                            *ngIf="contextmenuValida(acao, agenda)"
+                        >
+                            {{acao.nome}}
+                        </li>
+                    </ng-container>
+                </ul>
+                
+                <div
+                    *ngIf="agenda?.style?.width"
+                    id="{{agenda.id}}"
+                    class="agenda unselectable {{agenda.status}} blocos_popover"
+                    [ngClass]="{'agenda-draggable': agenda.draggable, 'agenda-encaixe': agenda.encaixe}"
+                    data-animation="false"
+
+                    (contextmenu)="abreContextMenu($event, agenda)"
+                    (mouseover)="abrePopover($event, agenda.id, agenda)"
+                    (mouseleave)="somePopover()"
+                    (click)="clicaAgenda($event, agenda, false)"
+
+                    [ngStyle]="{ 'width': agenda?.style?.width, 'height': agenda?.style?.height, 'background-color': agenda?.style?.bgColor, 'top': agenda?.style?.top, 'left': agenda?.style?.left }"
+
+                    title="{{formatTitle(agenda)}}"
+                >
+                    <div class="elemento_bloco_agenda">
+                        <p class="nome_paciente">{{formatTitle(agenda)}}</p>
+                    </div>
+
+                    <div 
+                        *ngIf="mostraIconeCheck(agenda)" 
+                        class="elemento_bloco_agenda"
+                    >
+                        <i class="material-icons icone_check {{validaIconeCheck(agenda)}}" title="{{validaTitleCheck(agenda)}}">{{validaIconeCheck(agenda)}}</i>
+                    </div>
+                </div>
+
+                <div 
+                    class="acoes"
+                    [ngStyle]="{ 'top': agenda?.style?.top, 'left': agenda?.style?.left }"
+                >
+                    
+                    <div class="move"
+                        draggable="true" 
+                        (dragstart)="onAgendaDragStart($event, agenda)"
+                        *ngIf="habilitaMoverAgenda"
+                    >
+                        <icone 
+                            nome="zoom_out_map" 
+                            tamanho="grande" 
+                            [ngClass]="'move'" 
+                        ></icone>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+
+<div class="grid-content visao-mes" *ngIf="calendarioOpt.visao == 'month'">
+    <ng-template [ngTemplateOutlet]="agendaHeader" [ngTemplateOutletContext]="contextObject"></ng-template>
+    <div class="calendar-grid calendar-head">
+        <div class="col" *ngFor="let data of datas;trackBy: trackByFn">
+            {{momentjs(data).format(formatosDeDatas.diaDaSemanaCompleto)}}
+        </div>
+    </div>
+    <div class="calendar-grid" *ngFor="let semana of dias;trackBy: trackByFn">
+        <div *ngFor="let dia of semana;trackBy: trackByFn" id="{{dia.id}}" class="col dia" [ngClass]="{'old': dataForaDoMes(dia.data, null)}">
+            {{dia.data.getDate()}}
+
+            <div id="{{dia.id}}" *ngFor="let atendimento of buscarAtendimento(dia.data);trackBy: trackByFn">
+                <div class="agendamento atendimento {{atendimento.status}} " *ngIf="atendimento.agrupado && mostraAtendimento(atendimento.status); else atendimentosBloco"
+                    (click)="miniDiaMouseDown($event, dia, true)" [title]="descricao(atendimento.status)">
+                    <icone [nome]="icone(atendimento.status)" [tamanho]="'pequeno'"></icone>
+                    <span> </span>
+                    <div class='text-overflow'>{{atendimento.quantidade}} Atendimentos</div>
+                </div>
+
+                <ng-template #atendimentosBloco>
+                    <div
+                        class="agendamento atendimento {{atendimento.status}}"
+                        *ngIf="mostraAtendimento(atendimento.status);"
+                        [title]="descricao(atendimento.status)"
+                        (click)="abrir(atendimento.id)"
+                        draggable="false"
+                    >
+                        <icone [nome]="icone(atendimento.status)" [tamanho]="'pequeno'"></icone>
+                        <span>
+                            {{getHora(atendimento.agendamento, atendimento.chegada)}}
+                        </span>
+                        <div class='text-overflow'>{{atendimento.paciente ? atendimento.paciente.nome : atendimento.nome}}</div>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="calendarioOpt.visao == 'list'">
+    <div
+        style="position:relative;"
+        class="grid-content visao-list" 
+        (resize)="aaa($event)"
+        (mouseover)="agendaMouseOver($event)" 
+        (mousemove)="agendaMouseMove($event)" 
+        (mouseup)="agendaMouseUp($event)"
+    >
+        <div id="aaaa"></div>
+        <div id="ocultar" class="fixed fixed-bar"></div>
+
+        <div class="fixed fixed-bar" [ngStyle]="{'width': getWidthFixedHeader(), 'left': getLeftFixedHeader() }">
+            <ng-template [ngTemplateOutlet]="agendaHeader" [ngTemplateOutletContext]="contextObject"></ng-template>
+
+            <div>
+                <div class="calendar-grid calendar-head static-bar fixed-bar-dias">
+                    <div class="col horario"></div>
+                </div>
+
+                <nouislider [(ngModel)]="horas || someKeyboard2" [tooltips]="true" (ngModelChange)="debounce.next($event)"></nouislider>
+            </div>
+        </div>
+
+
+        <div class="horarios">
+            <div *ngFor="let horario of horarios; trackBy: trackByFn">
+                <div id="{{horario}}{{momentjs(datas[0]).format(formatosDeDatas.htmlDataFormato)}}"></div>
+            </div>
+
+            <ul class="list-unstyled">
+                <li
+                    *ngFor="let agenda of agendas; let pos = index; trackBy: trackByFn"
+                    (contextmenu)="abreContextMenu($event, agenda, true)"
+                    style="margin-bottom: 10px"
+                    class="media my-3"
+                >
+                    <span class="mr-3" [title]="agenda?.tipo?.descricao">
+                        {{momentjs(agenda?.agendamento, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.horaFormato)}}
+                        -
+                        {{momentjs(agenda?.agendamentoFim, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.horaFormato)}}
+
+                        <p *ngIf="agenda?.encaixe" class="m-1">
+                            <icone nome="extension" tamanho="medio"></icone>
+                        </p>
+                    </span>
+
+                    <div class="media-body lista {{agenda?.status}}" (click)="clicaAgenda($event, agenda, false)">
+                        <p>{{agenda?.paciente?.nome | uppercase}} - {{agenda?.paciente?.idade}}</p>
+                        <small>{{agenda?.prestador?.nome | titlecase}}</small>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<ng-template 
+    #consultaColetivaModal 
+    let-c="close" 
+    let-d="dismiss"
+>
+
+    <ng-template 
+        [ngTemplateOutlet]="progressBarColetiva"
+        [ngTemplateOutletContext]="{
+            total: totalCapacidade,
+            quantidadeOcupada: quantidadeOcupada
+        }"
+    ></ng-template>
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th class="status"></th>
+                <th>CARTEIRINHA</th>
+                <th>PACIENTE</th>
+                <th>TIPO</th>
+                <th>INICIO</th>
+                <th>FIM</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <ng-container *ngFor="let agenda of agendasColetivas">
+                <ul class="list-group menu-context {{agenda.id}}" (mouseleave)="escondeContextMenu()">
+                    <ng-container *ngFor="let acao of agendaAcoes">
+                        <li 
+                            class="list-group-item" 
+                            (click)="contextmenuClick(acao, agenda)"
+                            *ngIf="contextmenuValida(acao, agenda)"
+                        >
+                            {{acao.nome}}
+                        </li>
+                    </ng-container>
+                </ul>
+
+                <tr title="STATUS: {{agenda.status}}" (contextmenu)="abreContextMenuColetivo($event, agenda)">
+                    <td 
+                        class="{{agenda.status}}" 
+                        [style.width.px]="10"
+                        [style.padding.px]="1"
+                        [style.margin.px]="0"
+                    ></td>
+                    <td>{{agenda?.pacientePlano?.codigo || 'Sem plano selecionado' }}</td>
+                    <td>{{agenda?.paciente?.nome || agenda?.nome}}</td>
+                    <td>{{agenda?.tipo?.descricao}}</td>
+                    <td>{{agenda.agendamento}}</td>
+                    <td>{{agenda.agendamentoFim}}</td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</ng-template>
+
+<ng-template #consultaColetivaModalBotoes let-c="close" let-d="dismiss">
+    <botao nome="Agendar Novo" (click)="novoAtendimentoColetivo()"></botao>
+</ng-template>
+
+<ng-template 
+    #progressBarColetiva
+    let-total="total"
+    let-quantidadeOcupada="quantidadeOcupada"
+>
+    <progressBar 
+        *ngIf="total"
+        labelTitle="Ocupado"
+        [maior]="total"
+        [menor]="quantidadeOcupada"
+        [classe]="{
+            'bg-danger' :  (((quantidadeOcupada || 0) / (total) ) * 100) > 66,
+            'bg-warning':  ((((quantidadeOcupada || 0) / (total) ) * 100) <= 66) && (((quantidadeOcupada || 0) / (total)) * 100 > 33),
+            'bg-success':  (((quantidadeOcupada || 0) / (total) ) * 100) <= 33
+        }"
+    ></progressBar>
+</ng-template>

@@ -1,0 +1,20 @@
+@import '../../sass/conf/conf';
+
+.submenu{
+    padding-left: 25px;
+}
+
+/* NO MEU ELEMENTO UL.AL-SIDEBAR-LIST SIDEBAR */
+.al-sidebar-list {
+    padding-top: 29px !important;
+}
+
+/* NO MEU ELEMENTO 'A' */
+a.al-sidebar-list-link {
+    min-height: min-content;
+    line-height: 20px !important;
+}
+
+.menuItem a span {
+    white-space: normal;
+}

@@ -1,0 +1,48 @@
+ul {
+	padding: 0;
+}
+
+ul li {
+	list-style-type:none; 
+}
+
+li ul {
+	padding: 0 0 10px 30px;
+}
+
+.legenda {
+	white-space: nowrap;
+    display: inline;
+    cursor: pointer;
+}
+
+.filho {
+	display: block;
+    white-space: nowrap;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+:host /deep/ icone i {
+	font-size: initial !important;
+}
+
+.card {
+	width: 200px;
+	overflow: hidden;
+}
+
+.card-body {
+	overflow-x: auto;
+}
+
+hr {
+	color: white;
+}
+
+li.filho {
+}
+
+.inline {
+	display: flex;
+}

@@ -1,0 +1,55 @@
+<moldura titulo="Nova Classificação de guia">
+    
+
+    <div class="row">
+
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <entrada 
+                [valor]="guiaClassificacao ? guiaClassificacao.descricao : ''" 
+                [nome]="'Descrição'"
+                (getValor)="getValor($event, 'descricao')"
+            ></entrada>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <entrada 
+                [valor]="guiaClassificacao ? guiaClassificacao.ordem : ''" 
+                [nome]="'Ordem'"
+                tipo="numero"
+                (getValor)="getValor($event, 'ordem')"
+            ></entrada>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <div class="row">
+                <div class="col">
+                    <botao nome="Salvar" (click)="salvarCuidadoTipo()"></botao>
+                </div>
+                <div *ngIf="guiaClassificacaoId" class="col">
+                    <botao nome="Excluir" classe="btn-danger" (click)="abrirModalExcluir()"></botao>
+                </div>
+                <div class="col">
+                    <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                </div>
+            </div>
+        </div>
+    </div>
+</moldura>
+
+<!--    
+##################################################################################
+                        Remover CuidadoTipo
+##################################################################################     
+-->
+<ng-template #bodyModalRemoverClassificacao let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>Você esta removendo a Classificação "{{guiaClassificacao.descricao}}".</p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalRemoverClassificacao let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluir()"></botao>
+</ng-template>

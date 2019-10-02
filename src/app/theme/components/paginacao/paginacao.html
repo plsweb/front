@@ -1,0 +1,53 @@
+<div class="sub_div_card div_paginacao" *ngIf="!scrollPagination">
+    <div class="botoes_paginacao">
+        <ul class="pagination pagination-sm">
+            <li class="page-item" (click)="eventoClique($event, -1)">
+                <a class="page-link">
+                    <i class="material-icons chevron_left">chevron_left</i>
+                </a>
+            </li>
+            <li class="page-item" (click)="eventoClique($event, 1)">
+                <a class="page-link">
+                    <i class="material-icons chevron_right">chevron_right</i>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="legendas_paginacao">
+        <div class="legenda-pagina-atual">
+            <span>{{(paginaAtual - 1) * itensPorPagina + 1}}</span>
+            -
+            <span>{{ ultimoRegistro }}</span> 
+            de 
+            <span>{{ qtdItensTotal }}</span>
+
+            <!-- TODO -->
+            <!-- COMENTEI POIS ESTAVA APARECENDO EM TODAS AS PAGINAÇÕES SEM SCROLL, 
+                  E O LOAD NAO PARAVA DE CARREGAR. VALIDAR COM GEAN  -->
+            <!-- <ng-container *ngTemplateOutlet="carregando"></ng-container> -->
+        </div>
+    </div>
+</div>
+
+<div class="legendas_paginacao" *ngIf="contaRegistro && scrollPagination">
+    <div class="legenda-pagina-atual">
+        <span>{{ultimoRegistro}} - {{qtdItensTotal}} Registros</span>
+
+        <ng-container *ngTemplateOutlet="carregando"></ng-container>
+    </div>
+</div>
+
+<div *ngIf="!contaRegistro && scrollPagination">
+    <ng-container *ngTemplateOutlet="carregando"></ng-container>
+</div>
+
+<ng-template #carregando>
+    <div *ngIf="paginaAtual != paginaRequest" class="ml-2 d-inline">
+        <icone 
+            tamanho="medio" 
+            nome="cached" 
+            [loading]="true" 
+        ></icone><span class="smal">Carregando dados...</span>
+    </div>
+</ng-template>

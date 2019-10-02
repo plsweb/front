@@ -1,0 +1,28 @@
+<!-- <button 
+	type="button" 
+	title="Cor do texto" 
+	[popover]="insertColorPicker" 
+></button> -->
+
+<div class="centro">
+	<span
+        id="{{id}}"
+        class="bloco-cor badge badge-secondary"
+		[ngStyle]="{ 'background-color': corSelecionada || '#ffffff'}"
+		[popover]="insertColorPicker"
+		placement="{{direcao}}"
+	>
+	</span>
+</div>
+
+<ng-template #insertColorPicker>
+	<div class="colors">
+		<div 
+			*ngFor="let color of colors" 
+			class="color" 
+			[ngClass]="{ 'cor_selecionada' : (corSelecionada == color) }" 
+			(click)="trocaCor($event, color)"
+			[style.background]="color"
+		></div>
+	</div>
+</ng-template>

@@ -1,0 +1,79 @@
+/*
+BAIXA(1),
+    MEDIA(2),
+    ALTA(3),
+    MAXIMA(4),
+    EXTREMA(5);
+
+*/
+
+:host /deep/ tabela {
+
+    td.status-tabela[data-name]{
+        border-left-width: 10px;
+        border-left-style: solid;
+    }
+
+    td.status-tabela[data-name="BAIXA"] {
+        border-left-color: green;
+    }
+
+    td.status-tabela[data-name="MEDIA"] {
+        border-left-color: yellow;
+    }
+
+    td.status-tabela[data-name="ALTA"] {
+        border-left-color: red;
+    }
+
+    td.status-tabela[data-name="MAXIMA"] {
+        border-left-color: rgb(99, 8, 8);
+    }
+
+    td.status-tabela[data-name="EXTREMA"] {
+        border-left-color: black;
+    }
+
+}
+
+:host /deep/ icone {
+
+    .text-danger{
+        font-size: 25px !important;
+    }
+
+    .text-success{
+        font-size: 25px !important;
+    }
+
+}
+
+:host /deep/ tabela {
+
+    .table > tbody > tr > td:last-child{
+        display: table-cell !important;
+    }
+
+}
+
+.col-md-4.botao-centro {
+    margin: 0 auto;
+}
+
+:host /deep/ {
+
+    entrada{
+
+        &.entrada.qnts {
+            width: 100px;
+            display: -webkit-inline-box;
+        }
+
+    }
+
+}
+
+:host /deep/ .edit botao button {
+    padding: 0 !important;
+    width: 19px !important;
+}

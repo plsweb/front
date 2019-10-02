@@ -1,0 +1,101 @@
+<moldura 
+    titulo="Tipo de Consulta" 
+    [registros]="qtdItensTotal" 
+    [pesquisar]="pesquisar.bind(this)"
+    [customFiltro]="customFiltroAtendimentoTipos"
+    [customAcoes]="customFiltroAcoesAtendimentoTipo"
+    [filtrar]="filtrarAtendimentoTipos.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="status"></th>
+                        <th>DESCRIÇÃO</th>
+                        <th>DURAÇÃO</th>
+                        <th>OBRIGA TELEFONE</th>
+                    </tr>
+                    <tr *ngFor="let tipo of tiposConsulta" (click)="atualizar(tipo.id)">
+                        <td class="status {{( tipo.ativo ) ? 'verde' : 'cinza'}}"></td>
+                        <td>{{tipo.descricao}}</td>
+                        <td>{{tipo.tempo}} minutos</td>
+                        <td>{{tipo.obrigaTelefone ? 'SIM' : 'NÃO'}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaTiposConsultaPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>
+
+
+<!-- 
+#############################################################################################
+                                CUSTOM FILTRO AtendimentoTipo
+#############################################################################################
+-->
+
+<ng-template #customFiltroAtendimentoTipos>
+
+        <form class="filtro">
+
+            <div class="row">                
+                <div class="col-md-6">
+                    <entrada 
+                        nome="Unidade de Atendimento" 
+                        [opcoes]="unidadesAtendimento"
+                        [mostraOpcaoEmBranco]="true"
+                        tipo="seleciona"
+                        [valor]="(objFiltroAtendimentoTipos && objFiltroAtendimentoTipos['idUnidadeAtendimento']) ? objFiltroAtendimentoTipos['idUnidadeAtendimento'] : '0'"
+                        (getValor)="($event && $event.valor) ? objFiltroAtendimentoTipos['idUnidadeAtendimento'] = $event.valor : objFiltroAtendimentoTipos['idUnidadeAtendimento'] = undefined " 
+                    ></entrada>
+                </div>
+
+                <div class="col-sm-6 col-md-6" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="check_filtro">Mostrar Inativos?</label>
+                        <input-checkbox 
+                            classe="check_filtro"
+                            [estado]="false"
+                            (trocaEstado)="setFiltroInativos($event)"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+        </form>
+        
+</ng-template>
+
+
+<ng-template #customFiltroAcoesAtendimentoTipo>
+    <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+        <botao 
+            nome="Limpar" 
+            classe="btn-default"
+            debounceClick 
+            [debounceTime]="200"
+            (debounceClick)="limparFiltros()" 
+        ></botao>
+    </div>
+</ng-template>

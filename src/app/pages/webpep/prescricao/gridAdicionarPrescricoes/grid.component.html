@@ -1,0 +1,76 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="row container-fluid checkbox">
+            <div class="col text-truncate" title="Crônico">
+                <label>Crônico</label>
+                <input-checkbox 
+                    [estado]="usoContinuo"
+                    (trocaEstado)="usoContinuo = $event"
+                ></input-checkbox>
+            </div>
+
+            <div class="col text-truncate" title="Obriga Ordem">
+                <label>Ob. Ordem</label>
+                <input-checkbox 
+                    [estado]="obrigaOrdem"
+                    (trocaEstado)="obrigaOrdem = $event"
+                ></input-checkbox>
+            </div>
+
+            <div class="col text-truncate" title="Transcrição">
+                <label>Transcrição</label>
+                <input-checkbox 
+                    [estado]="transcricao"
+                    (trocaEstado)="transcricao = $event"
+                ></input-checkbox>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <entrada 
+            tipo="seleciona"
+            nome="Local da Prescrição *"
+            objId="id"
+            [opcoes]="unidadesAtendimento" 
+            (getValor)="$event && $event.valor ? unidadeSelecionada = $event.valor : unidadeSelecionada = undefined"
+        ></entrada>
+    </div>
+        
+    <ng-container *ngIf="transcricao">
+        <div class="col-md-3">
+            <autocomplete
+                [titulo]="'Profissional *'"
+                [placeholder]="'Digite para buscar um Profissional'"
+                [minimo]="3"
+                [valor]="objProfissionalPrescricao"
+                [camposFiltro]="['nome']"
+                [valorSelecionado]="profissionalPrescricaoSelecionado"
+                [fnSearch]="fnCfgprofissionalPrescricaoRemote.bind(this)"
+                (fnOnSelected)="getProfissionalPrescricao($event)"
+            ></autocomplete>
+        </div>
+
+        <div
+            (dragenter)="uploadContainer=true"
+            (dragover)="uploadContainer=false"
+            class="col-md-2 text-truncate"
+            title="Anexo prescrição *"
+        >
+            <label>Anexo prescrição *</label>
+            <uploader
+                [style]="'icone'"
+                [(container)]="uploadContainer"
+                classe="input-file"
+                [mostraNomeArquivo]="true"
+                [upload]="false"
+                (uploadInsert)="anexaArquivo($event)"
+                (uploadPost)="enviarAnexo($event);container=false;"
+            ></uploader>
+        </div>
+    </ng-container>
+
+    <div class="col-sm-2">
+        <botao nome="Nova Prescrição" [botao_lateral]="true" (click)="novaPrescricao()"></botao>
+    </div>
+</div>

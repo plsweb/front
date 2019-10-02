@@ -1,0 +1,32 @@
+<form (ngSubmit)="submit()" class="auth-main">
+  <div class="auth-block" *ngIf="!recuperarSenha">
+    <h1>Login</h1>
+    <entrada nome="Usuário" icone="person" tamanho="grande" (getValor)="getUsuario($event)"></entrada>
+    <entrada nome="Senha" tipo="senha" icone="vpn_key" tamanho="grande" (getValor)="getSenha($event)"></entrada>
+    <mensagem texto="{{mensagem}}"></mensagem>
+    <div class="form-group row">
+      <div class="offset-sm-1 col-sm-10">
+        <botao nome="Entrar" submit="true" [desabilitado]="!formularioValido"></botao>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="offset-sm-1 col-sm-10">
+        <linque texto="Esqueceu sua senha?" (click)="esqueceuSenha()"></linque>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-block" *ngIf="recuperarSenha">
+    <h1>Recuperar senha</h1>
+    <entrada nome="Codigo" mascara="999 999" icone="https" tamanho="grande" (getValor)="getCodigo($event)"></entrada>
+    <entrada nome="Nova senha" tipo="senha" icone="vpn_key" tamanho="grande" (getValor)="getNovaSenha($event)"></entrada>
+    <entrada nome="Confirme a nova senha" tipo="senha" icone="vpn_key" tamanho="grande" (getValor)="getReNovaSenha($event)"></entrada>
+    <mensagem texto="{{mensagem}}"></mensagem>
+    <div class="form-group row">
+      <div class="offset-sm-1 col-sm-10">
+        <botao nome="Entrar" [desabilitado]="!formularioValido" (click)="alterarSenha()"></botao>
+      </div>
+    </div>
+  </div>
+</form>
+<rodape></rodape>

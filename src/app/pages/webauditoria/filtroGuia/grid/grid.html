@@ -1,0 +1,90 @@
+<moldura
+    titulo="Filtro de Guia Por Procedimento" 
+    [registros]="qtdItensTotal" 
+    [pesquisarKeydown]="pesquisar.bind(this)"
+    [registros]="qtdItensTotal" 
+    [customFiltro]="customFiltroGuias"
+    [filtrar]="filtrarGuias.bind(this)"
+>
+    <ng-container *ngIf="guias.length">
+        <div class="row">
+            <div class="col">
+                <span>TOTAL AUDITADO: {{qtdAudit}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <span>TOTAL REALIZADO: {{qtdReal}}</span>
+            </div>
+        </div>
+    </ng-container>
+
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>GUIA</th>
+                        <th>PROCEDIMENTO</th>
+                        <th>AUDITORIA</th>
+                        <th>REALIZADO</th>
+                        <th>DATA</th>
+                    </tr>
+                    <tr *ngFor="let guia of guias" (click)="abrir(guia)" class="link">
+                        <td>{{guia.id}}</td>
+                        <td>{{guia.procedimento ? (guia.procedimento.codigo + ' - ' + guia.procedimento.descricao) : ''}}</td>
+                        <td>{{guia.auditoria ? 'SIM' : 'NÃO'}}</td>
+                        <td>{{guia.realizado ? 'SIM' : 'NÃO'}}</td>
+                        <td>{{guia.data}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="filtroGuiaPorProcedimento($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>
+
+
+<!-- 
+#############################################################################################
+                                CUSTOM FILTRO GUIAS
+#############################################################################################
+-->
+
+<ng-template #customFiltroGuias>
+
+    <form class="filtro">
+
+        <div class="row">                
+            <div class="col-md-12">
+                <entrada 
+                    nome="Unidade de Atendimento" 
+                    [opcoes]="unidadesAtendimento"
+                    [mostraOpcaoEmBranco]="true"
+                    tipo="seleciona"
+                    [valor]="(objFiltroGuias && objFiltroGuias['idUnidadeAtendimento']) ? objFiltroGuias['idUnidadeAtendimento'] : '0'"
+                    (getValor)="($event && $event.valor) ? objFiltroGuias['idUnidadeAtendimento'] = $event.valor : objFiltroGuias['idUnidadeAtendimento'] = undefined " 
+                ></entrada>
+            </div>
+
+        </div>
+
+    </form>
+        
+</ng-template>

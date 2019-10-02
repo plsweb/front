@@ -1,0 +1,293 @@
+@import "../../../../../styles";
+
+.PENDENTE { background: $statusAtendimento_Pendente; }
+.SALADEESPERA { background: $statusAtendimento_SalaDeEspera; }
+.PREATENDIMENTO { background: $statusAtendimento_PreAtendimento; }
+.EMATENDIMENTO { background: $statusAtendimento_emAtendimento; }
+.ATENDIDO { background: $statusAtendimento_atendido; }
+.DESMARCADO { background: $statusAtendimento_desmarcado; }
+.FALTA { background: $statusAtendimento_faltou; }
+
+.agendado { background: rgba(121, 120, 125, 0.5); }
+.aguardando { background: $statusAtendimento_SalaDeEspera; }
+.realizado { background: #006a6a; }
+
+.atendimento {
+    border-radius: 5px;
+    margin-bottom: 5px;
+    overflow: hidden;
+    padding: 25px 10px 10px 10px;
+    position: relative;
+}
+
+.dia {
+    width: 14.285714286%;
+    max-width: 14.285714286% !important;
+}
+
+.atendimento > icone {
+    left: 5px;
+    padding-right: 5px;
+    position: absolute;
+    top: 5px;
+}
+
+:host /deep/{
+
+    .icone icone{
+        position: relative !important;
+        float: right;
+
+        i{
+            font-size: 25px !important;
+        }
+
+        &:hover{
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        
+
+    }
+
+    icone .carregarAtendimento {
+        margin-left: 15px;
+    }
+
+}
+
+.atendimento span {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+/*  
+    ===============================================
+                        LEGENDA
+    ===============================================
+*/
+
+ul.legenda {
+    list-style: none;
+    padding: 0;
+    position: relative;
+    width: 100%;
+}
+i.circle{
+    border-radius: 10%;
+    border: 1x solid grey;
+    padding: 2px;
+    margin: 0 5px 0 0;
+}
+
+
+/*  ===============================================
+                CALENDARIO
+    =============================================== */
+
+.calendar-header {
+    background-color: $roxo_escuro;
+    padding: 5px;
+}
+
+.calendar-grid, .calendar-header {
+    display: flex;
+}
+
+.calendar-grid.horario .col{
+    min-height: 30px;
+    padding: 8px 5px 5px;
+}
+
+.calendar-head .col {
+    padding: 10px;
+    background-color: $roxo_escuro;
+}
+
+.calendar-grid .col {
+    flex: 1;
+    border-right: 1px solid $roxo_escuro;
+    border-bottom: 1px solid $roxo_escuro;
+}
+
+.visao-customizada .col {
+    flex: 1;
+}
+.visao-customizada .horario {
+    flex: 0 0 50px;
+}
+
+.calendar-grid .col:first-child{
+    border-left: 1px solid $roxo_escuro;
+}
+
+.col.old {
+    color: $roxo_escuro;
+}
+
+.col.dia {
+    min-height: 100px;
+}
+
+.agendamento {
+    margin-bottom: 5px;
+    border-radius: 5px;
+    color: $branco;
+    cursor: pointer;
+}
+
+.calendar-header label.mesAtualVisao {
+    font-size: 20px;
+    top: 4px;
+    left: 7px;
+    position: relative;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.agendamento[draggable="true"]:hover {
+    color: $font_hover;
+    cursor: move;
+}
+
+[data-drop-target] {
+    float: left;
+}
+
+
+/*  ===============================================
+                ATENDIMENTOS AGRUPADOS
+    =============================================== */
+.atendimentos-agrupado {
+    border: thin $branco solid;
+    color: $branco;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+.old .atendimentos-agrupado {
+    color: $roxo_escuro;
+    border: thin $roxo_escuro solid;
+}
+
+
+/*  ===============================================
+                MINI CALENDARIO
+    =============================================== */
+.mini-calendario {
+    margin: 0 0 20px 0;
+}
+
+.mini-calendario .col.dia {
+    padding: 8px 5px;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+.mini-calendario .col.old {
+    background-color: initial;
+    color: $font_roxo_desabilitado;
+}
+
+
+.mini-calendario-container {
+    margin-left: -20px;
+    width: 16em !important;
+    max-height: 87vh !important;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    // flex: 0 0 180px;
+    // margin-right: 10px;
+    // margin-left: -20px;
+    // margin-top: 0px;
+    // position: fixed;
+    // width: 16em !important;
+    // display: block;
+    // max-height: 87vh !important;
+    // overflow-y: scroll;
+    // overflow-x: hidden;
+}
+
+// @media only screen and (max-height: 600px) {
+//     .mini-calendario-container {
+//         max-height: 530px !important;
+//     }
+// }
+
+// @media only screen and (min-height: 601px) and (max-height: 1024px){
+//     .mini-calendario-container {
+//         max-height: 665px !important;
+//     }
+// }
+
+// @media only screen and (min-height: 1024px){
+//     .mini-calendario-container {
+//         max-height: 820px !important;
+//     }
+// }
+
+.mini-calendario-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.mini-calendario-container::-webkit-scrollbar-thumb {
+    background: #505057;
+}
+
+.grid-calendario{
+    flex: 8; 
+    margin-left: 20px !important;
+}
+
+.mini-calendario .col.dia {
+    height: 30px;
+    min-height: 30px;
+}
+
+.mini-calendario .col.dia.ativo {
+    background-color: $roxo_claro;
+}
+
+.mesVisaoMiniCalendario{
+    top: 3px;
+    position: relative;
+    text-transform: capitalize;
+}
+
+/*  ===============================================
+                Selecao Mini Calendario
+    =============================================== */
+.unselectable {
+    user-select: none; 
+    -o-user-select: none; 
+    -moz-user-select: none; 
+    -khtml-user-select: none; 
+    -webkit-user-select: none; 
+}
+
+
+.menu-context {
+    position: fixed;
+    z-index: 9;
+    top: 280px;
+    left: 400px;
+    color: #000;
+    display: none;
+}
+
+.chegada{
+    float: right;
+    display: -webkit-box;
+}
+
+:host /deep/ treeview .card{
+    overflow-y: scroll;
+    max-height: 400px;
+}
+
+.responsavel_coletiva{
+    display: block;
+    margin-top: 10px;
+}

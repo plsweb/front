@@ -1,0 +1,98 @@
+<moldura 
+    [titulo]="edita ? 'Editar Item' : 'Adicionar Novo'" 
+    [podeOcultar]="!edita" 
+    [oculto]="!edita"
+>
+    <div class="row">
+        <div class="col-md-12">
+            <autocomplete
+                titulo="Procedimento" 
+                [placeholder]="'Procedimento'" 
+                [minimo]="3"
+                [requerido]="true"
+                [valor]="objProcedimentos"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="objProcedimento['procedimento']?.descricao" 
+                [fnSearch]="fnCfgProcedimentoRemote.bind(this)"
+                (fnOnSelected)="fnSetProcedimento($event, objProcedimento)"
+            ></autocomplete>
+        </div>
+
+        <div 
+            *ngIf="operadoras"
+            class="col-md-3"
+        >
+            <entrada
+                nome="Operadora"
+                tipo="seleciona"
+                [requerido]="true"
+                [opcoes]="operadoras"
+                [valor]="objProcedimento['operadora']?.id"
+                (getValor)="$event && $event.valor ? objProcedimento['operadora'] = { id : $event.valor } : objProcedimento['operadora'] = undefined"
+            ></entrada>
+        </div>
+
+        <ng-container *ngIf="labelId == 'tipo'">
+
+            <div class="col-md-3">
+                <entrada
+                    nome="Unidade de Atendimento"
+                    tipo="seleciona"
+                    [requerido]="true"
+                    [opcoes]="unidadesAtendimento"
+                    [valor]="objProcedimento['unidadeAtendimento']?.id || unidadeSelecionada"
+                    (getValor)="$event && $event.valor ? unidadeSelecionada = $event.valor : unidadeSelecionada = undefined"
+                ></entrada>
+            </div>
+
+            <div class="col-md-3">
+                <entrada 
+                    nome="Quantidade *"
+                    class="entrada qnts"
+                    tipo="numero"
+                    [valor]="objProcedimento['quantidade']"
+                    (getValor)="$event && $event.valor ? objProcedimento['quantidade'] = $event.valor : objProcedimento['quantidade'] = undefined"
+                ></entrada>
+            </div>
+
+        </ng-container>
+
+        <ng-container *ngIf="labelId == 'produto'">
+    
+            <div class="col-md-2">
+                <entrada 
+                    nome="Fracionamento"
+                    class="entrada qnts"
+                    expressaoRegular="^(\-)?[\d]+((\.)?[\d]+)?$"
+                    [valor]="objProcedimento?.fracaoTuss"
+                    (getValor)="$event && $event.valor ? objProcedimento['fracaoTuss'] = $event.valor : objProcedimento['fracaoTuss'] = undefined"
+                ></entrada>
+            </div>
+
+            <div class="col" style="margin-bottom: 25px;">
+                <div class="form-group">
+                    <label class="label_check">Arredonda? <i style="font-size: 15px;" class="material-icons">arrow_upward</i> </label>
+                    <input-checkbox 
+                        classe="check_principal"
+                        [estado]="objProcedimento?.arredondamento"
+                        (trocaEstado)="objProcedimento['arredondamento'] = $event"
+                    ></input-checkbox>
+                </div>
+            </div>
+
+        </ng-container>
+        
+    </div>
+
+    <div class="row">
+        <div 
+            *ngIf="!edita"
+            class="col-md-2"
+        >
+            <botao 
+                nome="Adicionar" 
+                (click)="salvarProcedimento(objProcedimento, true)"
+            ></botao>
+        </div>
+    </div>
+</moldura>

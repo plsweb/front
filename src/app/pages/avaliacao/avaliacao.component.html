@@ -1,0 +1,22 @@
+<div class="card-header clearfix">
+    <moldura titulo="{{paciente.nome}} - {{formularios[0].titulo}}" *ngIf="id && paciente && !mensagem">
+        <paciente-formulario
+            [id]="id"
+            [pacienteId]="paciente?.id"
+            [atendimento]="atendimento?.id"
+            [idFormulario]="formularios?.id"
+            [botaoSalvarFormulario]="true"
+            [bloqueiaRequisicoes]="false"
+            [semBotoes]="true"
+            [respostasCabecalho]="respostasCabecalho"
+            (salvaFormulario)="salvaFormulario($event)"
+        ></paciente-formulario>
+    </moldura>
+
+    <moldura *ngIf="mensagem">
+        <h2>Formulario Salvo</h2>
+        <h4>A Unimed Uberaba agradece por sua resposta.</h4>
+    </moldura>
+</div>
+
+<rodape></rodape>

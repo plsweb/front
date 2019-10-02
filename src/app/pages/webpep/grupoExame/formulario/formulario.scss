@@ -1,0 +1,76 @@
+botao {
+    cursor: pointer;
+    float: left;
+    margin: 0 5px;
+    position: relative;
+}
+
+entrada.entrada {
+	position: relative;
+	float: left;
+}
+
+input#Qnt,
+input#Código,
+entrada.entrada input.form-control {
+	height: 38px;
+}
+
+entrada.entrada.tamanho10 {
+	width: 10%;
+}
+
+entrada.entrada.tamanho20 {
+	width: 20%;
+}
+
+entrada.entrada.tamanho30 {
+	width: 30%;
+}
+
+entrada.entrada.tamanho40 {
+	width: 40%;
+}
+
+entrada.entrada.tamanho50 {
+	width: 50%;
+}
+
+entrada.entrada.tamanho56 {
+	width: 56%;
+}
+
+entrada.entrada.tamanho60 {
+	width: 60%;
+}
+
+entrada.entrada.tamanho70 {
+	width: 70%;
+}
+
+entrada.entrada.tamanho80 {
+	width: 80%;
+}
+
+entrada.entrada.tamanho90 {
+	width: 90%;
+}
+
+icone,
+icone i.material-icons,
+.card-header,
+i.material-icons,
+.material-icons {
+	cursor: pointer !important;
+}
+
+span {
+	cursor: pointer;
+	overflow: hidden;
+	text-align: center;
+	width: 50px;
+}
+
+.botaoSearch{
+	margin-top: 25px;
+}

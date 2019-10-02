@@ -1,0 +1,21 @@
+.status{
+    width: 5px !important;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.moldura-filtro {
+	width: 500px;
+}
+
+table.tabela_borda tbody tr {
+    border-top: 1px solid  white;
+}
+
+table.tabela_borda thead tr th {
+    border: none;
+}
+
+.cursorDefault {
+    cursor: default !important; 
+}

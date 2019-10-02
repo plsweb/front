@@ -1,0 +1,22 @@
+<label class="control control--checkbox" *ngIf="!circular">
+	<input 
+		type="checkbox" 
+		checked="{{estado ? 'checked' : null}}" 
+		[disabled]="disabled ? true : false"
+		(change)="trocaEstadoCheckbox()"
+	/> {{legenda}}
+    <div class="checkbox_flag {{classe}}"></div>
+</label>
+
+<label class="radio-inline custom-radio nowrap" *ngIf="circular">
+	
+	<input 
+		type="radio" 
+		name="{{ grupo ? grupo : 'inlineRadioOptions'}}" 
+		[disabled]="disabled ? true : false"
+		[checked]="estado" 
+		(change)="trocaEstadoRadio()"
+		id="{{ id ? id : 'inlineRadioUnico' }}"
+	/>
+	<span>{{legenda}}</span>
+</label>

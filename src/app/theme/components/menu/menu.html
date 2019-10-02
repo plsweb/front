@@ -1,0 +1,50 @@
+<ul id="al-sidebar-list" class="al-sidebar-list sidebar" baSlimScroll [baSlimScrollOptions]="{height: menuHeight}">
+    <li 
+        *ngFor="let item of itens" 
+        [title]="item.titulo" 
+        class="al-sidebar-list-item menuItem" 
+        >
+        <!-- [ngClass]="{'selected': ( pagina && menuAtual(item.uri) )}" -->
+        <a 
+            *ngIf="!item.item" 
+            class="al-sidebar-list-link" 
+            routerLink="/{{item.uri}}" 
+            (click)="selecionado($event, item)"
+        >
+            <icone [nome]="item.icone" [tamanho]="'pequeno'"></icone><span>{{item.titulo}}</span>
+        </a>
+
+        <a 
+            *ngIf="item.item" 
+            class="al-sidebar-list-link" 
+            (click)="selecionado($event, item)"
+        >
+            <icone [nome]="item.icone" [tamanho]="'pequeno'"></icone><span>{{item.titulo}}</span>
+            <b class="fa fa-angle-down" [ngClass]="{'fa-angle-up': item.expanded, 'fa-angle-down': !item.expanded}"></b>
+        </a>
+        
+        <ul 
+            *ngIf="item.item && !isMenuCollapsed" 
+            class="submenu" 
+            [ngClass]="{'al-sidebar-sublist': !item.expanded}"
+        >
+            <li 
+                *ngFor="let subitem of item.item" 
+                [title]="item.titulo" 
+                class="al-sidebar-list-item" 
+                >
+                <a 
+                    class="al-sidebar-list-link" 
+                    routerLink="/{{subitem.uri}}" 
+                    (click)="selecionado($event, item)"
+                >
+                    <!--icone 
+                        [nome]="subitem.icone" 
+                        [tamanho]="'pequeno'"
+                    ></icone-->
+                    <span>{{subitem.titulo}}</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>

@@ -1,0 +1,83 @@
+table.table.table-striped {
+    display: block;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: auto
+}
+
+.table .campos_indicador{
+    min-width: 310px !important;
+}
+
+td.first{
+    padding: 0px !important;
+}
+
+td.campos_indicador {
+    padding: 0px !important;
+}
+
+.table .indicador_unico
+{
+    width: 100% !important;
+}
+
+.cabecalho_sessao{
+    background: #575287;
+    line-height: 1.5;
+    font-size: 16px;
+}
+
+:host /deep/ .first entrada{
+    .form-control{
+        width: 107px;
+    }
+}
+
+:host /deep/ .campos_indicador entrada{
+    
+    select, input{
+        height: 45px !important;
+        vertical-align: middle;
+        width: 310px !important;
+    }
+
+    textarea{
+        padding: 4px;
+        height: auto !important;
+        width: 400px !important;
+    }
+
+    .form-group{
+        margin-bottom: 0px !important;
+    }
+
+    .selecao {
+        margin-left: 15px !important;
+
+        .opcoes input {
+            height: auto !important;
+            width: auto !important;
+            top: 10px;
+        }
+    }
+} 
+
+:host /deep/ .indicador_unico entrada{
+    
+    select, input, textarea,
+    .selecao .opcoes
+    {
+        width: 410px !important;
+    }
+} 
+
+:host /deep/ {
+
+    botao {
+        .botao_print{
+            width: -webkit-fill-available;
+        }
+    }
+
+}

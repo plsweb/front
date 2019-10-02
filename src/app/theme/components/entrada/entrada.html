@@ -1,0 +1,348 @@
+<div 
+    class="{{classeDiv}} {{classe}} {{tema}} {{ readonly ? 'somente-visualizacao' : '' }} ordem{{ ordemReplace }}" 
+    [attr.data-identificador]="identificador" 
+    title="{{nome}}"
+
+>
+<!-- Erro no formulario evolução (pergunta com texto muito longo){{ (type != 'datepicker' && type != 'edicao') ? 'text-truncate' : ''}} -->
+    <b class="{{type == 'titulo' ? 'titulo' : ''}}">
+        <label 
+            *ngIf="!icone && semTitulo === false" 
+            for="{{id}}"
+            class="titulo"
+        >
+            {{nome}} <span *ngIf="requerido">*</span>
+        </label>
+    </b>
+
+    <div class="row" *ngIf="type == 'upload'">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-right-zero" >
+            <!--input id="chatMsg" name="chatMsg" class="form-control" placeholder="Arquivo para " [(ngModel)]="chatMsg"-->
+            <inputAnexo 
+                name="chat_mensagem" 
+                [arquivo]="arquivo" 
+                [nomeArquivo]="nomeArquivo" 
+                [ocultaCampoArquivo]="true"
+                (onFileUploadCompleted)="uploadArquivo.bind(this)($event)"
+            ></inputAnexo>
+        </div>
+        
+        <div id="preview" class="preview" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-right-zero"></div>
+        <!--div class="col" *ngFor="let preview of previews">
+            ============================
+            {{preview.nomeArquivo}}
+            ============================
+        </div-->
+    </div>
+
+    <div *ngIf="type == 'estrela'">
+        <div class="rating">
+            <ngb-rating
+                [(rate)]="valor"
+                [starTemplate]=""
+                [readonly]="readonly"
+                [max]="maximo"
+                (leave)="hovered=0"
+                (hover)="hovered=$event"
+                (rateChange)="onRateChange($event)"
+            ></ngb-rating>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="type == 'desenho'">
+        <div 
+            class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-right-zero" 
+        >
+            <imageEdit
+                [bDesenho]="true"
+                [onConfirma]="salvaDesenho.bind(this)"
+                (setInstancia)="getInstancia($event)"
+            >
+            </imageEdit>
+        </div>
+    </div>
+
+    <span *ngIf="icone"
+        class="input-group-addon input-group-addon-primary addon-left" 
+    >
+        <icone [nome]="icone" [tamanho]="tamanho"></icone>
+    </span>
+    
+    <input *ngIf="type !== 'checkbox' && type !== 'radio' && type !== 'select' && type !== 'area' && type !== 'selecao' && type !== 'datepicker' && type !== 'funcao' && type !== 'number' && type !== 'tabela' && type !== 'multiselect' && type !== 'titulo' && type !== 'boolean' && type !== 'upload' && type !== 'desenho' && type !== 'estrela'" 
+        id="{{id}}"
+        #input
+        class="form-control {{temaEntrada}} {{range ? 'range-pai' : ''}} {{(type == 'edicao') ? 'hidden' : ''}}" 
+        [type]="type" 
+        [placeholder]="nome" 
+        [autocomplete]="completar" 
+        [(ngModel)]="valor" 
+        [maxlength]="tamanhoMaximo" 
+        [disabled]="bloqueado" 
+        [readonly]="readonly"
+        [required]="requerido" 
+        (click)="click(input)"
+        (blur)="onChange($event)"
+    >
+
+    <input *ngIf="range && type !== 'checkbox' && type !== 'radio' && type !== 'select' && type !== 'area' && type !== 'selecao' && type !== 'datepicker' && type !== 'funcao' && type !== 'number' && type !== 'tabela' && type !== 'multiselect' && type !== 'titulo' && type !== 'boolean' && type !== 'upload' && type !== 'desenho' && type !== 'estrela'" 
+        id="{{id}}range"
+        class="form-control {{temaEntrada}} range" 
+        [type]="type" 
+        [placeholder]="nome" 
+        [autocomplete]="completar" 
+        [(ngModel)]="valorRange" 
+        [maxlength]="tamanhoMaximo" 
+        [disabled]="bloqueado" 
+        [required]="requerido" 
+
+        (blur)="onChangeRange($event)"
+    >
+    
+    <input *ngIf="type == 'number'" 
+        id="{{id}}"
+        class="form-control {{temaEntrada}}" 
+        [type]="type" 
+        [placeholder]="nome" 
+        [(ngModel)]="valor" 
+        [disabled]="bloqueado" 
+        [required]="requerido" 
+        [max]="maximo" 
+        [min]="minimo" 
+
+        (blur)="onChange($event)"
+    >
+
+    <div *ngIf="type === 'select'">
+        <ng-container *ngIf="readonly; else selectOpcoes">
+            <p class="form-control">{{valor}}</p>
+        </ng-container>
+
+        <ng-template #selectOpcoes>
+            <select
+                id="{{id}}"
+                class="form-control input-sm {{temaEntrada}}" 
+                [(ngModel)]="valor" 
+                [disabled]="bloqueado" 
+                [required]="requerido" 
+                (change)="onChange($event)"
+            >
+                <option value="0" *ngIf="!(valor && valor != '0' && !mostraOpcaoEmBranco)">
+                    <span *ngIf="!opcaoZeroLabel">Selecione {{nome}}</span>
+                    <span *ngIf="opcaoZeroLabel">{{opcaoZeroLabel}}</span>
+                </option>
+                <option 
+                    *ngFor="let opcao of opcoes; let iOpcao = index " 
+                    value="{{ (opcao[objId] || opcao[objId] == 0 ) ? opcao[objId] : ( ( opcao.id || opcao.id == 0 ) ? opcao.id : ( opcao.guid ) ) }}"
+                >
+                    {{formataDescricaoOpcao(opcao, iOpcao)}}
+                </option>
+            </select>
+        </ng-template>
+    </div>
+
+    <select *ngIf="type == 'boolean'"
+        id="{{id}}"
+        class="{{valor}} form-control input-sm {{temaEntrada}}" 
+        [(ngModel)]="valor" 
+        [disabled]="bloqueado" 
+        [required]="requerido" 
+
+        (change)="onChange($event)"
+    >
+        <option *ngIf="mostraOpcaoEmBranco" [value]="undefined">Selecione {{nome}}</option>
+        <option
+            *ngFor="let opcao of opcoes" 
+            value="{{ (opcao[objId]) ? opcao[objId] : ( ( opcao.id ) ? opcao.id : ( opcao.guid ) ) }}"
+        >
+            {{ ( opcao[attrDsc] ) ? opcao[attrDsc] : ( ( opcao.nome ) ? opcao.nome : opcao.descricao ) }}
+        </option>
+    </select>
+
+    <div *ngIf="type === 'radio'">
+        <ng-template  *ngIf="readonly; else radioOpcoes">
+            <p class="form-control">{{valor}}</p>
+        </ng-template>
+
+        <ng-container #radioOpcoes *ngFor="let opcao of opcoes">
+            <div class="opc">
+                <input
+                    type="radio"
+                    id="{{opcao.id}}"
+                    value="{{opcao.id}}"
+                    name="{{nome}}"
+                    [disabled]="bloqueado"
+                    (change)="onChange($event)"
+                    [(ngModel)]="valor" 
+                />
+                <label class="ml-2" for="{{opcao.id}}">
+                    {{opcao.descricao}}
+                </label>
+            </div>
+        </ng-container>
+    </div>
+
+    <ng-container *ngIf="type === 'area'">
+
+        <ng-container *ngIf="!readonly">
+            <textarea 
+                id="{{id}}"
+                class="form-control {{temaEntrada}}" 
+                [placeholder]="nome" 
+                [(ngModel)]="valor" 
+                [maxlength]="tamanhoMaximo"
+                [disabled]="bloqueado" 
+                [required]="requerido" 
+                rows="{{qtdRows}}" 
+                cols="{{qtdCols}}" 
+                (blur)="onChange($event)"
+            ></textarea>
+        </ng-container>
+
+        <ng-container *ngIf="readonly">
+            <p class="form-control textarea-somente-visualizar">{{valor}}</p>
+        </ng-container>
+
+    </ng-container>
+
+    <div *ngIf="type === 'selecao'" class="selecao">
+        <ng-container *ngIf="readonly; else selecaoOpcoes">
+            <p class="form-control">{{valor}}</p>
+        </ng-container>
+
+        <ng-template #selecaoOpcoes>
+            <ng-container *ngFor="let opcao of opcoes">
+                <div class="opcoes">
+                    <input 
+                        id="{{opcao.id || opcao.guid}}" 
+                        class="{{opcao.id || opcao.guid}}"
+                        type="checkbox" 
+                        value="{{opcao.id || opcao.guid}}" 
+                        [disabled]="bloqueado" 
+                        (change)="getCheckbox($event)"
+                    />
+                    <label for="{{opcao.id || opcao.guid}}">
+                        {{opcao.nome || opcao.descricao}}
+                    </label>
+                </div>
+                <div class="paragrafo"></div>
+            </ng-container>
+        </ng-template>
+    </div>
+
+    <div *ngIf="type == 'checkbox'">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="{{valor}}" id="{{id}}">
+            <label class="form-check-label" for="{{id}}">{{nome}}</label>
+        </div>
+    </div>
+
+    <div *ngIf="type === 'datepicker'" class="datepicker datepicker_escuro {{classe}}">
+        <div class="row">
+            <div class="campos_data {{ hora ? ( classeData || 'col-md-7') : 'col' }}" *ngIf="mostraData">
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='semData'
+                    [disabled]='bloqueado'
+                    [fnOnChange]="setDataValor.bind(this)"
+                    (setInstancia)="getDatepickerInstancia($event)"
+                    [dataValor]='valorData'
+                > </datepicker>
+            </div>
+            <div class="{{ !mostraData ? 'somenteHora' : 'campo_hora' }} {{ ( classeHora || 'col-md-5' ) }}" *ngIf="hora">
+                <input 
+                    class="form-control input-sm {{temaEntrada}}"
+                    id="{{nome}}-tempo"
+                    type="time"
+                    [disabled]="bloqueado"
+                    [(ngModel)]="valorHora"
+                    (change)="setHoraValor($event.target.value || '00:00', $event)"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="type === 'funcao'" 
+        #divParams 
+        class="funcao"
+    >
+        <!-- <moldura [titulo]="nome" sub="true" oculto="true" [ngClass]="'no_margin'">
+            <input *ngFor="let parametro of objParam; let i=index" [type]="type" class="form-control {{temaEntrada}} elementoFormula" [placeholder]="objParam[i].nome" [(ngModel)]="objParam[i].valor" [value]="objParam[i].valor" [disabled]="bloqueado" [required]="requerido" (change)="getParamFormula($event)" id="objParam[i].nome">
+        </moldura> -->
+        <input 
+            id="{{id}}"
+            class="form-control {{temaEntrada}}" 
+            [type]="type" 
+            [(ngModel)]="valor" 
+            [placeholder]="nome" 
+            [disabled]="bloqueado" 
+            [required]="requerido" 
+            [attr.data-mascara]="bkpFormula" 
+
+            (blur)="onChange($event)"
+        >
+        <span 
+            *ngIf="mostraScore" 
+            class="score"
+        >
+            {{resultScore}}
+        </span>
+    </div>
+
+    <div *ngIf="type == 'tabela'"
+        id="{{id}}"
+        class="entrada_autocomplete"
+    >
+        <autocomplete
+            *ngIf="!readonly"
+            [minimo]="2"
+            [titulo]="nome"
+            [placeholder]="nome" 
+            [requerido]="requerido"
+            [valor]="objRetorno"
+            [camposFiltro]="objFiltroTabela"
+            [valorSelecionado]="valorMostrar"
+            [fnSearch]="fnCfgEntradaRemote.bind(this)"
+            (fnOnSelected)="getEntradaValorAutocomplete($event)"
+        ></autocomplete>  
+
+        <ng-container *ngIf="readonly">
+            <label for="{{id}}" class="titulo">
+                {{nome}} <span *ngIf="requerido">*</span>
+            </label>
+            <p class="form-control">{{valor}}</p>
+        </ng-container>
+    </div>
+
+    <div *ngIf="type == 'multiselect'"
+        id="{{id}}"
+        class="entrada_multiselect"
+    >
+        <multiselect
+            *ngIf="!readonly"
+            [itemList]="itemList"
+            [selectedItems]="selectedItems"
+            [posicaoIconeObjeto]="posicaoIconeObjeto"
+            [settings]="settingsMultiselect"
+            [noLabels]="true"
+            (emitOnItemSelect)="onItemSelect($event)"
+            (emitOnItemDeSelect)="onItemDeSelect($event)"
+            (emitOnSelectAll)="onSelectAll($event)"
+            (emitOnDeSelectAll)="onDeSelectAll($event)"
+        ></multiselect>
+
+    </div>
+
+    <div *ngIf="type == 'edicao'"
+        id="{{id}}"
+        class="editor block {{!bloqueado}}"
+    >
+        <app-ngx-editor
+            [(ngModel)]="valor"
+            (innerHeight)="salvaEdicao($event)"
+            [showToolbar]="!bloqueado"
+            [editable]="!bloqueado"
+            [config]="editorConfig"
+            [placeholder]="nome"
+        ></app-ngx-editor>
+    </div>
+</div>

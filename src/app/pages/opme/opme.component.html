@@ -1,0 +1,73 @@
+<div class="card-header clearfix">
+    <div class="row">
+        <div class="col-sm-12">
+            <entrada
+                nome="Material"
+                [valor]="material && material.descricao || ''"
+                bloqueado="true"
+            ></entrada>
+        </div>
+
+        <div class="col-sm-12">
+            <entrada
+                tipo="radioSelect"
+                nome="Aprovar"
+                requerido="true"
+                [valor]="'0'"
+                [opcoes]="[{ 'id' : '0', 'descricao' : 'Sim' }, { 'id' : '1', 'descricao' : 'Não' }]"
+                (getValor)="setRecusa($event.valor)"
+            ></entrada>
+        </div>
+
+        <div class="row col" *ngIf="recusa(request)">
+            <div class="col-sm-12 col-md-4">
+                <entrada
+                    tipo="area"
+                    requerido="true"
+                    nome="Sugestão 1"
+                    (getValor)="setSugestao($event.valor, 0)"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-12 col-md-4">
+                <entrada
+                    tipo="area"
+                    requerido="true"
+                    nome="Sugestão 2"
+                    (getValor)="setSugestao($event.valor, 1)"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-12 col-md-4">
+                <entrada
+                    tipo="area"
+                    requerido="true"
+                    nome="Sugestão 3"
+                    (getValor)="setSugestao($event.valor, 2)"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-12">
+                <entrada
+                    tipo="area"
+                    requerido="true"
+                    nome="Justificativa"
+                    [valor]="material?.justificativa_recusa"
+                    (getValor)="setJustificativa($event.valor)"
+                ></entrada>
+            </div>
+        </div>
+        
+        <div class="col-sm-12 form-group">
+            <label class="small">Para fins de solicitação médica do material, orientamos no sentido de que cabe ao médico assistente determinar as características (tipo, matéria-prima, dimensões) das órteses, próteses e materiais especiais implantáveis, bem como o instrumental compatível, necessário e adequado à execução do procedimento, segundo o disposto no art. 1° da Resolução CFM 1.956/10. E nesta mesma resolução no artigo 3º consta que é vedado ao médico assistente requisitante exigir fornecedor ou marca comercial exclusivos.</label>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col col-sm-2">
+            <botao nome="Salvar" (click)="salvar()"></botao>
+        </div>
+    </div>
+</div>
+
+<rodape></rodape>

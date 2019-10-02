@@ -1,0 +1,103 @@
+<div class="row">
+    <div *ngIf="!horaPorDia" [ngClass]=" (repetir == 'true' || repetir == true) ? 'col-sm-2 col-md-2' : 'col-sm-3 col-md-3' ">
+        <div class="form-group">
+            <label>Repetir</label>
+            <select class="form-control" [(ngModel)]="repetir" (change)="atualizaObjRecorrencia()">
+                <option value="true"> Sim </option>
+                <option value="false"> Não </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-sm-2 col-md-2" *ngIf="habilitaDiaTodo">
+        <div class="form-group">
+            <label>Dia Todo</label>
+            <input-checkbox 
+                [estado]="diaTodo" 
+                (trocaEstado)="trocaEstadoCheckbox($event, legenda)"
+            ></input-checkbox>
+        </div>
+    </div>
+
+    <div class="col form-group" *ngIf="(repetir == 'true' || repetir == true)">
+        <div class="row">
+            <div class="col-sm-2 col-md-2" *ngIf="habilitaTipoFrequencia">
+                <label class="label_recorrencia">A cada</label>
+                <input type="number" min="1" [(ngModel)]="qtdFrequencia" name="qtd" class="form-control" (change)="atualizaObjRecorrencia()">
+            </div>
+            <div class="col-sm-3 col-md-3" *ngIf="habilitaTipoFrequencia">
+                <label>&nbsp;</label>
+                <select class="form-control" [(ngModel)]="tipoFrequencia" (change)="atualizaObjRecorrencia()">
+                    <option value="day"> Dia<span *ngIf="qtdFrequencia > 1">s</span> </option>
+                    <option value="week"> Semana<span *ngIf="qtdFrequencia > 1">s</span> </option>
+                    <option value="month"> Mês<span *ngIf="qtdFrequencia > 1">es</span> </option>
+                </select>
+            </div>
+            <div class="col" *ngIf="(tipoFrequencia == 'week' && habilitaTipoFrequencia) || habilitaRecorrencia">
+                <ng-template [ngTemplateOutlet]="recorrenciaTmpl"></ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="horaPorDia && frequencia.length">
+    <div class="col-sm-8 col-md-8 body">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Dia</th>
+                    <th>Inicio</th>
+                    <th>Fim</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <ng-container *ngFor="let freq of frequencia">
+                    <tr *ngIf="objRecorrenciaDetalhada[freq]">
+                        <td>
+                            {{momentjs().weekday(freq).format(formatosDeDatas.diaDaSemanaCompleto)}}
+                        </td>
+                        <td>
+                            <input type="time" name="" [disabled]="bloqueiaRecorrenciaForaDaConfiguracao" class="form-control" (ngModelChange)="objRecorrenciaDetalhada[freq].alterado = true" [(ngModel)]="objRecorrenciaDetalhada[freq].horaInicio">
+                            
+                        </td>
+                        <td>
+                            <input type="time" name="" [disabled]="bloqueiaRecorrenciaForaDaConfiguracao" class="form-control" (ngModelChange)="objRecorrenciaDetalhada[freq].alterado = true" [(ngModel)]="objRecorrenciaDetalhada[freq].horaFim">
+                        </td>
+                        <td>
+                            <botao 
+                                *ngIf="mostraBotao(objRecorrenciaDetalhada[freq])" 
+                                icone="done" 
+                                (click)="salvaRecorrencia(objRecorrenciaDetalhada[freq])"
+                            ></botao>
+                            <!-- <input-checkbox
+                                *ngIf="fnRecorrenciaSelectCheckbox" 
+                                classe="check_recorrencias"
+                                [estado]="setEstadoCheck(objRecorrenciaDetalhada[freq])"
+                                (trocaEstado)="recorrenciaSelecionada(objRecorrenciaDetalhada[freq], $event)"
+                            ></input-checkbox> -->
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<ng-template #recorrenciaTmpl let-c="close" let-d="dismiss">
+    <label class="label_recorrencia">Recorrência</label>
+
+    <div class="row recorrencia-row">
+        <div class="col recorrencia-col form-control {{ (!podeEditar) ? 'bloqueado' : '' }}" 
+            *ngFor="let diaDaSemana of diasDaSemana" 
+            title="{{ (!podeEditar) ? 'Usuario sem permissao para editar' : '' }}"
+            [ngClass]="{'active': diaDaSemana.ativo, 'desativado' : objRecorrenciaDetalhada[diaDaSemana.valor]['desativado']}"                 
+            (click)="ativaDesativaDia(diaDaSemana);" 
+        >
+            <span>
+                {{diaDaSemana.dia}}
+            </span>
+        </div>
+    </div>
+</ng-template>

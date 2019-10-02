@@ -1,0 +1,103 @@
+<moldura 
+    titulo="Programas" 
+    [registros]="qtdItensTotal" 
+    [pesquisar]="pesquisar.bind(this)"
+    [customAcoes]="customFiltroAcoesPrograma"
+    [filtrar]="filtrarProgramas.bind(this)"
+>
+    <!-- [customFiltro]="customFiltroProgramas" -->
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>DESCRIÇÃO</th>
+                        <th>INICIO</th>
+                        <th>FIM</th>
+                    </tr>
+                    <tr *ngFor="let programa of programas" (click)="atualizar(programa.id)">
+                        <td
+                            class="status {{( momentjs(programa.dataFim, formatosDeDatas.dataHoraSegundoFormato).format( formatosDeDatas.dataFormato ) > momentjs().format(formatosDeDatas.dataFormato)) ? 'verde' : 'cinza'}}"
+                        ></td>
+                        <td>{{programa.descricao}}</td>
+                        <td>{{programa.dataInicio ? momentjs(programa.dataInicio, formatosDeDatas.dataHoraSegundoFormato).format( formatosDeDatas.dataFormato ) : ''}}</td>
+                        <td>{{programa.dataFim ? momentjs(programa.dataFim, formatosDeDatas.dataHoraSegundoFormato).format( formatosDeDatas.dataFormato ) : ''}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaProgramaPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>
+
+
+<!-- 
+#############################################################################################
+                                CUSTOM FILTRO Programa
+#############################################################################################
+-->
+
+<ng-template #customFiltroProgramas>
+
+        <form class="filtro">
+
+            <div class="row">                
+                <div class="col-md-6">
+                    <entrada 
+                        nome="Unidade de Atendimento" 
+                        [opcoes]="unidadesAtendimento"
+                        [mostraOpcaoEmBranco]="true"
+                        tipo="seleciona"
+                        [valor]="(buscaProgramaPaginado && buscaProgramaPaginado['idUnidadeAtendimento']) ? buscaProgramaPaginado['idUnidadeAtendimento'] : '0'"
+                        (getValor)="($event && $event.valor) ? buscaProgramaPaginado['idUnidadeAtendimento'] = $event.valor : buscaProgramaPaginado['idUnidadeAtendimento'] = undefined " 
+                    ></entrada>
+                </div>
+
+                <div class="col-sm-6 col-md-6" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label class="check_filtro">Mostrar Inativos?</label>
+                        <input-checkbox 
+                            classe="check_filtro"
+                            [estado]="false"
+                            (trocaEstado)="setFiltroInativos($event)"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+        </form>
+        
+</ng-template>
+
+
+<ng-template #customFiltroAcoesPrograma>
+    <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+        <botao 
+            nome="Limpar" 
+            classe="btn-default"
+            debounceClick 
+            [debounceTime]="200"
+            (debounceClick)="limparFiltros()" 
+        ></botao>
+    </div>
+</ng-template>

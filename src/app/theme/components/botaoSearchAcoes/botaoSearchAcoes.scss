@@ -1,0 +1,132 @@
+.botaoSearch {
+	position: relative;
+	z-index: 9;
+}
+
+.botaoSearch input {
+	position: relative;
+	float: left;
+}
+
+.desc {
+	width: 100% !important;
+}
+
+.botaoSearch button.btn {
+	float: left;
+	height: 35px;
+	position: relative;
+}
+
+:host /deep/ botao{
+    display: block !important;
+}
+
+/* ----------------------------------  */
+
+.table-modal.responsiva{
+	margin-left: 35px;
+	width: 95.4%;
+
+	.coluna_add{
+		position: absolute !important;
+		left: 15px;
+	}
+}
+
+table.table-modal{
+	overflow: auto;
+
+	tbody {
+		height: 300px;    
+	}
+
+	tbody > tr > td button {
+		padding: 0;
+		width: 30px !important;
+		background: transparent !important;
+		border: none;
+	}
+
+	tbody tr{
+		white-space: nowrap;
+
+		td:last-child {
+			display: table-cell !important;
+		}
+
+	}
+
+	tbody td.coluna_add {
+		background: #3a3668;	
+		display: -webkit-inline-box;
+		width: auto;
+		height: 43px;
+	}
+	
+}
+
+.div_table_modal {
+    display: block;
+	overflow: auto;
+	min-height: 230px;
+}
+
+.table > thead > tr > th.coluna_add:first-child {
+    width: 36px;
+    height: 49px;
+	z-index: 1;
+	background: #3a3668;
+}
+
+.botoes_acao{
+	display: -webkit-box;
+    padding-top: 4px;
+}
+
+.botao_adicionar button {
+    width: 100px;
+    float: right;
+}
+
+.botao_adicionar{
+    height: 30px;
+    margin-bottom: 16px;
+    padding-right: 16px;
+    position: absolute;
+    width: 100%;
+}
+
+.semFiltro {
+    position: relative !important;
+}
+
+.status{
+    width: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.verde{
+    background-color:#006a6a;
+}
+
+.cinza{
+    background-color:#79787d;
+}
+
+// VALIDAR DEPOIS POSSIBILIDADE DE DEIXAR OS BOTOES DE AÇÃO "FIXOS"
+// NO SCROLL DA TABELA DA MODAL.
+
+
+// .coluna_acoes, .table td:last-child {
+// 	right: 15px;
+// 	background: #3a3668;
+// }
+
+// table.table.table-modal[_ngcontent-c10] {
+//     overflow: auto;
+//     margin-left: 35px;
+//     width: 84.4%;
+//     display: block;
+// }

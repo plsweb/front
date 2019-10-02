@@ -1,0 +1,472 @@
+<moldura titulo="Formulário">
+    <form>
+        <div class="row">
+            <div class="col-sm-6">
+                <entrada nome="Título" [valor]="tituloValor" (getValor)="getTitulo($event)"></entrada>
+            </div>
+
+            <div class="col-sm-6">
+                <entrada nome="Descrição" [valor]="descricaoValor" (getValor)="getDescricao($event)"></entrada>
+            </div>
+
+            <div class="col-sm-6">
+                <entrada nome="Ativo" [valor]="ativoValor" (getValor)="getAtivo($event)" tipo="simnao" [bloqueado]="bloquear" title="{{bloquear ? 'Formulário em utilização' : ''}}"></entrada>
+            </div>
+
+            <div class="col-sm-6">
+                <entrada nome="Tipo do Formulario" [valor]="tipoFormularioValor" (getValor)="getTipoFormulario($event)" [opcoes]="tiposFormulario" tipo="seleciona"></entrada>
+            </div>
+        </div>
+
+        <ng-container *ngIf="id">
+            <div *ngIf="!modoSelecaoPerguntas" class="row">
+                <div class="col-sm-6 form-group">
+                    <moldura titulo="Pode criar" sub="true" oculto="true">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div *ngFor="let papel of papeisCriar" class="sub_div_card">
+                                    <p style="cursor:default;">
+                                        <icone nome="delete" class="acao" (click)="removerPapel(papel)"></icone>
+                                        {{papel?.papel?.nome}}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <entrada nome="visualizar" [opcoes]="papeis" tipo="seleciona" semTitulo="true" (getValor)="getPapelCriar($event)"></entrada>
+                            </div>
+
+                            <div class="">
+                                <button (click)="addPapelCriar()" class="btn btn-primary">+</button>
+                            </div>
+                        </div>
+                    </moldura>
+                </div>
+
+                <div class="col-sm-6 form-group">
+                    <moldura titulo="Pode visualizar" sub="true" oculto="true">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div *ngFor="let papel of papeisVer" class="sub_div_card">
+                                    <p style="cursor:default;">
+                                        <icone nome="delete" class="acao" (click)="removerPapel(papel)"></icone>
+                                        {{papel?.papel?.nome}}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <entrada nome="visualizar" [opcoes]="papeis" tipo="seleciona" semTitulo="true" (getValor)="getPapelVer($event)"></entrada>
+                            </div>
+
+                            <div class="">
+                                <button (click)="addPapelVer()" class="btn btn-primary">+</button>
+                            </div>
+                        </div>
+                    </moldura>
+                </div>
+            </div>
+
+            <moldura 
+                titulo="Grupos" 
+                sub="true" 
+                *ngIf="tipoFormulario == 'EVOLUCAO'"
+            >
+
+                <div class="row parent-blocos-grupo">
+                    <div
+                        class="{{ (grupos && grupos.length == 1) ? 'col-sm-12' : 'col-sm-6' }} col-sm-6 bloco-grupo"
+                        *ngFor="let grupo of grupos; let posGrupo = index"
+                        (drop)="dropGrupo($event, posGrupo)" 
+                        (dragover)="allowDropGrupo($event)" 
+                        (dragstart)="dragStartGrupo($event)"
+                        draggable="true"
+                        droppable="true"
+                        [attr.data-index]="posGrupo"
+                        [attr.data-grupo-id]="grupo?.id"
+                        [attr.data-grupo-nome]="grupo.descricao"
+                    >
+                        <moldura 
+                            [titulo]="grupo.descricao" 
+                            sub="true" 
+                            oculto="true" 
+                            (click)="clickMolduraGrupoPergunta($event)"
+                            [semDropdown]="true"
+                        >
+
+                            <div class="botoesLadoDireito">
+                                <ng-template 
+                                    [ngTemplateOutlet]="elementosOrdenacoes"
+                                    [ngTemplateOutletContext]="{
+                                        idAnterior: grupos[posGrupo-1]?.id,
+                                        idAtual: grupo?.id,
+                                        idProximo: grupos[posGrupo+1]?.id,
+                                        tamanhoObjeto: grupos?.length,
+                                        idObj: id,
+                                        label: 'formulario',
+                                        service: 'serviceFormulario',
+                                        pos: posGrupo
+                                    }"
+                                ></ng-template>
+                            </div>
+                            
+                            <div *ngIf="!modoSelecaoPerguntas" class="row">
+                                <div class="col">
+                                    <autocomplete
+                                        [titulo]="'Pergunta'"
+                                        [placeholder]="'Digite para buscar Pergunta'"
+                                        [minimo]="3"
+                                        [valor]="objPerguntas"
+                                        [camposFiltro]="['descricao','tipo']"
+                                        [valorSelecionado]="perguntaSelecionada"
+                                        [customElement]="botaoAdicionar"
+                                        [fnSearch]="fnCfgPerguntaRemote.bind(this)"
+                                        (fnOnSelected)="getPergunta($event, grupo?.id)"
+                                    ></autocomplete>
+                                </div>
+
+                                <ng-container *ngFor="let pergunta of perguntasCadastro; let pos = index;">
+                                    <div class="col">
+                                        <entrada></entrada>
+                                    </div>
+                                </ng-container>
+                            </div>
+
+                            <table class="table {{ !modoSelecaoPerguntas ? 'table-responsive' : '' }}">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th *ngIf="!modoSelecaoPerguntas"></th>
+                                        <th style="max-width:80px;"></th>
+                                        <th *ngIf="!modoSelecaoPerguntas" style="max-width:80px;">Obrigatória</th>
+                                        <th>Pergunta</th>
+                                        <ng-container *ngIf="!modoSelecaoPerguntas">
+                                            <th></th>
+                                            <th>IDADE-</th>
+                                            <th>IDADE+</th>
+                                        </ng-container>
+                                        <th style="max-width:80px;"></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <ng-container *ngFor="let pergunta of grupo.grupoPergunta; let pos = index">
+                                        <tr
+                                            *ngIf="mostraPrincipal(grupo, pergunta?.pergunta)"
+                                            (drop)="dropPergunta($event, posGrupo)"
+                                            (dragover)="allowDropPergunta($event)"
+                                            (dragstart)="dragStartPergunta($event)"
+                                            draggable="true"
+                                            droppable="true"
+                                            class="row-droppable"
+                                            [attr.data-pergunta-nome]="pergunta?.pergunta?.descricao"
+                                            [attr.data-pergunta-id]="pergunta?.id"
+                                            [attr.data-grupo-id]="grupo?.id"
+                                            [attr.data-index]="pos"
+                                        >
+                                            <td style="width: 80px;" *ngIf="!modoSelecaoPerguntas">
+                                                <ng-template 
+                                                    [ngTemplateOutlet]="elementosOrdenacoes"
+                                                    [ngTemplateOutletContext]="{
+                                                        idAnterior: grupo.grupoPergunta[pos-1]?.id,
+                                                        idAtual: pergunta?.id,
+                                                        idProximo: grupo.grupoPergunta[pos+1]?.id,
+                                                        tamanhoObjeto: grupo.grupoPergunta?.length,
+                                                        idObj: grupo?.id,
+                                                        label: 'formularioGrupo',
+                                                        service: 'serviceGrupoPergunta',
+                                                        posObj: posGrupo,
+                                                        pos: pos
+                                                    }"
+                                                ></ng-template>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <ng-container *ngIf="!this.modoSelecaoPerguntas" >
+                                                    <icone
+                                                        nome="delete" 
+                                                        class="acao" 
+                                                        (click)="excluirPergunta(pergunta)"
+                                                    ></icone>
+                                                </ng-container>
+
+                                                <ng-container *ngIf="modoSelecaoPerguntas">
+                                                    <ng-template 
+                                                        [ngTemplateOutlet]="selecionarPerguntas"
+                                                        [ngTemplateOutletContext]="{
+                                                            idPergunta: pergunta?.pergunta?.id,
+                                                            pergunta: pergunta
+                                                        }"
+                                                    ></ng-template>
+                                                </ng-container>
+    
+                                                
+                                            </td>
+
+                                            <td class="text-center" *ngIf="!modoSelecaoPerguntas">
+                                                <div class="mb-4">
+                                                    <input-checkbox 
+                                                        classe="check_principal"
+                                                        [estado]="pergunta.obrigatorio" 
+                                                        (trocaEstado)="trocaEstadoPerguntaObrigatoria($event, pergunta)"
+                                                    ></input-checkbox>
+                                                </div>
+                                            </td>
+
+                                            <td (click)="editarPergunta(pergunta, grupos[0]?.id)">
+                                                <span>
+                                                    {{pergunta?.pergunta?.descricao}}
+                                                </span>
+                                            </td>
+
+                                            <ng-container *ngIf="!modoSelecaoPerguntas">
+                                                <td>
+                                                    <span class="icones_sexo">
+                                                        <!-- <icone
+                                                            nome="wc"
+                                                            title="Ambos"
+                                                            classe="icones ambos {{ (!pergunta?.sexo || pergunta?.sexo == '') ? 'selecionado' : 'nao_selecionado'}}"
+                                                            tamanho="medio"
+                                                            (click)="setCondicaoPerguntaPrincipal(pergunta, 'sexo', '')"
+                                                        ></icone> -->
+
+                                                        <icone
+                                                            nome="person"
+                                                            title="Masculino"
+                                                            classe="icones masculino {{ ( pergunta?.sexo == 'M' ) ? 'selecionado' : 'nao_selecionado'}}"
+                                                            tamanho="medio"
+                                                            (click)="setCondicaoPerguntaPrincipal(pergunta, 'sexo', 'M')"
+                                                        ></icone>
+
+                                                        <icone
+                                                            nome="person"
+                                                            title="Feminino"
+                                                            classe="icones feminino {{ ( pergunta?.sexo == 'F' ) ? 'selecionado' : 'nao_selecionado'}}"
+                                                            tamanho="medio"
+                                                            (click)="setCondicaoPerguntaPrincipal(pergunta, 'sexo', 'F')"
+                                                        ></icone>
+                                                    </span>
+                                                </td>
+
+                                                <td (click)="colunaClick = 'idadeInicio'+pergunta.id">
+                                                    <span>
+                                                        <entrada
+                                                            *ngIf="colunaClick == 'idadeInicio'+pergunta.id"
+                                                            nome="Idade Minima"
+                                                            [semTitulo]="true"
+                                                            tipo="numero"
+                                                            [valor]="pergunta?.idadeInicio"
+                                                            [fnOnChange]="setCondicaoPerguntaPrincipal.bind(this, pergunta, 'idadeInicio')"
+                                                        ></entrada>
+
+                                                        <ng-container *ngIf="colunaClick != 'idadeInicio'+pergunta.id">
+                                                            {{pergunta?.idadeInicio || '0'}}
+                                                        </ng-container>
+                                                    </span>
+                                                </td>
+
+                                                <td (click)="colunaClick = 'idadeFim'+pergunta.id">
+                                                    <span>
+                                                        <entrada
+                                                            *ngIf="colunaClick == 'idadeFim'+pergunta.id"
+                                                            nome="Idade Maxima"
+                                                            [semTitulo]="true"
+                                                            tipo="numero"
+                                                            [valor]="pergunta?.idadeFim"
+                                                            [fnOnChange]="setCondicaoPerguntaPrincipal.bind(this, pergunta, 'idadeFim')"
+                                                        ></entrada>
+
+                                                        <ng-container *ngIf="colunaClick != 'idadeFim'+pergunta.id">
+                                                            {{pergunta?.idadeFim || '0'}}
+                                                        </ng-container>
+                                                    </span>
+                                                </td>
+                                            </ng-container>
+                                            
+                                            <td class="text-center"  (click)="editarPergunta(pergunta, grupos[0]?.id)">
+                                                <ng-container *ngIf="pergunta?.condicoes && pergunta?.condicoes.length">
+                                                    <icone
+                                                        nome="list_alt"
+                                                        tamanho="medio"
+                                                    ></icone>
+                                                </ng-container>
+                                            </td>
+                                        </tr>
+
+                                        <ng-container *ngIf="modoSelecaoPerguntas">
+                                            <ng-container *ngFor="let condicao of pergunta?.condicoes">
+                                                <ng-container *ngIf="condicao.perguntaFilho">
+                                                    <tr>
+                                                        <td>
+                                                            <ng-template 
+                                                                [ngTemplateOutlet]="selecionarPerguntas"
+                                                                [ngTemplateOutletContext]="{
+                                                                    idPergunta: condicao?.perguntaFilho?.id,
+                                                                    pergunta: condicao?.perguntaFilho
+                                                                }"
+                                                            ></ng-template>
+                                                        </td>
+                                                        <td colspan="4">{{mostraCondicaoDependente(condicao)}}</td>
+                                                    </tr>
+                                                </ng-container>
+                                            </ng-container>
+                                        </ng-container>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+
+                            <br>
+
+                            <div 
+                                *ngIf="!modoSelecaoPerguntas"
+                                class="row"
+                            >
+                                <div class="col-sm-6">
+                                    <button class="btn btn-danger form-control"  (click)="deletarGrupo(grupo)">Excluir grupo</button>
+                                </div>       
+                                
+                                <input-checkbox 
+                                    legenda="Repetir Perguntas"
+                                    classe="check_principal"
+                                    [estado]="grupo.repetir"
+                                    (trocaEstado)="trocaEstadoGrupoRepetir($event, grupo)"
+                                ></input-checkbox>
+
+                            </div>
+                        </moldura>
+
+                        <ng-template #botaoAdicionar>
+                            <button class="btn btn-primary form-control adicionarPergunta" (click)="adicionarPergunta(grupo)">Adicionar pergunta</button>
+                        </ng-template>
+
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="!modoSelecaoPerguntas">
+                    <div class="col-sm-6">
+                        <entrada nome="Grupo nome" semTitulo="true" (getValor)="getGrupo($event)"></entrada>
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-primary" (click)="criarGrupo()">+</button>
+                    </div>
+                </div>
+
+            </moldura>
+
+            <moldura titulo="Modelos" sub="true" oculto="true" *ngIf="tipoFormulario == 'MODELO'">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <moldura titulo="Adicionar Modelo">
+                            <div class="row">
+                                <div class="col">
+                                    <entrada 
+                                        tipo="edicao"
+                                        nome="Texto"
+                                        [valor]="modelos[0]?.modelo || ' '"
+                                        [fnOnChange]="editarModelo.bind(this, modelos.length, modelos[0] || ' ')"
+                                        (getValor)="textoModelo = $event.valor"
+                                    >
+                                    </entrada>
+                                </div>
+                            </div>
+
+                            <botao nome="Salvar Modelo"  *ngIf="!modelos.length" (click)="salvarModelo()"></botao>
+                            <botao nome="Atualizar Modelo" *ngIf="modelos.length" (click)="alteraModelo(modelos[0]?.id, textoModelo)"></botao>
+                        </moldura>
+                    </div>
+
+                    <div class="col-md-6">
+                        <moldura nome="Tags"
+                            [pesquisar]="pesquisarTags.bind(this)"
+                            [registros]="qtdItensTotal"
+                        >
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table class="tabela table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>TABELA</th>
+                                                <th>NOME</th>
+                                                <th>TAG</th>
+                                                <!-- <th></th> -->
+                                            </tr>
+                                            <tr *ngFor="let tag of tags" (click)="adicionarTag(tag.palavraChave)">
+                                                <td>{{tag.tabela ? tag.tabela.nome : ""}}</td>
+                                                <td>{{tag.descricao ? tag.descricao : "" }}</td>
+                                                <td>{{tag.palavraChave ? tag.palavraChave : "" }}</td>
+                                                <!-- <td class="acao"><icone nome="add" class="acao" (click)="adicionarTag(tag.palavraChave)"></icone></td> -->
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <paginacao
+                                    (atualizaDados)="buscarTags($event)"
+                                    qtdItensTotal="{{qtdItensTotal}}"
+                                    itensPorPagina="{{itensPorPagina}}"
+                                    paginaAtual="{{paginaAtual}}"
+                                ></paginacao>
+                            </div>
+                        </moldura>
+                    </div>
+
+                </div>
+
+            </moldura>
+        </ng-container>
+        
+        <div class="row">
+            <div class="col-sm-6 botoes" *ngIf="!modoSelecaoPerguntas">
+                <botao nome="Salvar"     (click)="submit()"></botao>
+                <botao nome="Visualizar" (click)="visualizar()" classe="btn-info"></botao>
+                <botao nome="Voltar"     (click)="voltar()"     classe="btn-default"></botao>
+            </div>
+        </div>
+    </form>
+</moldura>
+
+
+<ng-template 
+    #elementosOrdenacoes
+    let-idAnterior="idAnterior"
+    let-idAtual="idAtual"
+    let-idProximo="idProximo"
+    let-tamanhoObjeto="tamanhoObjeto"
+    let-idObj="idObj"
+    let-label="label"
+    let-service="service"
+    let-posObj="posObj"
+    let-pos="pos"
+>
+    <icone 
+        [ngClass]="{'invisible' : 0 == pos}"
+        nome="arrow_upward" 
+        title="Subir Nivel" 
+        (click)="ordenar(idAtual, idAnterior, idObj, label, service, posObj)"
+    ></icone>
+    <!-- sobe, desce, idObj, label, service = 'serviceGrupoPergunta'){ -->
+    <icone 
+        *ngIf="tamanhoObjeto-1 > pos"
+        nome="arrow_downward" 
+        title="Descer Nivel" 
+        (click)="ordenar(idProximo, idAtual, idObj, label, service, posObj)" 
+    ></icone>
+</ng-template>
+
+<ng-template 
+    #selecionarPerguntas
+    let-idPergunta="idPergunta"
+    let-pergunta="pergunta"
+>
+    <!-- [estado]="validaEstadoPerguntaRelatorio(pergunta?.pergunta?.id)"  -->
+    <input-checkbox 
+        classe="check_principal"
+        [estado]="validaEstadoPerguntaRelatorio(idPergunta)" 
+        (trocaEstado)="selecionaPergunta(pergunta, $event)"
+    ></input-checkbox>
+</ng-template>

@@ -1,0 +1,210 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!acaoId">Novo Cuidado</span>
+                <span *ngIf="acaoId">Editar Cuidado</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div (click)="navegar('permissoes')" [ngClass]="{ativo: atual === 'permissoes'}">Permissões</div>
+        </div>
+    </div>
+    <div class="card-body">
+
+        <div *ngIf="atual === 'permissoes'">
+
+            <moldura titulo="Adicionar Papel" podeOcultar="true" oculto="true">
+                
+                <div class="row">
+                    <div class="col">
+                        <autocomplete
+                            [titulo]="'Papel'"
+                            [placeholder]="'Digite para buscar Papel'"
+                            [minimo]="3"
+                            [valor]="objPapeis"
+                            [camposFiltro]="['nome', 'descricao']"
+                            [valorSelecionado]="papelSelecionado"
+                            [fnSearch]="fnCfgPapelRemote.bind(this)"
+                            (fnOnSelected)="getPapel($event)"
+                        ></autocomplete>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 col-sm-2 col-lg-2">
+                        <label>&nbsp;</label>
+                        <botao nome="Adicionar" (click)="salvarPapelPermissao()"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <moldura>
+
+                <div class="row">
+
+                    <div class="col">
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Papel</th>
+                                    <th>Visualizar</th>
+                                    <th>Inserir</th>
+                                    <th>Executar</th>
+                                    <th>Excluir</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let permissao of permissoes">
+                                    <td> {{permissao.papel ? permissao.papel.nome : ''}} </td>
+                                    <td>
+                                        <input-checkbox
+                                            [estado]="permissao.executar != 'NEGAR'"
+                                            (trocaEstado)="atualizaPermissao($event, permissao, 'executar')"
+                                        ></input-checkbox>
+                                    </td>
+                                    <td> 
+                                        <input-checkbox
+                                            [estado]="permissao.inserir != 'NEGAR'"
+                                            (trocaEstado)="atualizaPermissao($event, permissao, 'inserir')"
+                                        ></input-checkbox>
+                                    </td>
+                                    <td> 
+                                        <input-checkbox
+                                            [estado]="permissao.atualizar != 'NEGAR'"
+                                            (trocaEstado)="atualizaPermissao($event, permissao, 'atualizar')"
+                                        ></input-checkbox>
+                                    </td>
+                                    <td> 
+                                        <input-checkbox
+                                            [estado]="permissao.apagar != 'NEGAR'"
+                                            (trocaEstado)="atualizaPermissao($event, permissao, 'apagar')"
+                                        ></input-checkbox>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </moldura>
+        </div>
+
+        <div *ngIf="atual === 'geral'">
+
+            <moldura>
+
+                <div class="row">
+
+                    <div class="col">
+                        <entrada 
+                            [valor]="acao ? acao.descricao : ''" 
+                            [nome]="'Nome'"
+                            (getValor)="getNome($event)"
+                        ></entrada>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <entrada 
+                            nome="Tipo do Cuidado" 
+                            tipo="seleciona"
+                            [opcoes]="tiposAcoes" 
+                            [valor]="acao && acao.tipo ? acao.tipo.id : ''" 
+                            (getValor)="getTipoAcao($event)"
+                        ></entrada>
+                    </div>
+                    <div class="col">
+                        <entrada
+                            nome="Quantos dias para iniciar" 
+                            [valor]="acao.diasInicio" 
+                            (getValor)="acao.diasInicio = $event.valor" 
+                        ></entrada>
+                    </div>
+                    <div class="col">
+                        <entrada 
+                            nome="Conflito" 
+                            tipo="seleciona" 
+                            [opcoes]="opcoesConflitos" 
+                            [valor]="acao ? acao.conflito : ''" 
+                            (getValor)="getConflito($event)"
+                        ></entrada>
+                    </div>
+                    <div *ngIf="acao.conflito == 'OU'" class="col">
+                        <entrada 
+                            nome="Resolução de Conflito" 
+                            tipo="seleciona" 
+                            [objId]="'codigo'"
+                            [opcoes]="opcoesResolucao" 
+                            [valor]="acao ? acao.resolucaoConflito : ''" 
+                            (getValor)="acao.resolucaoConflito = $event.valor;"
+                        ></entrada>
+                    </div>
+                </div>
+                <div *ngIf="eFormulario || ( ePergunta && formularioSelecionado )" class="row">
+                    <div class="col-md-6">
+                        <autocomplete
+                            [titulo]="'Formulário'"                    
+                            [placeholder]="'Digite para buscar Formulários'"
+                            [minimo]="3"
+                            [valor]="objFormularios"
+                            [camposFiltro]="['descricao']"
+                            [valorSelecionado]="formularioSelecionado"
+                            [fnSearch]="fnCfgFormularioRemote.bind(this)"
+                            (fnOnSelected)="getFormulario($event)"
+                        ></autocomplete>
+                    </div>
+
+                    <!-- <div *ngIf="ePergunta && formularioSelecionado" class="col-md-1">
+                        <botao 
+                            [botao_lateral]="true"
+                            classe="transparente"
+                            icone="edit"
+                            (click)="abreModalEditarFormulario()"
+                        ></botao>
+                    </div> -->
+
+                </div>
+
+                <div *ngIf="ePergunta && !acaoId" class="row">
+                    <div class="col">
+                        <autocomplete
+                            titulo="Selecione uma Pergunta"
+                            [placeholder]="'Digite para buscar Perguntas'"
+                            [minimo]="3"
+                            [valor]="objPerguntas"
+                            [camposFiltro]="['descricao']"
+                            [valorSelecionado]="perguntaSelecionada"
+                            [fnSearch]="fnCfgPerguntaRemote.bind(this)"
+                            (fnOnSelected)="getPergunta($event)"
+                        ></autocomplete>
+                    </div>
+                </div>
+
+            </moldura>
+
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-sm-6 botoes">
+                <div class="row">
+                    <div class="col">
+                        <botao nome="Salvar" (click)="salvarAcao()"></botao>
+                    </div>
+                    <div *ngIf="acaoId" class="col">
+                        <botao nome="Excluir" classe="btn-danger" (click)="excluir()"></botao>
+                    </div>
+                    <div class="col">
+                        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

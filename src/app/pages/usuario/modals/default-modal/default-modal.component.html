@@ -1,0 +1,31 @@
+<div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">{{modalHeader}}</h4>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <entrada nome="Descrição" tema="popup" (getValor)="getPapel($event)"></entrada>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>NOME</th>
+                        <th>DESCRIÇÃO</th>
+                    </tr>
+                    <tr *ngFor="let papel of papeis" class="link" id="linha{{papel.guid}}">
+                        <td class="acao"><icone nome="add_circle" class="acao" (click)=clickLinha(papel)></icone></td>
+                        <td>{{papel.nome}}</td>
+                        <td>{{papel.descricao}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default confirm-btn btn-raised" (click)="voltar()">Fechar</button>
+        </div>
+    </div>
+    <style type="text/css">
+        .popup .form-control,
+        .form-control {
+            text-transform: uppercase;
+        }
+    </style>

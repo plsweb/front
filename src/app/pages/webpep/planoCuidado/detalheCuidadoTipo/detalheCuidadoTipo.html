@@ -1,0 +1,82 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!cuidadoTipoId">Novo Tipo de Cuidado</span>
+                <span *ngIf="cuidadoTipoId">Editar Tipo de Cuidado</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+        </div>
+    </div>
+    <div class="card-body">
+
+        <div *ngIf="atual === 'geral'">
+
+            <moldura>
+
+                <div class="row">
+
+                    <div class="col">
+                        <entrada 
+                            [valor]="cuidadoTipo ? cuidadoTipo.descricao : ''" 
+                            [nome]="'Nome'"
+                            (getValor)="getNome($event)"
+                        ></entrada>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <entrada 
+                            nome="Tabela" 
+                            tipo="seleciona" 
+                            [opcoes]="tiposTabela" 
+                            [valor]="cuidadoTipo && cuidadoTipo.tabela ? cuidadoTipo.tabela.id : ''" 
+                            (getValor)="getTabela($event)"
+                        ></entrada>
+                    </div>
+                </div>
+
+            </moldura>
+
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-sm-6 botoes">
+                <div class="row">
+                    <div class="col">
+                        <botao nome="Salvar" (click)="salvarCuidadoTipo()"></botao>
+                    </div>
+                    <div *ngIf="cuidadoTipoId" class="col">
+                        <botao nome="Excluir" classe="btn-danger" (click)="abrirModalExcluir()"></botao>
+                    </div>
+                    <div class="col">
+                        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--    
+##################################################################################
+                        Remover CuidadoTipo
+##################################################################################     
+-->
+<ng-template #bodyModalRemoverTipoCuidado let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>Você esta removendo o Tipo de Cuidado "{{cuidadoTipo.descricao}}".</p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #footerModalRemoverTipoCuidado let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-danger" (click)="excluir()"></botao>
+</ng-template>

@@ -1,0 +1,46 @@
+<angular2-multiselect
+    [data]="itemList" 
+    [(ngModel)]="selectedItems" 
+    [settings]="settings" 
+    (onSelect)="onItemSelect($event)"
+    (onDeSelect)="OnItemDeSelect($event)" 
+    (onSelectAll)="onSelectAll($event)" 
+    (onDeSelectAll)="onDeSelectAll($event)"
+>
+
+    <c-badge>
+        <ng-template let-item="item">
+            <ng-container *ngIf="!noLabels">
+                <i *ngIf="settings.icone" class="material-icons">{{item[ settings.icone ]}}</i>
+                <label class="label_multiselect_badge" style="margin: 0px;top: -5px;position: relative;">{{item[ settings.labelKey ]}}</label>
+            </ng-container>
+            <ng-container *ngIf="noLabels">
+                <label class="label_multiselect_badge" style="margin: 0px;top: -5px;position: relative;">{{ selectedItems.length }} selecionados</label>
+            </ng-container>
+        </ng-template>
+    </c-badge>
+    <c-item>
+        <ng-template let-item="item">
+            <i *ngIf="settings.icone" class="material-icons icone_multiselect_item">{{item[ settings.icone ]}}</i>
+            <label style="cursor: pointer;">{{item[ settings.labelKey ]}}</label>
+        </ng-template>
+    </c-item>
+
+</angular2-multiselect>
+
+<!-- EXEMPLO 
+
+  <entrada 
+      nome="Multiselect" 
+      tipo="multiselect" 
+      [objMultiselect]="['id', 'descricao']" 
+      [itemList]="itemList" 
+      [valor]="valorMultiselect" 
+      (getValor)="setValorMultiselect($event)"
+  ></entrada>
+
+
+
+
+
+-->

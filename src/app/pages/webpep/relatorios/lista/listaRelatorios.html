@@ -1,0 +1,252 @@
+<div class="row">
+    <!--div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <ng-template [ngTemplateOutlet]="tmplFiltro"></ng-template>
+    </div-->
+
+    <div class="col">
+        <ng-template [ngTemplateOutlet]="tmplRelatorio"></ng-template>
+    </div>
+</div>  
+
+<!-- 
+#############################################################################################
+                                        Relatório
+#############################################################################################
+-->
+<ng-template #tmplRelatorio let-c="close" let-d="dismiss">
+    <moldura 
+        titulo="Relatórios Salvos" 
+        [registros]="variaveisDeAmbiente['tabela']['qtdItensTotal']" 
+        [customFiltro]="customFiltroRelatorios"
+        [customAcoes]="customFiltroAcoesRelatorio"
+        [pesquisar]="pesquisar.bind(this)"
+        [filtrar]="filtrarRelatorios.bind(this)"
+    >   
+        <div class="card-body">
+            <div class="row">
+                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                    <botao nome="Novo Relatório" (click)="aplicarRelatorioFiltroSalvo()" classe="btn-primary"></botao>
+                </div>
+                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                    <botao nome="Extração Rápida" (click)="modificaTabelaRelatorios()" classe="btn-primary"></botao>
+                </div>
+            </div>
+            <br>
+
+            <div [ngInit]="inicializaRelatorioFiltros.bind(this)">
+                <ng-template [ngTemplateOutlet]="tmplRelatoriosSalvo"></ng-template>
+                <ng-template [ngTemplateOutlet]="tmplBotoesRodape"></ng-template>
+            </div>
+        </div>
+    </moldura>
+
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                    Relatorios Salvos
+#############################################################################################
+-->
+<ng-template #tmplRelatoriosSalvo let-c="close" let-d="dismiss">
+    
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <ng-container *ngIf="!variaveisDeAmbiente['modoExtracao']; else headExtracao">
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                </ng-container>
+
+                <ng-template #headExtracao>
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                </ng-template>
+
+                <th style="width: 25%"> Descrição </th>
+                <th style="width: 20%"> RESPONSÁVEL </th>
+                <th> Colunas </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr 
+                *ngFor="let relatorioFiltro of relatorioFiltros" 
+                (click)="aplicarRelatorioFiltroSalvo(relatorioFiltro)"
+                title="ID: {{ relatorioFiltro.id }}"
+            >
+                <ng-container *ngIf="!variaveisDeAmbiente['modoExtracao']; else checkboxExtracao">
+                    <td (click)="abreModalRelatorioFiltro($event, 'Excluir', relatorioFiltro)"> 
+                        <icone nome="delete"></icone> 
+                    </td>
+                </ng-container>
+
+                <ng-template #checkboxExtracao>
+                    <td>
+                        <input-checkbox
+                            classe="check_extracao"
+                            [estado]="validaEstado(relatorioFiltro)"
+                            (trocaEstado)="setExtracaoRelatorio($event, relatorioFiltro)"
+                        ></input-checkbox>
+                    </td>
+
+                    <td>
+                        <dropdown [relative]="true" [someAoClicar]="false">
+                            <div class="selected">
+                                <i class="material-icons dropdown-label">filter_list</i>
+                            </div>
+
+                            <ul class="opcoes list-group">
+                                <!-- <li class="list-group-item " *ngFor="let local of icones" (click)="getValor( { valor: local.id }, 'local' )" > -->
+                                <li class="list-group-item " (click)="setLocal(undefined)" >
+                                    <div class="row">
+                                        <div class="col" style="color: black;">
+                                            <input-checkbox 
+                                                classe="check_extracao" 
+                                                legenda="Todos"
+                                                [estado]="false" 
+                                                (trocaEstado)="setExtracaoRelatorioFiltro($event, relatorioFiltro.id, 'todos')"
+                                            ></input-checkbox>
+                                        </div>
+                                    </div>
+                                    <!-- <span class="legenda_local">Todos</span> -->
+                                </li>
+
+                                <li class="list-group-item " *ngFor="let filtro of relatorioFiltro.json.items; let pos = index" style="cursor:pointer;" >
+                                    <div class="row">
+                                        <div class="col">
+                                            <input-checkbox 
+                                                classe="check_extracao" 
+                                                [estado]="validaEstadoFiltro(relatorioFiltro.id, filtro, pos)" 
+                                                (trocaEstado)="setExtracaoRelatorioFiltro($event, relatorioFiltro.id, filtro, pos)"
+                                            ></input-checkbox>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label> {{ filtro.campo }} </label>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label> {{ filtro.tipo }} </label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label> {{ filtro.valor }} </label>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="list-group-item campo_titulo_extracao">
+                                    <entrada 
+                                        nome="Titulo desse Indicador" 
+                                        [valor]="sessao.getPreferenciasUsuario()['objExtracao'] && sessao.getPreferenciasUsuario()['objExtracao'][relatorioFiltro.id] && sessao.getPreferenciasUsuario()['objExtracao'][relatorioFiltro.id]['titulo'] ? sessao.getPreferenciasUsuario()['objExtracao'][relatorioFiltro.id]['titulo'] : null"
+                                        (getValor)="getValorTituloExtracao($event, relatorioFiltro.id)"
+                                    ></entrada>
+                                </li>
+                            </ul>
+                        </dropdown>
+                    </td>
+                </ng-template>
+
+                <td> {{relatorioFiltro.id}} </td>
+                <td> {{relatorioFiltro.descricao}} </td>
+                <td> {{relatorioFiltro?.usuario?.nome}} </td>
+                <td>
+                    <ul class="filtro">
+                        <li *ngFor="let coluna of relatorioFiltro.json.colunas">
+                            <span class="opcao">{{coluna ? coluna.alias || coluna.coluna.descricao : ''}}</span>
+                        </li>
+                        <li *ngFor="let operacao of relatorioFiltro.json.colunasOperacoes">
+                            <span class="opcao">{{operacao ? operacao.nome : ''}}</span>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br clear="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="inicializaRelatorioFiltros($event)"
+            qtdItensTotal="{{variaveisDeAmbiente.tabela.qtdItensTotal}}"
+            itensPorPagina="{{variaveisDeAmbiente.tabela.itensPorPagina}}"
+            paginaAtual="{{variaveisDeAmbiente.tabela.paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</ng-template>
+
+<ng-template #tmplBotoesRodape>
+    <div *ngIf="variaveisDeAmbiente['modoExtracao']" class="col-md-2 botao_flutuante">
+        <botao nome="Extrair" (click)="extrair()"></botao>
+    </div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                Excluir Relatorio Filtro
+#############################################################################################
+-->
+<ng-template #templateBotoesModalExcluirFiltroSalvo let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="excluirRelatorioFiltro()"></botao>
+</ng-template>
+
+<ng-template #bodyModalExcluirFiltroSalvo let-c="close" let-d="dismiss">
+    Você está excluindo o filtro salvo  "{{variaveisDeAmbiente['relatorioFiltroAtual'].descricao}}".
+</ng-template>
+
+<!-- 
+#############################################################################################
+                                CUSTOM FILTRO RELATORIO
+#############################################################################################
+-->
+
+<ng-template #customFiltroRelatorios>
+
+        <form class="filtro">
+
+            <div class="row">                
+                <div class="col-md-12">
+                    <entrada 
+                        nome="Unidade de Atendimento" 
+                        [opcoes]="unidadesAtendimento"
+                        [mostraOpcaoEmBranco]="true"
+                        tipo="seleciona"
+                        [valor]="(objFiltroRelatorios && objFiltroRelatorios['idUnidadeAtendimento']) ? objFiltroRelatorios['idUnidadeAtendimento'] : '0'"
+                        (getValor)="($event && $event.valor) ? objFiltroRelatorios['idUnidadeAtendimento'] = $event.valor : objFiltroRelatorios['idUnidadeAtendimento'] = undefined " 
+                    ></entrada>
+                </div>
+
+                <div class="col-md-12">
+                    <autocomplete
+                        [titulo]="'Especialidade'"
+                        [placeholder]="'Digite para buscar Especialidade'"
+                        [minimo]="2"
+                        [valor]="objEspecialidades"
+                        [camposFiltro]="['descricao']"
+                        [valorSelecionado]="especialidadeSelecionada"
+                        [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                        (fnOnSelected)="getEspecialidade($event)"
+                    ></autocomplete>
+                </div>
+            </div>
+
+        </form>
+        
+</ng-template>
+
+
+<ng-template #customFiltroAcoesRelatorio>
+    <div class="col-sm-5 col-md-5 col-lg-5 filtro-acoes">
+        <botao 
+            nome="Limpar" 
+            classe="btn-default"
+            debounceClick 
+            [debounceTime]="200"
+            (debounceClick)="limparFiltros()" 
+        ></botao>
+    </div>
+</ng-template>

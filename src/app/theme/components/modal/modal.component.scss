@@ -1,0 +1,29 @@
+@import "../../sass/conf/conf";
+
+.popup .form-control, .form-control {
+    text-transform: uppercase;
+}
+
+.modal-buttons .btn {
+    margin-right: 20px;
+}
+
+.modal-content {
+    color: $dropdown-text;
+}
+
+.modal-content {
+    background-color: #443f7a;
+    border-color: #575287;
+    border-radius: 0;
+    box-shadow: 0px 0px 16px -6px #605a98;
+    color: #FFF;
+}
+
+.close:focus, .close:hover {
+    color: #f3f3f7;
+}
+
+.botaoSearch {
+	margin-top: 25px;
+}

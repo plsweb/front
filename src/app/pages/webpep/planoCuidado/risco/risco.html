@@ -1,0 +1,41 @@
+<moldura 
+    titulo="Riscos"
+    [pesquisar]="pesquisarRiscosSaude.bind(this)"
+>
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+            <botao nome="Adicionar" (click)="adicionarRiscoSaude()"></botao>
+        </div>
+    </div>
+    <br>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="status"></th>
+                <th> Nome </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngFor="let risco of riscosSaude" (click)="abrir(risco)" class="link">
+                <td> 
+                    <i class="material-icons {{risco.icone}}">{{risco.icone}}</i>
+                </td>
+                <td> {{risco.nome}} </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <br class="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscarRiscosSaudePaginado($event, null, false)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            paginaAtual="{{paginaAtual}}"
+            itensPorPagina="{{itensPorPagina}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+</moldura>

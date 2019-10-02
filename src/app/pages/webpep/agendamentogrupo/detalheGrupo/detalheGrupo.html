@@ -1,0 +1,729 @@
+<div *ngIf="usuario" baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!idGrupo">Novo Grupo</span>
+                <span *ngIf="idGrupo && novoGrupo['descricao']">
+                    GRUPO: {{novoGrupo['descricao']}} <br>
+                    TEMA: {{novoGrupo['tema']['descricao']}}<br>
+                    DATA INICIO: {{momentjs(novoGrupo['dataPrimeiraSessao'], formatosDeDatas.htmlDataFormato).format(formatosDeDatas.dataFormato)}}
+                    {{( novoGrupo['dataUltimaSessao'] != 'Invalid date' ) ? ' - DATA FINAL:' + momentjs(novoGrupo['dataUltimaSessao'], formatosDeDatas.htmlDataFormato).format(formatosDeDatas.dataFormato) : ''}} <br>
+                    {{ (novoGrupo.encerramento) ? 'GRUPO ENCERRADO' : '' }}
+                </span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div *ngIf="idGrupo" (click)="navegar('pacientes')" [ngClass]="{ativo: atual === 'pacientes'}">Pacientes</div>
+            <div *ngIf="idGrupo" (click)="navegar('responsaveis')" [ngClass]="{ativo: atual === 'responsaveis'}">Responsáveis</div>
+            <div *ngIf="idGrupo" (click)="navegar('sessoes')" [ngClass]="{ativo: atual === 'sessoes'}">Sessoes</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div *ngIf="atual === 'geral'">
+            <moldura>
+
+                <div class="row">
+                    <div class="col">
+                        <autocomplete *ngIf="!idGrupo; else temaGrupo"
+                            [titulo]="'Temas'"
+                            [placeholder]="'Digite para buscar Temas'"
+                            [minimo]="3"
+                            [valor]="objTemas"
+                            [camposFiltro]="['descricao']"
+                            [valorSelecionado]="temaSelecionado"
+                            [fnSearch]="fnCfgTemaRemote.bind(this)"
+                            (fnOnSelected)="getTemaGrupo($event)"
+                        ></autocomplete>
+
+                        <ng-template #temaGrupo>
+                            <div class="row">
+                                <entrada 
+                                    [ngClass]="'col-sm-8 col-md-8'" 
+                                    [valor]="(novoGrupo['tema']) ? novoGrupo['tema']['descricao'] : null" [nome]="'Tema'" 
+                                    [bloqueado]="true"
+                                ></entrada> 
+                                <entrada 
+                                    [ngClass]="'col-sm-4 col-md-4'" 
+                                    [valor]="(novoGrupo['tema'] && novoGrupo['tema']['especialidade']) ? novoGrupo['tema']['especialidade']['descricao'] : null" [nome]="'Especialidade'" 
+                                    [bloqueado]="true"
+                                ></entrada> 
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <div class="col">
+                        <entrada nome="Nome" [bloqueado]="!podeEditarRecorrencia()" [valor]="novoGrupo.descricao" (getValor)="novoGrupo.descricao=$event.valor" tamanhoMaximo="40"></entrada>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <entrada 
+                            nome="Local de Atendimento" 
+                            tipo="seleciona" 
+                            [bloqueado]="!podeEditarRecorrencia()"
+                            objId="codigoDto" 
+                            [valor]="(novoGrupo.unidadeAtendimento) ? novoGrupo.unidadeAtendimento['id'] : '0'"
+                            [opcoes]="unidadesAtendimento" 
+                            (getValor)="($event) ? novoGrupo.unidadeAtendimento= { id : $event.valor } : null"
+                        ></entrada>
+                    </div>
+                    <div class="col">
+                        <entrada 
+                            nome="Quantidade de participantes" 
+                            [bloqueado]="!podeEditarRecorrencia()"
+                            [valor]="novoGrupo.qtdMaxPaciente" 
+                            tipo="numero" 
+                            (getValor)="novoGrupo.qtdMaxPaciente=$event.valor"
+                        ></entrada>
+                    </div>
+                    <div class="col">
+                        <entrada 
+                            nome="Quantidade máxima de faltas permitidas" 
+                            [bloqueado]="!podeEditarRecorrencia()"
+                            [valor]="novoGrupo.qtdFaltas" 
+                            tipo="numero" 
+                            (getValor)="novoGrupo.qtdFaltas=$event.valor"
+                        ></entrada>
+                    </div>
+                </div>
+            </moldura>
+
+            <moldura>
+                <div class="row">
+                    <div 
+                        *ngIf="!idGrupo"
+                        class="col-md-12" 
+                        style="margin-bottom: 25px;"
+                    >
+                        <label>Recorrência variável?</label>
+                        <input-checkbox 
+                            [estado]="recorrenciaVariavel"
+                            (trocaEstado)="recorrenciaVariavel = $event"
+                        ></input-checkbox>
+                    </div>
+
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Data da primeira sessão</label>
+                            <input 
+                                type="date" 
+                                [disabled]="!podeEditarRecorrencia()"
+                                name="inicio" 
+                                class="form-control" 
+                                (change)="validaDatasHoras('dataInicio', 'dataFim')" 
+                                [(ngModel)]="novoGrupo.dataPrimeiraSessao"
+                            >
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="!recorrenciaVariavel">
+                    
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Data da ultima sessão</label>
+                                <input type="date" name="fim" class="form-control" [disabled]="!podeEditarRecorrencia()" (change)="validaDatasHoras('dataInicio', 'dataFim')" [(ngModel)]="novoGrupo.dataUltimaSessao">
+                            </div>
+                        </div>
+
+                    </ng-container>
+                </div>
+                
+            </moldura>
+        </div>
+
+        <div *ngIf="(atual === 'pacientes') && (idGrupo)">
+
+            <div *ngIf="novoGrupo && !novoGrupo.encerramento" style="width: 25%;float: right;margin-bottom: 14px;">
+                <botao nome="Adicionar Paciente" (click)="abreModalAdicionaPaciente(modalAdicionarPaciente, modalAdicionarPacienteBotoes)"></botao>
+            </div>
+
+            <ng-template #modalAdicionarPaciente >
+
+                <moldura
+                    titulo="Adicionar da Lista de Espera"
+                    oculto="true"
+                >
+                    <table class="table no-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th></th>
+                                <th>BENEFICIARIO</th>
+                                <th>INCLUSÃO</th>
+                                <th>OBSERVAÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr #linha *ngFor="let pacienteLista of listaEspera" class="link">
+                                <td class="status" [style.background]="setColorBackgroundStatus(pacienteLista.prioridade)" ></td>
+                                <td>
+                                    <icone nome="check" tamanho="grande" (click)="setObjParamPaciente(pacienteLista, linha)" ></icone>
+                                </td>
+                                <td>{{(pacienteLista.paciente ? pacienteLista.paciente.nome : '')}}</td>
+                                <td>{{pacienteLista.inclusao}}</td>
+                                <td>{{pacienteLista.observacao}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+    
+                    <br class="all">
+    
+                    <div>
+                        <paginacao
+                            (atualizaDados)="buscarAtendimentoEsperaPaginado($event)"
+                            qtdItensTotal="{{qtdItensTotalListaEspera}}"
+                            paginaAtual="{{paginaAtualListaEspera}}"
+                            itensPorPagina="{{itensPorPaginaListaEspera}}"
+                            scrollPagination="true"
+                        ></paginacao>
+                    </div>
+                </moldura>
+
+                <moldura
+                        titulo=""
+                    >
+
+                    <autocomplete
+                        [titulo]="'Pacientes'"
+                        [placeholder]="'Digite para buscar Pacientes'"
+                        [minimo]="3"
+                        [valor]="objPacientes"
+                        [camposFiltro]="['nome', 'cpf']"
+                        [valorSelecionado]="valorPacienteSelecionado"
+                        [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                        (fnOnSelected)="setObjParamPaciente($event)"
+                    ></autocomplete>
+
+                    <div class="col-sm-12 col-md-12" *ngIf="objParamsAddPaciente['paciente'] && !consultaAgendaPaciente">
+                        <moldura titulo="Carteirinhas" oculto="true" >
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="status"></th>
+                                        <th>Codigo</th>
+                                        <th>Operadora</th>
+                                        <th>Validade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr 
+                                        *ngFor="let plano of objParamsAddPaciente['paciente'].planos" 
+                                        [ngClass]="{'active': planoSelecionado && planoSelecionado.codigo == plano.codigo}"
+                                        (click)="getPlano(plano)"
+                                    >
+                                        <td class="status" [style.background]="(plano.bloqueio) ? 'red' : 'green' "></td>
+                                        <td>{{plano.codigo}}</td>
+                                        <td>{{plano.operadora.nome}}</td>
+                                        <td>{{plano.validade}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </moldura>
+                    </div>
+
+                    <input-checkbox
+                        classe="check_todasSessoes"
+                        [legenda]="'Todas as sessoes'"
+                        [estado]="todasSessoes" 
+                        (trocaEstado)="todasSessoes = $event"
+                    ></input-checkbox>
+
+                    <entrada 
+                        nome="Quantidade de Sessoes do Paciente"
+                        tipo="numero"
+                        (getValor)="objParamsAddPaciente['qtdSessoes'] = $event.valor"
+                    ></entrada>
+
+                    <div [hidden]="todasSessoes" class="row">
+
+                        <div *ngIf="!recorrenciaVariavel" class="col-md-12 col-sm-12">
+                            <recorrencia
+                                [horaPorDia]='true'
+                                [habilitaDiaTodo]='false'
+                                [bloqueiaRecorrenciaForaDaConfiguracao]="true"
+                                [(obj)]='recorrenciaPaciente'
+                                (setObjRecorrencia)="recorrenciaPaciente=$event"
+                                (setRecorrenciaInstancia)="setRecorrenciaInstanciaPaciente($event)"
+                            ></recorrencia>
+                        </div>
+
+                        <div *ngIf="recorrenciaVariavel" class="col-md-12 col-sm-12">
+                            <ng-template 
+                                [ngTemplateOutlet]="recorrenciaGrupo"
+                                [ngTemplateOutletContext]="{
+                                    somenteSelecionar: true,
+                                    objRecorrencias: recorrenciasPaciente,
+                                    naoSalva: true
+                                }"
+                            ></ng-template>
+                        </div>
+
+                    </div>
+                </moldura>
+            </ng-template>
+
+            <ng-template #modalAdicionarPacienteBotoes>
+                <botao nome="Adicionar" [desabilitado]="!objParamsAddPaciente['paciente']" (click)="adicionarPaciente()"></botao>
+            </ng-template>
+
+            <br clear="all">
+
+            <moldura titulo="Pacientes" [pesquisar]="pesquisar.bind(this)" [registros]="qtdItensTotal">
+                <div *ngIf="pacientes">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="width: 100px !important"></th>
+                                <th>CARTEIRA</th>
+                                <th>NOME</th>
+                                <th>NASCIMENTO</th>
+                                <th>CONTRATANTE</th>
+                                <th>FALTAS</th>
+                                <th>RESTANTES</th>
+                                <th>TOTAL SESSÕES</th>                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let paciente of pacientesFiltro; let pos = index" class="link">
+                                <tr>
+                                    <td class="coluna_acoes">
+                                        <icone nome="delete" title="Excluir" (click)="removeItem(paciente.id, paciente.paciente.nome, 'paciente')"></icone>
+                                        <icone nome="edit" title="Editar" class="ml-3" (click)="abreRecorrenciaPaciente(modalEditarPaciente, modalEditarPacienteBotoes, paciente, pos)"></icone>
+                                    </td>
+                                    <td>{{ (paciente.pacientePlano) ? paciente.pacientePlano.codigo : '' }}</td>
+                                    <td>{{ paciente.paciente.nome }}</td>
+                                    <td>{{ paciente.paciente.nascimento }}</td>
+                                    <td>{{ paciente.paciente.contratante }}</td>
+                                    <td>{{ (paciente.qtdFaltas == '0') ? 'Sem Faltas' : paciente.qtdFaltas }}</td>
+                                    <td>{{ (paciente.qtdSessoesRestantes == '99999') ? 'Todas sessões' : paciente.qtdSessoesRestantes }}</td>
+                                    <td>{{ (paciente.qtdSessoes == '0' && paciente.qtdSessoesRestantes == '99999') ? 'Todas Sessões' : paciente.qtdSessoes }}</td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+            
+                    <br class="all">
+            
+                    <div>
+                        <paginacao
+                            (atualizaDados)="buscarPacientes($event, null, false)"
+                            qtdItensTotal="{{qtdItensTotal}}"
+                            paginaAtual="{{paginaAtual}}"
+                            itensPorPagina="{{itensPorPagina}}"
+                            scrollPagination="true"
+                            contaRegistro="true"
+                        ></paginacao>
+                    </div>
+                </div>
+            </moldura>
+        </div>
+
+        <div *ngIf="(atual === 'responsaveis') && (idGrupo)">
+
+            <div 
+                *ngIf="novoGrupo && !novoGrupo.encerramento"
+                class="row"
+            >
+                <div class="col-sm-10 col-md-10">
+
+                    <autocomplete
+                        [titulo]="'Responsáveis'"
+                        [placeholder]="'Digite para buscar um Responsável'"
+                        [minimo]="1"
+                        [valor]="objResponsaveis"
+                        [camposFiltro]="['nome']"
+                        [valorSelecionado]="responsavelSelecionado"
+                        [fnSearch]="fnCfgResponsavelRemote.bind(this)"
+                        (fnOnSelected)="getResponsavel($event)"
+                    ></autocomplete>
+
+                </div>
+
+                <div class="col-sm-1 col-md-1">
+                    <div class="form-group">
+                        <label>Principal</label>
+                        <input-checkbox
+                            classe="check_principal_label"
+                            (trocaEstado)="objParamsAddResponsavel['principal'] = $event"
+                        ></input-checkbox>
+                    </div>
+                </div>
+
+                <div class="col-sm-1 col-md-1">
+                    <div class="form-group" [style.marginTop.px]="21">
+                        <label></label>
+                        <botao 
+                            icone="add" 
+                            tamanho="medio" 
+                            [desabilitado]="!objParamsAddResponsavel['usuario']"
+                            (click)="adicionarResponsavel()"
+                        ></botao>
+                    </div>
+                </div>
+            </div>
+
+            <br clear="all">
+
+            <moldura
+                titulo="&nbsp;"
+                [pesquisar]="pesquisarResponsaveis.bind(this)"
+            >
+                <div *ngIf="responsaveis">
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th>
+                                <th>USERNAME</th>
+                                <th>NOME</th>
+                                <th>EMAIL</th>
+                                <th></th>
+                            </tr>
+                            <tr *ngFor="let responsavel of responsaveisFiltro" class="link">
+                                <td>
+                                    <input-checkbox 
+                                        classe="check_principal"
+                                        [estado]="responsavel.principal" 
+                                        (trocaEstado)="defineUsuarioPrincipal($event, responsavel)"
+                                    ></input-checkbox>
+                                </td>
+                                <td>{{responsavel.usuario.username}}</td>
+                                <td>{{responsavel.usuario.nome}}</td>
+                                <td>{{responsavel.usuario.email}}</td>
+                                <td class="coluna_acoes">
+                                    <botao icone="delete" (click)="removeItem(responsavel.id, responsavel.usuario.nome, 'responsavel')"></botao>
+                                </td>
+                            </tr>
+                        </thead>
+                    </table>
+            
+                    <br class="all">
+            
+                    <div>
+                        <paginacao
+                            (atualizaDados)="buscarResponsaveis($event, false)"
+                            qtdItensTotal="{{qtdItensTotalResponsaveis}}"
+                            paginaAtual="{{paginaAtualResponsaveis}}"
+                            itensPorPagina="{{itensPorPaginaResponsaveis}}"
+                            scrollPagination="true"
+                        ></paginacao>
+                    </div>
+                </div>
+            </moldura>
+        </div>
+        
+        <div *ngIf="(atual === 'sessoes') && (idGrupo)">
+
+            <br clear="all">
+
+            <div 
+                *ngIf="novoGrupo && !novoGrupo.encerramento"
+                class="row"
+            >
+
+                <div class="col-md-3">
+                    <botao nome="Iniciar sessao de hoje" (click)="iniciarSessaoDeHoje()"></botao>
+                </div>
+
+                <div class="col-md-3">
+                    <botao nome="Iniciar sessao de ontem" (click)="iniciarSessaoDeHoje(true)"></botao>
+                </div>
+
+            </div>
+
+            <br>
+
+            <div>
+                <moldura
+                    titulo="&nbsp;"
+                >
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <td class="status"></td>
+                                <td>GRUPO</td>
+                                <td>DATA</td>
+                                <td>INÍCIO</td>
+                                <td>FIM</td>
+                                <td>USUÁRIO</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let sessao of sessoes" class="link">
+                                <td class="status" [style.background]="validaStatusSessao(sessao, false)['cor']"></td>
+                                <td>{{sessao.grupo.descricao}}</td>
+                                <td>{{ momentjs(sessao.dataSessao, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.dataFormato) }}</td>
+                                <td>{{sessao.recorrencia ? sessao.recorrencia.horaInicio : ''}}</td>
+                                <td>{{sessao.recorrencia ? sessao.recorrencia.horaFim : ''}}</td>
+                                <td>{{sessao.usuario ? sessao.usuario.username : ''}}</td>
+                                <td class="coluna_acoes">
+                                    <botao *ngIf="validaStatusSessao(sessao, true)['tipo'] != 'nao iniciada' " icone="search"  classe="form-control btn btn-primary" (click)="visualizaSessao(sessao['id'], sessao)" ></botao>
+                                    <botao *ngIf="validaStatusSessao(sessao, true)['tipo'] == 'podeIniciarHoje' && validaStatusSessao(sessao, false)['tipo'] != 'finalizada'" icone="check" classe="form-control btn btn-primary" (click)="realizaSessao(sessao['id'], sessao)" ></botao>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <br class="all">
+
+                    <div>
+                        <paginacao
+                            (atualizaDados)="buscarSessoesGrupo($event, false)"
+                            qtdItensTotal="{{qtdItensTotalSessoes}}"
+                            paginaAtual="{{paginaAtualSessoes}}"
+                            itensPorPagina="{{itensPorPaginaSessoes}}"
+                            scrollPagination="true"
+                        ></paginacao>
+                    </div>
+                </moldura>
+            </div>
+        </div>
+
+        <ng-template 
+            *ngIf="(atual != 'pacientes') && (atual != 'responsaveis')" 
+            [ngTemplateOutlet]="recorrenciaGrupo"
+            [ngTemplateOutletContext]="{
+                objRecorrencias: recorrenciasVariaveis
+            }"
+        ></ng-template>
+
+        <div class="row">
+
+            <ng-container *ngIf="novoGrupo && !novoGrupo.encerramento">
+
+                <div *ngIf="atual === 'geral'" class="col-lg-2 col-md-2 col-sm-2">
+                    <botao nome="Salvar" [ngClass]="'col-md-3'"    (click)="salvarGrupo()"></botao>
+                </div>
+                <div *ngIf="permiteUsuarioEditar" class="col-lg-2 col-md-2 col-sm-2">
+                    <botao nome="Encerrar" [ngClass]="'col-md-3'"  (click)="encerrarGrupo()" classe="btn-danger"></botao>
+                </div>
+
+            </ng-container>
+
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <botao nome="Voltar" [ngClass]="'col-md-3'"    (click)="voltar()" classe="btn-default"></botao>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<ng-template #bodyModalRemoverItem let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>
+                {{textoModalExclusao}}
+            </p>
+            <p>Por favor informe o motivo dessa exclusão</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            
+            <textarea
+                name="Motivo" 
+                class="form-control" 
+                placeholder="Motivo"
+                [(ngModel)]="observacaoRemocao"
+            ></textarea>
+
+            <entrada
+                *ngIf="tipoRemocao == 'paciente'"
+                nome="Tipo Encerramento"
+                tipo="seleciona"
+                [valor]="'0'"
+                [opcoes]="tiposEncerramento"
+                (getValor)="($event.valor && ($event.valor != '0') ) ? tipoEncerramento=$event.valor : tipoEncerramento=undefined ">
+            ></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesModalRemoverItem let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" [desabilitado]="validaConfirmaREmocao()" classe="btn-primary" (click)="removerDaLista(itemRemocao)"></botao>
+</ng-template>
+
+<!-- 
+ -->
+<ng-template #modalEditarPaciente>
+
+    <div class="col-md-8 col-sm-8" style=" text-align: center;margin: 0 auto; ">
+        <entrada
+            nome="Quantidade de Sessoes do Paciente"
+            tipo="numero"
+            [valor]="pacienteSelecionado.qtdSessoes"
+            (getValor)="objParamsAddPaciente['qtdSessoes'] = $event.valor"
+        ></entrada>
+    </div>
+
+    <div class="row">
+        <div *ngIf="!recorrenciaVariavel" class="recorrencias">
+            <recorrencia
+                [horaPorDia]='true'
+                [habilitaDiaTodo]='false'
+                [bloqueiaRecorrenciaForaDaConfiguracao]="true"
+                [(obj)]='objRecorrenciaPacienteAtual'
+                (setObjRecorrencia)="objRecorrenciaPacienteAtual=$event"
+                (setRecorrenciaInstancia)="setRecorrenciaInstanciaPacienteTable($event)"
+                [fnSalvaRecorrencia]="recorrenciaPacienteObjTable.bind(this)"
+            ></recorrencia>
+        </div>
+
+        <div *ngIf="recorrenciaVariavel" class="recorrencias">
+            <ng-template 
+                [ngTemplateOutlet]="recorrenciaGrupo"
+                [ngTemplateOutletContext]="{
+                    somenteSelecionar: true,
+                    objRecorrencias: recorrenciasPaciente
+                }"
+            ></ng-template>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #modalEditarPacienteBotoes>
+    <botao nome="Salvar" classe="btn-primary" (click)="editarPaciente()"></botao>
+</ng-template>
+
+
+<ng-template 
+    #recorrenciaGrupo 
+    let-somenteSelecionar="somenteSelecionar"
+    let-objRecorrencias="objRecorrencias"
+    let-naoSalva="naoSalva"
+>
+
+    <moldura *ngIf="!recorrenciaVariavel || (recorrenciaVariavel && idGrupo)">
+        <div class="row">
+            <ng-container *ngIf="!recorrenciaVariavel">
+                <div class="col-md-8 col-sm-8">
+                    <recorrencia
+                        [horaPorDia]='true'
+                        [habilitaDiaTodo]='false'
+                        [(obj)]='recorrencia'
+                        [podeEditar]="permiteUsuarioEditar"
+                        (setObjRecorrencia)="recorrencia=$event"
+                        (setRecorrenciaInstancia)="setRecorrenciaInstancia($event)"
+
+                        [fnRecorrenciaMostraBotao]="fnRecorrenciaMostraBotao.bind(this)"
+                        [fnSalvaRecorrencia]="fnSalvaRecorrencia.bind(this)"
+                    ></recorrencia>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="recorrenciaVariavel && idGrupo">
+
+                <div class="row col-md-12 novaData" *ngFor="let recorrencia of objRecorrencias; let pos = index">
+
+                    <ng-container *ngIf="(!somenteSelecionar) || (somenteSelecionar && recorrencia.id)">
+
+                        <div class="row col-md-8 {{ recorrencia.checado ? 'checado' : '' }}"
+                            [ngClass]="{
+                                'sub': !!(pos)
+                            }"
+                        >
+
+                            <div class="col-md-4">
+                                <entrada
+                                    nome="Data"
+                                    tipo="datepicker"
+                                    [semTitulo]="!!(pos)"
+                                    [semData]="!(recorrencia.id)"
+                                    formatoData="DD/MM/YYYY"
+                                    classe="top"
+                                    [valor]="recorrencia['data']"
+                                    (getValor)="recorrencia['data'] = $event['valor']"
+                                ></entrada>
+
+                            </div>
+                            <div class="col-md-3">
+                                <entrada
+                                    nome="Hora Inicio"
+                                    tipo="datepicker"
+                                    [mostraData]="false"
+                                    [semTitulo]="!!(pos)"
+                                    classeHora="tamanhoMaximo"
+                                    [hora]="true"
+                                    [valor]="recorrencia['horaInicio']"
+                                    (getValor)="recorrencia['horaInicio'] = $event['valor']"
+                                ></entrada>
+                            </div>
+                            <div class="col-md-3">
+                                <entrada
+                                    nome="Hora Fim"
+                                    tipo="datepicker"
+                                    [semTitulo]="!!(pos)"
+                                    [mostraData]="false"
+                                    classeHora="tamanhoMaximo"
+                                    [hora]="true"
+                                    [valor]="recorrencia['horaFim']"
+                                    (getValor)="recorrencia['horaFim'] = $event['valor']"
+                                ></entrada>
+                            </div>
+                            <ng-container *ngIf="!somenteSelecionar" >
+
+                                <div 
+                                    class="col-md-2 d-flex"
+                                    *ngIf="pos == recorrenciasVariaveis.length - 1"
+                                >
+                                    <botao 
+                                        icone="add"
+                                        classe="transparente"
+                                        [botao_lateral]="true"
+                                        [desabilitado]="validaDesabilitar(recorrencia)" 
+                                        (click)="novaRecorrenciaVariavel(recorrencia)"
+                                    ></botao>
+                                </div>
+                                <div 
+                                    class="col-md-2 d-flex"
+                                    *ngIf="!(pos == recorrenciasVariaveis.length - 1)"
+                                >
+                                    <botao 
+                                        icone="edit"
+                                        classe="transparente"
+                                        [botao_lateral]="true"
+                                        [desabilitado]="validaDesabilitar(recorrencia)" 
+                                        (click)="novaRecorrenciaVariavel(recorrencia)"
+                                    ></botao>
+                                    <botao 
+                                        icone="delete"
+                                        classe="transparente"
+                                        [botao_lateral]="true"
+                                        [desabilitado]="validaDesabilitar(recorrencia)" 
+                                        (click)="removeRecorrenciaVariavel(recorrencia)"
+                                    ></botao>
+                                </div>
+
+                            </ng-container>
+                            
+                            <ng-container *ngIf="somenteSelecionar">
+                                <div 
+                                    class="col-md-2 d-flex"
+                                >
+                                    <botao 
+                                        icone="{{ recorrencia.checado ? 'delete' : 'check' }}"
+                                        classe="{{ recorrencia.checado ? 'btn-danger' : 'btn-primary' }} transparente"
+                                        [botao_lateral]="true"
+                                        [desabilitado]="validaDesabilitar(recorrencia)" 
+                                        (click)="adicionarRecorrenciaPaciente(recorrencia, naoSalva)"
+                                    ></botao>
+                                    <!-- recorrencia.checado = !recorrencia.checado -->
+                                </div>
+                            </ng-container>
+                        </div>
+
+                    </ng-container>
+
+                </div>
+            
+            </ng-container>
+        </div>
+    </moldura>
+
+</ng-template>

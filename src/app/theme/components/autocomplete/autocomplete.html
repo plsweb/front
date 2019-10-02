@@ -1,0 +1,131 @@
+<div #elementAutocomplete class="form-group has-feedback {{(custom_class)}}" *ngIf="fnSearch; else buscaLocal">
+    <label class="control-label" *ngIf="titulo">{{titulo}}</label><span *ngIf="requerido"> *</span>
+    <label *ngIf="!titulo && !semTitulo"> </label>
+    <input 
+        #inputAutocomplete
+        class="form-control" 
+        type="text" 
+        placeholder="{{placeholder}}" 
+        [(ngModel)]="valorSelecionado"
+        (keyup)="searchData()"
+        (blur)="onBlur($event)"
+        (focus)="onFocus($event)"
+        (mouseenter)="mouseEnterCampo($event)" 
+        (mouseleave)="mouseLeaveCampo($event)"
+        [disabled]="bloqueado"
+    >
+
+    <i *ngIf="buscando" class="material-icons form-control-feedback loading">cached</i>
+
+    <div *ngIf="buscando && foco" class="searching content-search">
+        <table class="table_autocomplete">
+            <thead class="thead-dark">
+                <th>Buscando...</th>
+            </thead>
+        </table>
+    </div>
+
+    <ng-container *ngIf="foco && valorSelecionado && (valorSelecionado.length >= minimo)">
+        <div *ngIf="(valor && !buscando) && !selecionou" (mouseenter)="mouseEnter($event)" (mouseleave)="mouseLeave($event)" class="content-search">
+            <ng-container *ngIf="valor.length && foco">
+                <table *ngIf="valor.length" class="table_autocomplete no-hover">
+                    <thead class="thead-dark">
+                        <th *ngFor="let head of camposLabel">{{head}}</th>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of valor" class="linha_autocomplete" (click)="selectItem($event, item)">
+                            <td *ngFor="let head of objFiltros">
+                                {{ ( ( item[head] != 'NULL' ) && ( item[head] != 'UNDEFINED' ) ) ? formataValor(item, head) : '' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row">
+                    <div class="col">
+                        <ng-template [ngTemplateOutlet]="customElement"></ng-template>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="!valor.length && foco && valorSelecionado">
+                <table class="table_autocomplete">
+                    <thead class="thead-dark">
+                        <th>Sem resultados</th>
+                    </thead>
+                </table>
+                <div class="row">
+                    <div class="col">
+                        <ng-template [ngTemplateOutlet]="customElement"></ng-template>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+</div>
+
+<ng-template #buscaLocal>
+    <div #elementAutocomplete class="form-group has-feedback {{(custom_class)}}">
+        <label class="control-label" *ngIf="titulo">{{titulo}} </label><span *ngIf="requerido"> *</span>
+        <label *ngIf="!titulo && !semTitulo"> </label>
+        <input 
+            class="form-control" 
+            type="text" 
+            placeholder="{{placeholder}}" 
+            [(ngModel)]="valorSelecionado"
+            (keyup)="searchData()"
+            (blur)="onBlur($event)"
+            (focus)="onFocus($event)"
+            [disabled]="bloqueado"
+        >
+
+        <i class="material-icons form-control-feedback loading">cached</i>
+
+        <div *ngIf="buscando && foco" class="searching content-search">
+            <table class="table_autocomplete">
+                <thead class="thead-dark">
+                    <th>Buscando...</th>
+                </thead>
+            </table>
+        </div>
+
+        <ng-container *ngIf="foco && valorSelecionado">
+            <div *ngIf="(valorLocal && !buscando) && !selecionou" class="content-search">
+                <ng-container *ngIf="valorLocal.length && foco">
+                    <table *ngIf="valorLocal.length" class="table_autocomplete no-hover">
+                        <thead class="thead-dark">
+                            <th *ngFor="let head of camposLabel">{{head}}</th>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of valorLocal" (click)="selectItem($event, item)">
+                                <td *ngFor="let head of objFiltros">
+                                    {{ ( ( item[head] != 'NULL' ) && ( item[head] != 'UNDEFINED' ) ) ? formataValor(item, head) : '' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col">
+                            <ng-template [ngTemplateOutlet]="customElement"></ng-template>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="!valorLocal.length && foco && valorSelecionado">
+                    <table class="table_autocomplete">
+                        <thead class="thead-dark">
+                            <th>Sem resultados</th>
+                        </thead>
+                    </table>
+
+                    <div class="row">
+                        <div class="col">
+                            <ng-template [ngTemplateOutlet]="customElement"></ng-template>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+    </div>
+</ng-template>

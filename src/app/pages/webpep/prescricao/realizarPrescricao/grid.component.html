@@ -1,0 +1,22 @@
+<moldura
+    titulo="Medicações"
+    [registros]="totalPrescricoes"
+>
+
+    <!-- <div class="row">
+        <div class="col-md-3">
+            <botao [nome]="expandido ? 'Fecha Todos' : 'Abre Todos'" (click)="expandido = !expandido"></botao>
+        </div>
+    </div> -->
+
+    <listaPrescricoesFiltro
+        [filtros]="requestBODY"
+        [validaEspecialidade]="true"
+        [modoDetalhado]="true"
+        [visaoPaciente]="true"
+        [somenteVisualizacao]="true"
+        [visualizaHistoricoRealizacao]="false"
+        [tamanhoVw]="5.3"
+    ></listaPrescricoesFiltro>
+
+</moldura>

@@ -1,0 +1,275 @@
+<moldura *ngIf="carregou">
+
+    <moldura *ngIf="sessao">
+        <div class="card-header clearfix" class="cabecalho_sessao">
+            GRUPO: {{sessao.grupo.descricao}} <br>
+            DATA DA SESSÃO: {{sessao.dataSessao}} <br>
+            {{  (tipoSessao && tipoSessao != 'naoPermitida') ? 'STATUS: ' + tipoSessao.toUpperCase() : '' }}
+        </div>
+    </moldura>
+
+    <moldura titulo="Adicionar novo Paciente" [oculto]="true">
+        <div class="row">
+            <div class="col-sm-10 col-md-10">
+
+                <entrada 
+                    nome="Pacientes do Grupo"
+                    (getValor)="getPaciente($event)"
+                    tipo="seleciona"
+                    [opcoes]="pacientesGrupo"
+                ></entrada>
+
+            </div>
+
+            <div class="col-sm-2 col-md-2">
+                <div class="form-group" [style.marginTop.px]="21">
+                    <botao 
+                        nome="Adicionar"
+                        tamanho="medio" 
+                        [desabilitado]="!grupoBeneficiarioSelecionado"
+                        (click)="adicionarPacienteSessao()"
+                    ></botao>
+                </div>
+            </div>
+        </div>
+    </moldura>
+
+    <moldura>
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h4>Participantes da Sessão:</h4>
+            </div>
+            <div class="col-md-4 col-sm-4" >
+                <label>{{mensagemSalvou}}</label>
+                <ng-container *ngIf="carregandoRespostas">
+                    <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando respostas...
+                </ng-container>
+
+                <div class="row">
+
+                    <div *ngIf="( tipoSessao == 'iniciada' && !visualizacao )"  class="col">
+                        <botao 
+                            nome="Finalizar Sessão" 
+                            (click)="finalizarSessao()" 
+                        ></botao> 
+                    </div>
+
+                    <!--
+                    <div *ngIf="( tipoSessao == 'iniciada' && !visualizacao )"  class="col-md-7">
+                        <botao
+                            nome="Perguntas Obrigatórias"
+                            (click)="abrirPerguntasNaoRespondidas()"
+                        ></botao>
+                    </div>
+                    -->
+
+                    <div *ngIf="( !tipoSessao )" class="col">
+                        <botao 
+                            nome="Iniciar Sessão" 
+                            (click)="iniciarSessao()" 
+                        ></botao>
+                    </div>
+
+                    <div *ngIf="( tipoSessao == 'naoPermitida' )" class="col">
+                        <label>
+                            Sessão não pode ser iniciada
+                        </label>
+                    </div>
+
+                    <div *ngIf="( tipoSessao == 'iniciada' && visualizacao )" class="col">
+                        <label>
+                            Sessão já iniciada.
+                        </label>
+                    </div>
+
+                    <div *ngIf="( tipoSessao == 'iniciada' && visualizacao )" class="col">
+                        <botao 
+                            nome="Continuar Sessão" 
+                            (click)="mudarParaRealizar()" 
+                        ></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th class="status"></th>
+                        <th class="first">STATUS</th>
+                        <th [style.minWidth.px]="( getIndicadores(objSessoes, false).length == 1 ) ? '367' : '272' ">NOME</th>
+                        <th [style.textAlign]="'center'"> <icone [nome]="'description'" [tamanho]="'medio'"></icone> </th>                    
+                        <th 
+                            *ngFor="let indicador of getIndicadores(objSessoes, true); let pos = index"
+                            class="campos_indicador"
+                            [ngClass]="( getIndicadores(objSessoes, false).length == 1) ? 'indicador_unico' : ''"
+                        >
+                            {{indicador.descricao}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="link {{participante.id}}" *ngFor="let participante of objSessoes; let posPart = index">
+                        <td>
+                            <icone nome="delete" (click)="removerPacienteSessao(participante)"></icone>
+                        </td>
+                        <td class="status" [style.background]="setColorBackgroundStatus(posPart, participante.id)"></td>
+                        <td class="first">
+                            <entrada
+                                nome="Status"
+                                tipo="seleciona"   
+                                [valor]="setValor(posPart)"
+                                [objId]="'codigo'"
+                                [naoValidaScore]="false"
+                                [semTitulo]="true"
+                                [bloqueado]="visualizacao"
+                                [opcoes]="objTipoPresenca"
+                                (change)="setStatusBene(  { valor : $event.target.value }, posPart)">
+                            ></entrada>
+                        </td>
+                        <td>{{participante.paciente.nome}}</td>
+                        <td>
+                            <botao 
+                                nome="Formulários"
+                                [desabilitado]="!objPresenca || ( objPresenca && !objPresenca.length ) || (objPresenca && objPresenca.length && !objPresenca[posPart]['obj']['presenca'])"
+                                classe="form-control btn btn-info"
+                                (click)="visualizarFormulario(participante, posPart)"
+                            ></botao>
+                        </td>
+                        <td
+                            *ngFor="let indicador of getIndicadores(objSessoes, true ); let pos = index"
+                            class="campos_indicador"
+                            [ngClass]="( count == 1) ? 'indicador_unico' : ''"
+                        >
+                            <entrada 
+                                #inputsForm
+                                *ngIf="indicador.tipo != 'SELECAO'" 
+                                [valor]="resposta(participante, participante['formularioResposta'], indicador.id)" 
+                                [tipo]="indicador.tipo"
+                                [grupoPergunta]="indicador"
+                                [ordemPergunta]="1.1"
+                                [semTitulo]="true"
+                                [mostraScore]="false"
+                                [naoValidaScore]="false"
+                                [opcoes]="indicador.opcoes"
+                                [opcoesBoolean]="false"
+                                [nome]="indicador.descricao"
+                                [mascara]="indicador.mascara"
+                                [id]="objSessoes[posPart]?.id+'-'+indicador.descricao"
+                                (change)="getResposta({ valor : $event.target.value }, indicador, participante, indicador.tipo, true, posPart, (pos+1))"
+                                (getValor)="getResposta($event, indicador, participante, indicador.tipo, false, posPart, (pos+1))" 
+                                [bloqueado]="!objPresenca || ( objPresenca && !objPresenca.length ) || (objPresenca && objPresenca.length && !objPresenca[posPart]['obj']['presenca']) || visualizacao"
+                            ></entrada>
+
+                            <div *ngIf="indicador.tipo == 'SELECAO'">
+                                <div class="selecao">
+                                    <div *ngFor="let opcao of indicador.opcoes" class="opcoes">
+                                        <input 
+                                            type="checkbox" 
+                                            id="{{opcao.id || opcao.guid}}"
+                                            [disabled]="!objPresenca || ( objPresenca && !objPresenca.length ) || (objPresenca && objPresenca.length && !objPresenca[posPart]['obj']['presenca']) || visualizacao" 
+                                            value="{{opcao.id || opcao.guid}}" 
+                                            [checked]="checkboxMarcado(opcao, participante, indicador)"
+                                            (change)="getCheckbox(participante, $event.target.value, indicador, (pos+1))"/>
+                                        <label for="{{opcao.id || opcao.guid}}">{{opcao.nome || opcao.descricao}}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div>
+                <paginacao
+                    (atualizaDados)="buscaPacienteGrupoSessaoPaginado($event)"
+                    qtdItensTotal="{{qtdItensTotal}}"
+                    itensPorPagina="{{itensPorPagina}}"
+                    [paginaAtual]="paginaAtual"
+                    contaRegistro="true"
+                ></paginacao>
+            </div>
+
+            <br class="all">
+
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-3">
+                    <botao nome="Voltar" [ngClass]="'col-md-3'"    (click)="voltar()" classe="btn-default"></botao>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                    <botao
+                        (click)="imprimirEvolucoes()"
+                        nome="Imprimir"
+                        icone="print"
+                        classe="botao_print btn-info"
+                        tamanho="medio"
+                    ></botao>
+                </div>
+            </div>
+
+            <!-- <entrada
+                [valor]="objSessoes.observacao" 
+                tipo="area"
+                [nome]="'Observações da Sessão'" 
+                (getValor)="objSessoes.observacao=$event.valor" 
+            ></entrada> -->
+    
+        </div>
+    </moldura>
+        
+</moldura>
+
+
+<ng-template #bodyModalFormEvolucao>
+    <paciente-formulario
+        [id]="idFormAberto"
+        [semBotoes]="true"
+        [respostasCabecalho]="respostasCabecalho"
+        [botaoSalvarFormulario]="false"
+        [bloqueiaRequisicoes]="visualizacao"
+    ></paciente-formulario>
+</ng-template>
+
+<ng-template #botoesModalFormEvolucao>
+    <botao nome="Imprimir" (click)="imprimirFomulario(idFormAberto)"></botao>
+</ng-template>
+
+
+<ng-template #bodyPerguntasNaoRespondidas>
+    <div *ngFor="let pergunta of perguntasObrigatoriasNaoRespondidas" class="animated fadeIn card link" zoom-in id="{{pergunta.id}}" style="cursor: pointer !important;">
+        <div class="card-header clearfix locais" (click)="abrirAbaPergunta(pergunta.id)">
+            <div class="titulo link">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td style="border-top: none;">{{pergunta.paciente}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fa {{idAbaAberta === pergunta.id ? 'fa-angle-up' : 'fa-angle-down'}} seta-dropdown"></div>
+        </div>
+        <div class="card-body" [hidden]="idAbaAberta !== pergunta.id">
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Pergunta</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let tipo of pergunta.pergunta">
+                        <td>{{tipo.descricao}}</td>
+                        <td>{{ (tipo.tipo == 'BOOLEAN') ? 'SIM OU NAO' : tipo.tipo}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</ng-template>

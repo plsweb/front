@@ -1,0 +1,34 @@
+
+<div class="modal-content">
+
+    <div class="modal-header">
+        <h4 class="modal-title">{{modalHeader}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="voltar()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body" id="modalBody">
+        {{modalBody}}
+    </div>
+
+    <div class="modal-footer">
+
+        <botao *ngIf="tipo == 'alert'; else confirm" nome="OK" (click)="emitAlert()">OK</botao>
+
+        <ng-template #confirm>
+            <botao nome="CONFIRM" (click)="emitConfirm(true)">SIM</botao>
+            <botao nome="NÃO" (click)="emitConfirm(false)">NÃO</botao>
+        </ng-template>
+
+        <!-- <button class="btn btn-default confirm-btn btn-raised" (click)="voltar()">Fechar</button> -->
+
+    </div>
+
+</div>
+<style type="text/css">
+    .popup .form-control,
+    .form-control {
+        text-transform: uppercase;
+    }
+</style>

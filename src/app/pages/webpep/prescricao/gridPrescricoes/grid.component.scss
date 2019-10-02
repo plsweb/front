@@ -1,0 +1,353 @@
+.status.aberto {
+    background-color: #79787d;
+}
+
+.status.prescrito {
+    background-color: #f47920;
+}
+
+.status.suspenso {
+    background-color: #ffffff;
+}
+
+.status.executado {
+    background-color: #00995d;
+}
+
+.status.cancelado {
+    background-color: #ed1651;
+}
+
+.label,
+.valor {
+    padding: 0 5px;
+    font-size: 11px;
+    border-radius: 0;
+    height: 30px;
+}
+
+:host /deep/ moldura {
+    
+}
+
+:host /deep/ .valor icone i {
+    top: 5px;
+    font-size: 20px;
+    position: relative;
+    z-index: 999;
+}
+
+.label{
+    font-weight: 700 !important;
+    height: auto;
+    // background: #3a3568;
+    // border-bottom: 1px solid rgba(14, 5, 107, 0.14);
+}
+
+.riscado {
+    width: 100%;
+    height: 2px;
+    left: 5em;
+    margin-bottom: -2px;
+    top: 16px;
+    position: relative;
+    background: rgba(183, 24, 24, 0.45) !important;
+    z-index: 999;
+}
+
+.label label,
+.valor span {
+    vertical-align: -webkit-baseline-middle;
+    margin-bottom: 0;
+    display: -webkit-box;
+}
+
+.grid-itens,
+.row.head-sub-itens,
+.produtosItem{
+    width: 96%;
+    margin: 0;
+    // border: 1px solid;
+}
+
+.grid-itens.modo-realizacao{
+    .row.itens{
+        cursor: auto;
+    }
+}
+
+.grid-detalhada{
+    width: auto;
+
+    .valor{
+        height: auto;
+    }
+
+    .row.head, 
+    .row.itens{
+        // display: -webkit-box;
+        display: flex;
+    }
+
+    .execucoes {
+        height: auto;
+    }
+}
+
+
+.historico-prescricao{
+    width: 50px;
+    height: 35px;
+    color: black;
+    position: relative;
+    text-align: -webkit-center;
+    text-align: center;
+    text-align: -moz-center;
+    cursor: pointer;
+    display: -webkit-inline-box;
+
+    .label_valor{
+        width: 108%;
+        display: block;
+        right: 5%;
+        position: relative;
+        background: rgba(0, 0, 0, 0.15);
+        margin-bottom: 10px;
+        height: 30px;
+    }
+
+}
+
+.row.head-sub-itens div {
+    background: rgba(23, 20, 53, 0.48) !important;
+}
+
+.row.sub-itens {
+    margin: 0 auto 10px;
+    width: 96%;
+    padding: 0 15px;
+    display: block;
+
+    // .valor, span {
+    //     height: 20px;
+    // }
+
+    .valor span {
+        // top: -0.6em;
+        position: relative;
+    }
+}
+
+.modo-prescricao{
+
+    .row.itens{
+
+        .valor.edit:hover {
+            background: rgba(21, 16, 64, 0.11);
+            cursor: pointer;
+            transition: 0.25s ease-out;
+        }
+
+    }
+
+}
+
+.row.itens:nth-child(even),
+.row.sub-itens div.row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.07);
+}
+
+
+.row.itens:nth-child(odd),
+.row.sub-itens div.row:nth-child(odd) {
+    background: rgba(0, 0, 0, 0.16);
+}
+
+
+:host /deep/ .valor .edit entrada{
+    
+    select,
+    input{
+        font-size: 1.2em;
+        padding: 0;
+        height: 30px !important;
+        width: 200px;
+    }
+
+}
+
+$tamanho_campos: 35px;
+:host /deep/ {
+    
+    .addProcedimento,
+    .addProduto {
+        // padding: 0 15px;
+        
+        entrada,
+        .entrada{
+
+            select, input {
+                height: $tamanho_campos !important;
+                font-size: 1.1em;
+            }
+
+            div {
+                margin: 0;
+            }
+        }
+
+        autocomplete{
+
+            input{
+                height: $tamanho_campos !important;
+                font-size: 1.1em;
+            }
+
+        }
+
+        div{
+            padding: 0;
+        }
+        
+    }
+
+    botao{
+
+        button{
+            height: 25px;
+            font-size: 11px;
+        }
+
+    }
+
+    .historico-prescricao{
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.09);
+            box-shadow: 0px 0px 3px -1px #171435;
+            transition: 0.4s ease-out;
+        }
+
+        .checado{
+            right: 50%;
+            margin-right: -19px;
+            position: absolute;
+            top: 50%;
+            margin-top: -18px;
+            height: 35px;
+
+            input-checkbox  {
+
+                .checkbox_flag {
+                    background: transparent !important;
+
+                    &::after {
+                        font-size: 37px !important;
+                        width: 6px !important;
+                        height: 15px !important;
+                        position: absolute;
+                        border-color: #109451;
+                        border-width: 0 3px 3px 0 !important;
+                    }
+
+                }
+
+            }
+        }
+
+        .bolado{
+            width: 18px;
+            height: 18px;
+            background: #b52020;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            margin-top: -9px;
+            right: 50%;
+            margin-right: -9px;
+        }
+
+        .inicial {
+            font-size: 40px;
+            position: absolute;
+            right: 50%;
+            margin-right: -3px;
+            top: 50%;
+            margin-top: -27px;
+        }
+        
+        .inicial.bolado {
+            background: white !important;
+            width: 5px !important;
+            height: 5px !important;
+            margin-top: -2px !important;
+            right: 50% !important;
+            margin-right: -6% !important;
+        }
+
+        .play{
+            position: absolute;
+            top: 50%;
+            margin-top: -12px;
+            right: 50%;
+            color: #0ac50a;
+        }
+
+    }
+
+}
+
+.entrada{
+
+    select, input {
+        height: $tamanho_campos !important;
+    }
+
+}
+
+.addProduto {
+    margin: 0 auto 15px;
+    padding: 15px 30px !important;
+}
+
+.addProcedimentoGrid{
+    margin: 0 auto 15px;
+    padding: 15px 30px !important;
+}
+
+.row.item_modelo {
+    width: 98%;
+    position: relative;
+    left: 35px;
+}
+
+.row.head,
+.row.itens {
+    margin: 0 auto;
+}
+
+.nome_procedimento{
+    cursor: pointer;
+}
+
+.execucoes {
+    // max-width: 400px;
+    height: 35px;
+}
+
+.descricao_item {
+    padding: 0 30px;
+}
+
+.descricao_item p {
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.label_slots{
+    line-height: 5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

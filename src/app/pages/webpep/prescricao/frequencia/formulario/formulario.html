@@ -1,0 +1,56 @@
+<moldura [titulo]="(( idFrequencia ) ? 'Editar' : 'Novo') + ' Frequência'">
+	<ng-container *ngIf="novaFrequencia; else carregandoFrequencia">
+		<div class="row">
+			<div class="col-sm-6 col-md-6">
+				<entrada 
+					nome="Nome"
+					[valor]="novaFrequencia['descricao']"
+					(getValor)="novaFrequencia['descricao'] = $event.valor"
+				></entrada>
+            </div>
+			
+			<ng-container *ngIf="!idFrequencia">
+				<div class="col-sm-2 col-md-2">
+					<entrada 
+						nome="A cada:*"
+						tipo="numero"
+						[valor]="novaFrequencia['valor']"
+						(getValor)="novaFrequencia['valor'] = $event.valor"
+					></entrada>
+				</div>
+				<div class="col-sm-4 col-md-4">
+					<entrada 
+						nome="Período:*"
+						tipo="seleciona"
+						[opcoes]="opcoesUnidades"
+						[valor]="novaFrequencia['tipo']"
+						(getValor)="novaFrequencia['tipo'] = $event.valor"
+					></entrada>
+				</div>
+			</ng-container>
+			
+			<ng-container *ngIf="idFrequencia">
+				<div class="col-sm-6 col-md-6">
+					<entrada 
+						nome="Minutos"
+						[valor]="novaFrequencia['minutos']"
+						(getValor)="novaFrequencia['minutos'] = $event.valor"
+					></entrada>
+				</div>
+			</ng-container>
+		</div>
+	</ng-container>
+
+	<div class="row">
+		<botao 
+			nome="Salvar"
+			[ngClass]="'col-md-3'" 
+			(click)="salvarFrequencia()"
+		></botao>
+		<botao nome="Voltar" [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+	</div>
+</moldura>
+
+<ng-template #carregandoFrequencia>
+    <icone tamanho="grande" nome="cached" [loading]="true"></icone> Carregando frequência...
+</ng-template>

@@ -1,0 +1,119 @@
+<ng-container *ngIf="adicionaPrescricao">
+    <gridAdicionarPrescricoes
+        [pacienteId]="pacienteId"
+        [atendimentoId]="atendimentoId"
+        [respostas]="respostas"
+        (onSave)="retornoPrescricao($event)"
+    ></gridAdicionarPrescricoes>
+</ng-container>
+
+<table *ngIf="prescricoes; else carregaPrescricoes" class="table no-hover prescricoes">
+    <thead class="thead-dark">
+        <tr>
+            <th></th>
+            <th class="status"></th>
+            <!-- <th>LOG</th> -->
+            <th></th>
+            <th>{{ (visaoPaciente) ? 'PACIENTE' : 'RESPONSÁVEL' }}</th>
+            <th>DATA</th>
+            <th *ngIf="!visaoPaciente">PROFISSIONAL</th>
+            <th>LOCAL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <ng-container *ngFor="let prescricao of prescricoes; let pos = index">
+            <tr (click)="abrirAbaPrescricao(prescricao.id)" class="link {{ (prescricao.id == idAbaPrescricao) ? 'ativo' : '' }} {{ validaClasse(pos) ? 'even' : 'odd' }}">
+                <td title="{{prescricao.status}}" class="status {{validaStatus(prescricao.status)}}"></td>
+
+                <td title="Obrigatório Seguir a Ordem dos Itens">
+                    <i *ngIf="prescricao?.obrigaOrdem" class="fas fa-sort-amount-up inverter"></i>
+                </td>
+
+                <!--
+                <td>
+                    <icone 
+                        nome="info"
+                        (click)="abrirLog($event, prescricao.id)"
+                        title="Abrir Log"
+                    ></icone>
+                </td>
+                -->
+
+                <td>
+                    <div class="row">
+                        <icone
+                            (click)="abrirAnexo($event, prescricao.arquivo.id)"
+                            *ngIf="prescricao.arquivo"
+                            nome="attach_file"
+                            title="Abrir Prescrição"
+                            class="ml-2"
+                        ></icone>
+
+                        <icone
+                            nome="restore_page"
+                            title="Crônico"
+                            *ngIf="prescricao.usoContinuo"
+                            class="ml-2"
+                        ></icone>
+                    </div>
+                </td>
+
+                <td>{{ (visaoPaciente) ? prescricao?.paciente?.nome : prescricao?.usuario?.nome }}</td>
+
+                <td>{{ prescricao.data}}</td>
+
+                <td *ngIf="!visaoPaciente">{{prescricao.profissional ? prescricao?.profissional?.nome : ''}}</td>
+
+                <td>{{prescricao?.unidadeAtendimento?.descricao}}</td>
+            </tr>
+
+            <tr *ngIf="(prescricao.id == idAbaPrescricao || expandido)" class="ativo {{ validaClasse(pos) ? 'even' : 'odd' }} ">
+                <td colspan="100%" class="formulario">
+                    <div>
+                        <gridPrescricoes 
+                            [idItemPrescricao]="prescricao.id" 
+                            [idPaciente]="pacienteId" 
+                            [modoDetalhado]="modoDetalhado"
+                            [objPrescricao]="prescricao"
+                            [validaEspecialidade]="validaEspecialidade"
+                            [modoRealizacao]="visaoPaciente"
+                            [somenteVisualizacao]="prescricao.status != 'ABERTO'"
+                            [visualizaHistoricoRealizacao]="visualizaHistoricoRealizacao"
+                            [tamanhoVw]="tamanhoVw"
+                        ></gridPrescricoes>
+                        <!-- [mostraModelo] ="mostraModelo" -->
+                        <!-- [somenteVisualizacao]="somenteVisualizacao" -->
+                        <!-- [validaEspecialidade]="validaEspecialidade" -->
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2" *ngIf="prescricao.status == 'ABERTO'">
+                            <botao nome="Prescrever" (click)="atualizarPrescriscao(prescricao.id, 'PRESCRITO', pos)"></botao>
+                        </div>
+                        <div class="col-md-2" *ngIf="prescricao.status == 'PRESCRITO'">
+                            <botao nome="Cancelar" classe="btn-danger" (click)="atualizarPrescriscao(prescricao.id, 'CANCELADO', pos)"></botao>
+                        </div>
+                        <div class="col-md-2" *ngIf="prescricao.status == 'PRESCRITO'">
+                            <botao nome="Suspender" classe="btn-danger" (click)="atualizarPrescriscao(prescricao.id, 'SUSPENSO', pos)"></botao>
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+        </ng-container>
+    </tbody>
+</table>
+
+<div>
+    <paginacao
+        (atualizaDados)="buscarPrescricoes($event)"
+        qtdItensTotal="{{totalPrescricoes}}"
+        itensPorPagina="{{itensPorPagina}}"
+        paginaAtual="{{paginaAtual}}"
+        [scrollPagination]="paginacaoScroll"
+    ></paginacao>
+</div>
+
+<ng-template #carregaPrescricoes>
+    <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando prescrições...
+</ng-template>

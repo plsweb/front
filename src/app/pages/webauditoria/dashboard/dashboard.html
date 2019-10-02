@@ -1,0 +1,18 @@
+<moldura titulo="Início">
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <dashboardPieChart  *ngFor="let dash of dashboards" titulo="{{dash.titulo}}" subtitulo="{{dash.quantidade}}" icone="{{dash.icone | lowercase}}" tamanho="grande-70" percentual="{{dash.percentual}}"></dashboardPieChart>
+        </div>
+    </div>
+</moldura>
+
+<!-- MODAL -->
+<ng-template #bodyModalSenha let-c="close" let-d="dismiss">
+    <entrada nome="Nova Senha" tipo="senha" id="novasenha" (getValor)="getNovaSenha($event)"></entrada>
+    <entrada nome="Confirmar Senha" tipo="senha" (getValor)="getConfirmacao($event)"></entrada>
+</ng-template>
+
+
+<ng-template #botoesModalSenha let-c="close" let-d="dismiss">
+    <botao nome="Salvar Senha" (click)="salvarSenha()"></botao>
+</ng-template>

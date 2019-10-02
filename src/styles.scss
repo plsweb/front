@@ -1,0 +1,391 @@
+@import "~ngx-toastr/toastr.css";
+/* 
+ bootstrap style toast
+ or import a bootstrap 4 alert styled design (SASS ONLY)
+ should be after your bootstrap imports, it uses bs4 variables, mixins, functions
+@import "~ngx-toastr/toastr-bs4-alert";
+*/
+
+/*  ===============================================
+                Navegação - Abas
+    =============================================== */
+/*.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+.card-header {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}*/
+
+/*  ===============================================
+                
+    =============================================== */
+
+ba-card {
+    display: inline-block;
+}
+
+td icone.acao{
+    cursor: pointer !important;
+}
+
+.cabecalho .dados {
+    padding: 10px;
+    line-height: 1.5;
+}
+
+/*  ===============================================
+                Estilos Uteis
+    =============================================== */
+.text-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.botoesLadoDireito i {
+    top: 6px;
+    position: relative;
+}
+
+.goog-tooltip {
+    z-index: 9999999;
+}
+
+.baixatotal{
+    i{
+        color: #13a059;
+        font-weight: 800;
+    }
+    span{
+        color: #8e8e8e !important;
+    }
+}
+.parcial{    
+    i{
+        color: #f5781e;
+    }
+}
+
+.sembaixa{
+    i{
+        color: #c1c1c1;
+    }
+}
+
+.send_icone {
+    color: #fff;
+    background: #006a6a;
+    border-radius: 0px 5px 5px 0px !important;
+    width: 35px;
+    height: 36px;
+}
+
+ul.lazyContainer {
+    overflow: hidden;
+}
+
+.dataPadrao{
+    width: 130px;
+    padding-left: 13px;
+}
+
+.horaPadrao input{
+    width: 75px;
+    padding: 0px;
+    padding-left: 5px;
+}
+
+.tamanhoMaximo{
+    width: 100%;
+}
+
+.subtitle1_pieChart{
+    text-align: center;
+    margin-top: -7%;
+}
+
+datepicker .calendar-head{
+    color: #fff !important;
+}
+
+td .btn.transparente.form-control.icone {
+    padding: 0;
+    display: -webkit-box;
+}
+
+.no_margin, .no_margin .card {
+    margin: 0 !important;
+}
+
+[tipo="multiselect"] .text-truncate {
+    overflow: inherit !important;
+}
+
+.no_hover:hover{
+    background: #ffffff00 !important;
+    color: #25002e !important;
+}
+
+.bloco{
+    display: block !important;
+}
+
+.pointer i:hover{
+	background: rgba(68, 63, 122, 0.55);
+}
+
+.move {
+    cursor: move !important;
+}
+
+i.inverter{
+    transform: rotateZ(180deg);
+}
+
+.div_busca_entrada{
+    margin-top: 20px !important;
+}
+
+.datepicker_escuro{
+
+    .calendar-head{
+        color: #fff !important;
+    }
+
+    .calendar-grid div.col.dia:not(.old){
+        color: #0c0a1b !important;
+    }
+
+    div.col.dia:hover{
+        background: #9c98b7 !important;
+    }
+
+}
+
+.unselectable {
+    user-select: none; 
+    -o-user-select: none; 
+    -moz-user-select: none; 
+    -khtml-user-select: none; 
+    -webkit-user-select: none; 
+}
+
+[draggable=true] {
+    -khtml-user-drag: element;
+}
+
+.align_right{
+    float: right;
+}
+
+.card > .card-footer {
+    z-index: -1;
+}
+
+ngbd-modal-content {
+    max-height: 610px;
+}
+
+.modal-backdrop{
+    z-index: 1050 !important;
+}
+
+.no_padding {
+    padding: 0 !important;
+}
+
+.grid_guias .card-header{
+    padding-bottom: 15px !important;
+}
+.seta-dropdown {
+    padding: 15px;
+    font-size: 22px;
+    position: absolute;
+    right: 22px;
+    top: 9px;
+}
+
+.recorrencias .col-sm-8.col-md-8.body, 
+.recorrencias .col-sm-8.col-md-8.header {
+    margin: 0 auto;
+}
+
+input.form-control:not([size]):not([multiple]){
+    height: calc(2.25rem + 2px);
+}
+
+.coluna_acoes botao button {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+/*  ===============================================
+                ESTILOS FILTROS
+    =============================================== */
+.moldura-filtro {
+    width: 500px;
+}
+
+.filtro-container {
+    margin: 10px;
+}
+
+.check_filtro{
+    color: #292b2c !important;
+}
+
+:host /deep/ .moldura-filtro,
+.moldura-filtro,
+.dropdown-menu:not(.dark_theme) {
+
+    autocomplete{
+
+        label {
+            color: #292b2c !important;
+        }
+
+        .content-search {
+            position: absolute;
+            max-height: 200px;
+            padding: 10px;
+            border-left: 2px solid #78777b;
+            border-right: 2px solid #78777b;
+            border-bottom: 2px solid #78777b;
+            color: #292b2c;
+            background: #f1f1f1;
+        }
+
+        .linha_autocomplete:hover{
+            background: #d0d0d0 !important;
+        }
+
+    }
+
+    entrada{
+
+        label{
+            color: #292b2c;
+        }
+
+        select, input{
+            color: #424243 !important;
+            background-color: rgba(0, 0, 0, 0.15) !important;
+        }
+
+    }
+}
+
+:host /deep/ .hidden{
+    display: none !important;
+}
+
+/*  ===============================================
+                ESTILOS TABELA 
+    =============================================== */
+table {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+th.col-checkbox {
+    width: 50px;
+}
+
+.table td{
+    font-size: 12px !important;
+}
+
+th.col-acoes {
+    width: 100px;
+}
+
+th.col-numero {
+    width: 80px;
+}
+
+.table select, 
+.table input:not([type='checkbox']) {
+    height: 45px !important;
+    vertical-align: middle;
+}
+
+td.status {
+    padding: 5px !important;
+}
+
+.table .form-group{
+    margin-bottom: 0px !important;
+}
+
+.dropdown.show #filtro {
+    
+    .form-control:not(button)::-webkit-input-placeholder,
+    .form-control:not(button)[disabled]::-webkit-input-placeholder,
+    .form-control[readonly]::-webkit-input-placeholder  { color: black !important; }
+
+    select, input{
+        color: #424243 !important;
+    }
+
+}
+
+
+/*  ===============================================
+                    ESTILOS ABAS
+    =============================================== */
+
+.card-header.abas {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.navegacao {
+
+    div {
+        color: #a1a1e5;
+        cursor: pointer;
+        float: left;
+        margin-top: 10px;
+        padding: 0px 10px 10px 10px;
+    }
+
+    .ativo {
+        border-bottom: 1px solid #eceeef;
+        color: #fff !important;
+        cursor: default !important;
+    }
+
+}
+
+
+/*  ===============================================
+            			Cores
+    =============================================== */
+$branco: #ffffff;
+$roxo_claro: rgba(255, 255, 255, 0.1);
+$roxo_escuro: #171435;
+$font_roxo_desabilitado: #575287;
+$font_hover: rgba(0, 0, 0, 0.5);
+
+/*  ===============================================
+            Cores Status Atendimento
+    =============================================== */
+$statusAtendimento_SalaDeEspera: #f5781e;
+$statusAtendimento_Pendente: #79787d;
+$statusAtendimento_PreAtendimento: #ec0e63;
+$statusAtendimento_emAtendimento: #ffc20f;
+$statusAtendimento_atendido: #005128;
+$statusAtendimento_desmarcado: #683c0f;
+$statusAtendimento_faltou: #410050;
+

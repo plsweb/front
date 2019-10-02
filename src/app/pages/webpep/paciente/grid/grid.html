@@ -1,0 +1,63 @@
+<moldura titulo="Paciente">
+    <moldura>
+        <div class="pull-right mb-2">
+            <div class="col">
+                <botao nome="Adicionar Paciente" (click)="adicionarPaciente()"></botao>
+            </div>
+        </div>
+        
+        <form (submit)="filtrar()">
+            <entrada 
+                mascara="99999999999999999"
+                nome="Carteira/CPF" 
+                (change)="validaCodigo($event)" 
+                id="filtroCart" 
+                class="entrada tamanho90" 
+                (getValor)="getCarteira($event)" 
+                semTitulo="true"
+            ></entrada>
+            
+            <entrada 
+                nome="Nome"
+                id="filtroNome"
+                class="entrada tamanho90"
+                (getValor)="getNome($event)"
+                semTitulo="true"
+            ></entrada>
+
+            <div class="col-md-1 pl-0">
+                <botao icone="search" tamanho="pequeno-16"[submit]="true"></botao>
+            </div>
+
+        </form>
+    </moldura>
+
+    <br clear="all">
+    <div *ngIf="pacientes">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>CPF</th>
+                    <th>NOME</th>
+                    <th>NASCIMENTO</th>
+                </tr>
+                <tr *ngFor="let paciente of pacientes" (click)="abrir(paciente)" class="link">
+                    <td>{{paciente.cpf}}</td>
+                    <td>{{paciente.nome}}</td>
+                    <td>{{ (paciente.nascimento) ? momentjs(paciente.nascimento, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.dataFormato) : ''  }}</td>
+                </tr>
+            </thead>
+        </table>
+
+        <br class="all">
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscarPaginado($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                paginaAtual="{{paginaAtual}}"
+                itensPorPagina="{{itensPorPagina}}"
+            ></paginacao>
+        </div>
+    </div>
+</moldura>

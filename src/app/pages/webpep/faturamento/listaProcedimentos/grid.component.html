@@ -1,0 +1,130 @@
+<div class="mt-4" *ngIf="items; else carregandoProcedimentos">
+        
+    <moldura
+        [oculto]="false"
+        [titulo]=""
+        [podeOcultar]="false"
+        [pesquisar]="buscarProcedimentosLike.bind(this)"
+        labelRegistros="procedimentos"
+        [registros]="qtdItensTotal">
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th *ngIf="!modoSelecao" class="status"></th>
+                    <th *ngIf="modoSelecao" class="selecao"></th>
+                    <th>CÓDIGO</th>
+                    <th>PROCEDIMENTO</th>
+                    <th>OPERADORA</th>
+                    
+                    <ng-container *ngIf="labelIdAdd == 'produto'">
+                        <th>FRACIONAMENTO</th>
+                        <th>ARREDONDAR</th>
+                    </ng-container>
+
+                    <ng-container *ngIf="labelIdAdd == 'tipo'">
+                        <th>QUANTIDADE</th>
+                        <th>LOCAL</th>
+                    </ng-container>
+
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngIf="items && items?.length">
+                    <tr *ngFor="let procedimento of items">
+                        <td *ngIf="!modoSelecao; else habilitaSelecao" class="col-md-2 d-flex">
+                            <botao 
+                                icone="edit"
+                                classe="transparente"
+                                (click)="abreModalItem(procedimento)"
+                            ></botao>
+                            <botao
+                                icone="delete"
+                                classe="transparente"
+                                (click)="removeItem(procedimento)"
+                            ></botao>
+                        </td>
+
+                        <ng-template #habilitaSelecao>
+                            <input-checkbox 
+                                classe="check_principal"
+                                [estado]="verificaSeChecou(procedimento)"
+                                (trocaEstado)="checkProcedimento($event, procedimento)"
+                            ></input-checkbox>
+                        </ng-template>
+                        <td>{{procedimento?.procedimento?.codigo}}</td>
+                        <td>{{procedimento?.procedimento?.descricao}}</td>
+                        <td>{{procedimento?.operadora?.nome}}</td>
+
+                        <ng-container *ngIf="labelIdAdd == 'produto'">
+                            <td>{{procedimento?.fracaoTuss}}</td>
+                            <td>{{procedimento?.arredondamento ? 'SIM' : 'NÃO'}}</td>
+                        </ng-container>
+
+                        <ng-container *ngIf="labelIdAdd == 'tipo'">
+                            <td>{{procedimento?.quantidade}}</td>
+                            <td>{{procedimento?.unidadeAtendimento?.descricao}}</td>
+                        </ng-container>
+
+
+                    </tr>
+                </ng-container>
+                <ng-container *ngIf="!items?.length">
+                    <!-- <tr>
+                        <td>
+                            <span>Não há procedimentos cadastrados para esse {{labelIdAdd}}</span>
+                        </td>
+                    </tr> -->
+                </ng-container>
+            </tbody>
+        </table>
+
+        <br class="all">
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscarProcedimentos($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                paginaAtual="{{paginaAtual}}"
+                itensPorPagina="{{itensPorPagina}}"
+                [scrollPagination]="paginacaoScroll"
+                [contaRegistro]="true"
+            ></paginacao>
+        </div>
+
+    </moldura>
+
+</div>
+
+<ng-template 
+    #modalEditaProcedimento 
+    let-procedimentoItem="procedimentoItem"
+>
+
+    <gridAdicionarProcedimento
+        [edita]="true"
+        [labelId]="labelIdAdd"
+        [objProcedimento]="procedimentoItem"
+        (onSave)="ngOnInit()"
+    ></gridAdicionarProcedimento>
+
+</ng-template>
+
+<ng-template 
+    #modalEditaProcedimentoBotoes 
+    let-procedimentoItem="procedimentoItem"
+>
+    <botao 
+        nome="Salvar" 
+        (click)="salvarProcedimento(procedimentoItem)"
+    ></botao>
+
+</ng-template>
+
+<ng-template #bodyModalConfirm>
+    Tem certeza que deseja remover este item?
+</ng-template>
+
+<ng-template #carregandoProcedimentos>
+    <icone tamanho="grande" nome="cached" [loading]="true"></icone> Carregando procedimentos...
+</ng-template>

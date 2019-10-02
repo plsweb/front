@@ -1,0 +1,35 @@
+<moldura titulo="Grupo de Exame">
+    <div class="row">
+        <div class="col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+
+    <br class="all">
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>DESCRIÇÃO</th>
+                <th>GRUPO PAI</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let leito of grupoExames" (click)="atualizar(leito.id)" class="link">
+                <td>{{leito.descricao}}</td>
+                <td>{{leito.exameGrupo ? leito.exameGrupo.descricao : ""}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br class="all">
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscarPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+        ></paginacao>
+    </div>
+</moldura>

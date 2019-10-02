@@ -1,0 +1,198 @@
+.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+.card-header {
+    cursor: default;
+    // padding-bottom: 0px;
+}
+
+.acoes {
+    float: right;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}
+
+.selecionada{
+    background: rgba(68, 63, 122, 0.51);
+}
+
+.status {
+    padding-left: 0px;
+    padding-right: 0px;
+    width: 5px !important;
+}
+
+.verde {
+    background-color:#006a6a;
+}
+
+.cinza {
+    background-color:#79787d;
+}
+
+tr td {
+    cursor: default;
+    font-size: 12px;
+}
+
+tr.link,
+tr.link td,
+tr.link td icone,
+tr.link td icone i,
+.material-icons,
+tr.link .material-icons {
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.adicionar{
+    display: -webkit-box;
+    text-align: -webkit-right;
+    text-align: -moz-right;
+}
+
+.formulario {
+    padding-top: 10px;
+}
+
+.foto {
+    float: left;
+}
+
+// $class_ativo: #575287;
+// :host /deep/ table.prescricoes, table.guias{
+
+//     // tr.link {
+//     //     // border-bottom: 1px solid #8a86a9;
+//     // }
+
+//     .ativo{
+//         // background: $class_ativo !important;
+//         border-bottom: none !important;
+//     }
+
+//     thead tr {
+//         background: #3a3568;
+
+//         th{
+//             border-top: none;
+//         }
+//     }
+    
+//     td.formulario {
+//         padding-top: 10px !important;
+//         padding-bottom: 20px;
+//     }
+
+//     .even,
+//     .even:hover{
+//         background: #444077 !important;
+//     }
+
+//     .odd,
+//     .odd:hover{
+//         background: rgb(83, 78, 129) !important;
+//     }
+
+//     // tr.link:nth-child(odd){
+//     //     background: #443f7a;
+
+//     //     &.grid-itens{
+//     //         background: #443f7a;
+//     //     }
+//     // }
+
+//     // tr.link:nth-child(even){
+//     //     background: #575287;
+
+//     //     &.grid-itens{
+//     //         background: #443f7a;
+//     //     }
+//     // }
+
+//     // tr.ativo:nth-child(2n+2) {
+//     //     background: #443f7a !important;
+//     // }
+
+// }
+
+
+:host /deep/ {
+
+    .prescricoes {
+        
+        .valor, .label{
+            text-transform: uppercase;
+        }
+
+        entrada {
+            
+            input,select{
+                text-transform: uppercase;
+            }
+
+        }
+
+    }
+    
+    gridPrescricoes{
+
+        .grid-itens{
+            // background: $class_ativo !important;
+        }
+        
+    }
+
+    .grid_guias .table{
+
+        tbody td{
+            width: 23%;
+        }
+
+    }
+
+    .grid_exames .table{
+        tbody td{
+            // width: 23%;
+        }
+
+        tbody > tr > td:not([colspan]):last-child {
+            display: initial !important;
+        }
+    }
+
+    .procedimento {
+        background-color: initial !important;
+        margin: 10px;
+    }
+
+}
+
+.coluna_status{
+    width: 5px !important
+}
+
+.loading{
+    width: 100%;
+    position: relative;
+    text-align: center;
+}
+
+.desativado{
+    border-left: 10px solid #79787d;
+    height: 35px;
+    margin-left: -10px;
+}
+
+.bloco-evolucao .formulario {
+    padding: 0 30px;
+}

@@ -1,0 +1,48 @@
+.legenda-pagina-atual {
+	font-size: 18px;
+    padding: 10px;
+}
+
+.pagination > li > a, .pagination > li > span {
+    border-color: #25002e;
+    cursor: pointer
+}
+
+.pagination > li:hover{
+    color: #004e4e !important
+}
+
+div.div_paginacao {
+    margin-top: 25px; 
+    display: -webkit-inline-box;
+    line-height: 1;
+}
+
+.botoes_paginacao {
+    margin: 0;
+}
+
+.pagination-sm .page-link {
+    padding: 0.35rem 0.5rem !important;
+}
+
+#carteira {
+    background: transparent;
+    color: transparent;
+    cursor: default;
+    border: none;
+    &:focus {
+        outline: none;
+    }
+}
+
+.planoInativo {
+    cursor: default;
+    background-color: rgba(255,255,255,.1) !important;
+}
+
+:host /deep/ moldura {
+    .card {
+        margin-bottom: 0 !important;
+    }
+}

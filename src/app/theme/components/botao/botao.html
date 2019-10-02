@@ -1,0 +1,15 @@
+<label *ngIf="botao_lateral" class="alinhamento {{padding_0 ? 'padding_0' : ''}}">&nbsp;</label>
+<br *ngIf="botao_lateral">
+<button 
+	[type]="type" 
+	class="btn {{classe}} form-control" 
+	[disabled]="desabilitado" 
+	[ngClass]="{icone: icone}"
+>
+	<icone 
+		*ngIf="icone" 
+		[nome]="icone" 
+		[tamanho]="tamanho"
+	></icone>
+	{{nome}}
+</button>

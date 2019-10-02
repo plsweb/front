@@ -1,0 +1,194 @@
+<moldura [titulo]="(( idMedicamento ) ? 'Editar' : 'Novo') + ' Medicamento'">
+	<div class="row">
+
+		<div class="col-sm-6 col-md-6">
+			<entrada 
+				nome="Nome"
+				[valor]="novoMedicamento['nome']"
+				(getValor)="$event && $event.valor ? novoMedicamento['nome'] = $event.valor : novoMedicamento['nome'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-6 col-md-6">
+			<entrada 
+				nome="Descrição"
+				[valor]="novoMedicamento['descricao']"
+				(getValor)="$event && $event.valor ? novoMedicamento['descricao'] = $event.valor : novoMedicamento['descricao'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Código ANVISA"
+				[valor]="novoMedicamento['codigoAnvisa']"
+				(getValor)="$event && $event.valor ? novoMedicamento['codigoAnvisa'] = $event.valor : novoMedicamento['codigoAnvisa'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Código ABC Farma"
+				[valor]="novoMedicamento['codigoAbcFarma']"
+				(getValor)="$event && $event.valor ? novoMedicamento['codigoAbcFarma'] = $event.valor : novoMedicamento['codigoAbcFarma'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-2 col-md-2">
+			<entrada 
+				nome="Gramagem"
+				[valor]="novoMedicamento['apresentacao']"
+				(getValor)="$event && $event.valor ? novoMedicamento['apresentacao'] = $event.valor : novoMedicamento['apresentacao'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-4 col-md-4">
+			<entrada 
+				nome="Reconstituição"
+				[valor]="novoMedicamento['reconstituicao']"
+				(getValor)="$event && $event.valor ? novoMedicamento['reconstituicao'] = $event.valor : novoMedicamento['reconstituicao'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Solvente"
+				[valor]="novoMedicamento['solvente']"
+				(getValor)="$event && $event.valor ? novoMedicamento['solvente'] = $event.valor : novoMedicamento['solvente'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Classificação"
+				tipo="seleciona"
+				objId="codigo"
+				[opcoes]="opcoesClassificacao"
+				[valor]="novoMedicamento['classificacao']"
+				(getValor)="$event && $event.valor ? novoMedicamento['classificacao'] = $event.valor : novoMedicamento['classificacao'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-2 col-md-2">
+			<entrada 
+				nome="Fotossensível"
+				[tamanhoMaximo]="1"
+				[valor]="novoMedicamento['fotossensivel']"
+				(getValor)="$event && $event.valor ? novoMedicamento['fotossensivel'] = $event.valor : novoMedicamento['fotossensivel'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-2 col-md-2">
+			<entrada 
+				nome="Estabilidade"
+				[valor]="novoMedicamento['estabilidade']"
+				(getValor)="$event && $event.valor ? novoMedicamento['estabilidade'] = $event.valor : novoMedicamento['estabilidade'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-2 col-md-2">
+			<entrada 
+				nome="Temperatura"
+				mascara="? °C"
+				expressaoRegular="^(\-)?[\d]+((\.)?[\d]+)?$"
+				[valor]="novoMedicamento['temperatura']"
+				(getValor)="$event && $event.valor ? novoMedicamento['temperatura'] = $event.valor : novoMedicamento['temperatura'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Overfill"
+				tipo="numero"
+				[valor]="novoMedicamento['overfill']"
+				(getValor)="$event && $event.valor ? novoMedicamento['overfill'] = $event.valor : novoMedicamento['overfill'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-sm-3 col-md-3">
+			<entrada 
+				nome="Tipo de Receita"
+				tipo="seleciona"
+				[opcoes]="opcoesReceita"
+				objId="codigo"
+				[valor]="novoMedicamento['tipoReceita']"
+				(getValor)="$event && $event.valor ? novoMedicamento['tipoReceita'] = $event.valor : novoMedicamento['tipoReceita'] = undefined"
+			></entrada>
+		</div>
+
+		<div class="col-md-12 col-sm-12">
+			<entrada 
+				nome="Descrição de Incompatibilidades" 
+				tipo="area" 
+				[tamanhoMaximo]="250"
+				[valor]="novoMedicamento['observacaoIncompatibilidade']" 
+				(getValor)="novoMedicamento['observacaoIncompatibilidade'] = $event.valor"
+			></entrada>
+		</div>
+
+	</div>
+
+	<moldura
+		titulo="Composições"
+	>
+		<div class="row">
+
+			<div class="col-md-7">
+				<autocomplete
+					[semTitulo]="true"
+					[placeholder]="'Digite para buscar Composições'"
+					[minimo]="3"
+					[valor]="objComposicoes"
+					[camposFiltro]="['nome']"
+					[valorSelecionado]="valorComposicaoSelecionado"
+					[fnSearch]="fnCfgComposicaoRemote.bind(this)"
+					(fnOnSelected)="setObjParamComposicao($event)"
+				></autocomplete>
+			</div>
+
+			<div *ngIf="objParamAddComposicao['composicao']" class="col-md-3 col-sm-3">
+				<entrada 
+					nome="Gramagem" 
+					tipo="numero"
+					[semTitulo]="true" 
+					[valor]="objParamAddComposicao['gramagem']"
+					(getValor)="objParamAddComposicao['gramagem'] = $event.valor"
+				></entrada>
+			</div>
+	
+			<div class="col-md-2">
+				<botao nome="Adicionar" (click)="salvarNovaComposicao()"></botao>
+			</div>
+
+		</div>
+
+		<table class="table">
+			<thead class="thead-dark">
+				<tr>
+					<th>COMPOSTO</th>
+					<th>GRAMAGEM</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let composicao of novoMedicamento['composicoes']">
+					<td scope="row">
+						{{ composicao.composicao.nome }}
+					</td>
+					<td scope="row">
+						{{ composicao.gramagem }}
+					</td>
+					<td>
+						<icone nome="delete" class="acao" (click)=removerComposicao(composicao)></icone>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</moldura>
+
+	<div class="row">
+		<botao nome="Salvar" 	[ngClass]="'col-md-3'" (click)="salvarMedicamento()"></botao>
+		<botao nome="Voltar"    [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+	</div>
+	
+</moldura>

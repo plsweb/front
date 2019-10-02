@@ -1,0 +1,633 @@
+<div style="display: flex;">
+    <div class="mini-calendario-container">
+        <datepicker
+            habilitaMultiSelecao='true'
+            [(datas)]='datasSelecionadas'
+            [fnOnChange]="onDatePickerChange.bind(this)"
+            (setDatasSelecionadas)="getDatasSelecionadas($event)"
+        ></datepicker>
+
+        <div class="filtrosAgenda">
+            <entrada
+                semTitulo="true"
+                tipo="seleciona"
+                objId="id"
+                [valor]="unidadeAtendimento"
+                [opcoes]="unidadesAtendimento" 
+                (getValor)="getUnidadeAtendimento($event)"
+            ></entrada>
+
+            <treeview
+                [items]="usuarioEspecialidade"
+                [(value)]="prestadorSelecionado"
+                [fnOnSelect]="getPrestador.bind(this)"
+                (setInstanciaTreeview)="getInstanciaTreeview($event)"
+            ></treeview>
+        </div>
+    </div>
+
+    <div class="grid-calendario">
+        <div class="animated fadeIn">
+            <div class="card-body calendario-agenda">
+                <agenda
+                    (setInstanciaAgenda)="getInstanciaAgenda($event)"
+                    [zoom]="zoom"
+                    [(calendarioOpt)]='calendarioOpt'
+                    [(verDesmarcados)]='verDesmarcados'
+                    [(datas)]='datasSelecionadas'
+                    [habilitaSelecaoHorario]='false'
+                    [mostraMover]='false'
+                    [mostraEditar]='false'
+                    (setDatasSelecionadas)="getDatasSelecionadas($event)"
+                    (setDesmarcados)="fnVisualizaDesmarcados($event)"
+                    [(someKeyboard2)]="someKeyboard2"
+
+                    [fnPegaHoraInicial]="fnPegaHoraInicial.bind(this)"
+                    [fnPegaHoraFinal]="fnPegaHoraFinal.bind(this)"
+
+                    [habilitaCriarHorario]='true'
+                    [fnInicializaAgendas]="fnInicializaAgendas.bind(this)"
+                    [onAgendaDrop]="fnReagendarAtendimento.bind(this, agendamentoModal, botoesModalAgendamento, 'REAGENDAR')"
+                    [doisTiposAgendamento]="true"
+                    [habilitaMoverAgenda]='true'
+                    [onCreateAgenda]="fnVisualizaAgenda.bind(this)"
+
+                    [onAgendaClick]="fnEditarAtendimento.bind(this, agendamentoModal, botoesModalAgendamento, 'VISUALIZAR')"
+
+                    [fnInicializaBlocos]="fnInicializaBlocos.bind(this)"
+                    [onDrop]="fnDropBloco.bind(this)"
+
+                    [onCreateBloco]="fnOnCreateBloco.bind(this, agendamentoModal, botoesModalAgendamento)"
+                    [onBlocoClick]="fnCriaAgendamento.bind(this, null, false)"
+
+                    [onBlocoRemove]="fnDesbloquearHorario.bind(this)"
+                    (criaNovaColetiva)="fnColetivoAtendimento(alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento, 'COLETIVA', $event)"
+                    [parametrosObserver]="observer"
+
+                    [agendaAcoes]="[
+                        {
+                            fnValida: this.validaMostraDesbloquear.bind(this), 
+                            fn: this.fnDesbloquearHorario.bind(this), 
+                            nome: 'Desbloquear horário'
+                        },
+                        {
+                            fnValida: this.validaStatusNotIn.bind(this, ['FALTA', 'ATENDIDO', 'EMATENDIMENTO', 'DESMARCADO', 'SALADEESPERA', 'BLOQUEADO']), 
+                            fn: this.fnEditarAtendimento.bind(this, agendamentoModal, botoesModalAgendamento, 'ALTERARTIPO'), 
+                            nome: 'Editar Agendamento'
+                        },
+                        {
+                            fnValida: this.validaStatusNotIn.bind(this, ['FALTA', 'ATENDIDO', 'EMATENDIMENTO', 'DESMARCADO', 'SALADEESPERA', 'BLOQUEADO']), 
+                            fn: this.fnAbreModalAlteraStatus.bind(this, alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento, 'FALTA'), 
+                            nome: 'Faltou'
+                        },
+                        {
+                            fnValida: this.validaStatusNotIn.bind(this, ['DESMARCADO', 'BLOQUEADO']), 
+                            fn: this.fnEncaixeAtendimento.bind(this, alteraStatusAgendamentoModal, 
+                            botoesModalAlteraStatusAgendamento, 'ENCAIXE'), 
+                            nome: 'Encaixe'
+                        },
+                        {
+                            fnValida: this.validaColetivo.bind(this), 
+                            fn: this.fnColetivoAtendimento.bind(this, alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento, 'COLETIVA'), 
+                            nome: 'Agendamento Coletivo'
+                        },
+                        {
+                            fnValida: this.validaStatusNotIn.bind(this, ['FALTA', 'ATENDIDO', 'EMATENDIMENTO', 'DESMARCADO', 'BLOQUEADO']), 
+                            fn: this.fnAbreModalAlteraStatus.bind(this, alteraStatusAgendamentoModal, 
+                            botoesModalAlteraStatusAgendamento, 'DESMARCADO'), 
+                            nome: 'Cancelar'
+                        },
+                        {
+                            fnValida: this.validaStatusNotIn.bind(this, ['FALTA', 'ATENDIDO', 'EMATENDIMENTO', 'DESMARCADO', 'SALADEESPERA', 'BLOQUEADO']), 
+                            fn: this.fnAbreModalSalaDeEspera.bind(this, alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento, 'SALADEESPERA'), 
+                            nome: 'Chegou (sala de espera)'
+                        }
+                    ]"
+                    [elementoAcoes]="acoesAgendamentoIndividual"
+                > </agenda>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #acoesAgendamentoIndividual>
+    <icone 
+        tamanho="medium" 
+        nome="phone"
+        title="Atendimento Call Center"
+        [ngClass]="'pointer agendamentoIndividual'"
+        (click)="abreCallCenter()"
+    ></icone>
+    <icone 
+        tamanho="medium" 
+        nome="person"
+        title="Agenda Paciente"
+        [ngClass]="'pointer agendamentoIndividual'"
+        (click)="fnCriaAgendamento(null, null, true)"
+    ></icone>
+    <icone 
+        tamanho="medium" 
+        nome="view_list"
+        title="Lista de Espera"
+        [ngClass]="'pointer agendamentoIndividual'"
+        (click)="router.navigate(['/webpep/listaespera'])"
+    ></icone>
+</ng-template>
+
+<!-- #########################################   Mudar Status Agendamento  ######################################### -->
+<ng-template #botoesModalAlteraStatusAgendamento let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" (click)="alterarStatusAgendamento()"></botao>
+</ng-template>
+
+<ng-template #alteraStatusAgendamentoModal let-c="close" let-d="dismiss">
+    <div *ngIf="acaoAgendamento == 'FALTA'">
+
+        <entrada 
+            nome="Selecione o tipo da falta" 
+            tipo="seleciona"
+            attrDsc="descricao"
+            objId="id"
+            [valor]="tipoFalta"
+            [opcoes]="tiposFalta"
+            (getValor)="($event['valor']) ? tipoFalta = $event['valor'] : null"
+        ></entrada>
+
+        <div
+            (dragenter)="uploadContainer=true"
+            (dragover)="uploadContainer=false"
+            class="text-truncate"
+            title="Anexo justificativa"
+        >
+            <label>Anexo justificativa</label>
+            <uploader
+                [style]="'icone'"
+                [(container)]="uploadContainer"
+                classe="input-file"
+                [mostraNomeArquivo]="true"
+                [upload]="false"
+                (uploadInsert)="enviarAnexo($event)"
+                (uploadPost)="enviarAnexo($event);container=false;"
+            ></uploader>
+        </div>
+
+        <div class="mt-5">
+            <textarea class="form-control" [(ngModel)]="motivoCancelamento"></textarea>
+        </div>
+
+    </div>
+
+    <div *ngIf="acaoAgendamento == 'DESMARCADO'">
+        <p>Motivo do cancelamento:</p>
+        <textarea class="form-control" [(ngModel)]="motivoCancelamento"></textarea>
+    </div>
+
+    <div *ngIf="acaoAgendamento == 'SALADEESPERA'">
+
+        <entrada 
+            *ngIf="unidadePainelSenha"
+            nome="Insira o código do painel de senha" 
+            tipo="seleciona"
+            attrDsc="numero"
+            objId="numero"
+            [valor]="senhaPainel"
+            [opcoes]="senhasPainelDeSenha"
+            (getValor)="($event['valor']) ? senhaPainel = $event['valor'] : null"
+        ></entrada>
+
+        <p *ngIf="!unidadePainelSenha">Deseja confirmar da chegada do paciente?</p>
+
+        <div *ngIf="foraDoHorario" class="alert alert-danger" role="alert">
+            <h4>Paciente com atraso de <b>{{foraDoHorario}}</b> horas</h4>
+        </div>
+
+        <ng-container *ngIf="guiaObrigatoria && tipoAtendimentoFatura">
+
+            <entrada 
+                nome="Impresso da Guia"
+                (getValor)="$event && $event.valor ? guiaVinculada = $event.valor : null"
+            ></entrada>
+
+            <span>Selecione os itens a faturar:</span>
+            <listaProcedimentos
+                [modoSelecao]="true"
+                [filtros]="{}"
+                [service]="atendimentoTipoTussService"
+                [codigo]="tipoConsulta ? tipoConsulta : agendaAtual.tipo.id"
+                labelIdAdd="tipo"
+                labelIdList="atendimentoTipoId"
+                (setProcedimentoChecados)="atendimentoTipoTussFaturar = $event"
+                [paginacaoScroll]="false"
+            ></listaProcedimentos>
+
+        </ng-container>
+        
+    </div>
+    
+    <div *ngIf="acaoAgendamento == 'CONFIRMARAGENDAMENTO'">
+        <p>Deseja confirmar agendamento do paciente?</p>
+
+        <entrada 
+            nome="Protocolo"
+            tipo="numero"
+            (getValor)="$event && $event.valor ? protocolo = $event.valor : protocolo = undefined"
+        ></entrada>
+    </div>
+
+</ng-template>
+
+
+<!-- #########################################   Criar Agendamento  ######################################### -->
+<ng-template #botoesModalAgendamento let-c="close" let-d="dismiss">
+    <botao
+        *ngIf="(acaoAgendamento != 'VISUALIZAR') && !consultaAgendaPaciente"
+        [desabilitado]="bloqueiaSalvar"
+        [nome]="(acaoAgendamento != 'ALTERARTIPO' ? 'Salvar' : 'Editar')"
+        (click)="salvaAgendamento()"
+    ></botao>
+
+    <botao
+        *ngIf="novoAtendimento['status'] == 'PENDENTE' && !consultaAgendaPaciente && agendaAtual.id"
+        nome="Chegou"
+        (click)="fnAbreModalSalaDeEspera(alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento, 'SALADEESPERA', novoAtendimento)">
+    </botao>
+</ng-template>
+
+<ng-template #agendamentoModal let-c="close" let-d="dismiss">
+
+    <div class="row">
+
+        <ng-container *ngIf="!consultaAgendaPaciente">
+            <div class="col-sm-4 col-md-4">
+                <entrada
+                    nome="Tipo de Consulta *"
+                    tipo="seleciona"
+                    disabled="disabled"
+                    objId="codigoDto"
+                    bloqueado="{{(acaoAgendamento == 'REAGENDAR' || acaoAgendamento == 'VISUALIZAR' || acaoAgendamento == 'ALTERARTIPO')}}"
+                    [valor]="tipoConsulta"
+                    [opcoes]="tiposConsulta"
+                    (getValor)="getTipoConsulta($event)"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4">
+                <label>Data *</label>
+                <input 
+                    type="date" 
+                    name="usuario" 
+                    class="form-control"
+                    [(ngModel)]="novoAtendimento['data']"
+                />
+            </div>
+            
+            <div class="col-sm-4 col-md-4">
+                <label>Hora *</label>
+                <input 
+                    type="time" 
+                    name="usuario" 
+                    class="form-control"
+                    [(ngModel)]="novoAtendimento['hora']"
+                    [disabled]="tipoConsulta ? false : true"
+                    [min]="configuraHorario.horaInicio"
+                    [max]="configuraHorario.horaFim"
+                />
+            </div>
+
+            <div *ngIf="novoAtendimento['confirmacao']" class="col-sm-12 col-md-12">
+                <span class="confirmacao_atendimento">Agendamento confirmado: {{novoAtendimento['confirmacao']}}</span>
+            </div>
+
+            <div *ngIf="((!unidadeAtendimento || (unidadeAtendimento == '0')) || novaUnidadeAtendimento) && !acaoAgendamento" class="col-sm-6 col-md-6">
+                <entrada 
+                    nome="Local de Atendimento" 
+                    tipo="seleciona" 
+                    objId="codigoDto" 
+                    [opcoes]="unidadesAtendimento" 
+                    (getValor)="($event) ? novaUnidadeAtendimento=$event.valor : null"
+                ></entrada>
+            </div>
+
+            <div 
+                *ngIf="!consultaAgendaPaciente && (agendaAtual && agendaAtual.id && !agendaAtual.agendaInstancia)"
+            >
+                <ng-template 
+                    [ngTemplateOutlet]="campoOperadora"
+                    [ngTemplateOutletContext]="{
+                        bloqueado: true   
+                    }"
+                ></ng-template>
+            </div>
+
+        </ng-container>
+
+        <div class="col-sm-12 col-md-12" *ngIf="(!(agendaAtual && agendaAtual.id && !agendaAtual.agendaInstancia))">
+            
+            <div class="row">
+                <div [ngClass]="{ 'col-sm-8 col-md-8' : !consultaAgendaPaciente, 'col-sm-12 col-md-12' : consultaAgendaPaciente }">
+
+                    <autocomplete
+                        *ngIf="!disableInputPaciente; else campoSimplesBene"
+                        titulo="Paciente"
+                        [placeholder]="'Digite para buscar Pacientes'"
+                        [minimo]="3"
+                        [valor]="objPacientes"
+                        (onKeyUp)="getNomePaciente($event)"
+                        (onClear)="getPaciente(undefined)"
+                        [camposFiltro]="['nome', 'cpf']"
+                        [valorSelecionado]="valorPacienteSelecionado"
+                        [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                        (fnOnSelected)="getPaciente($event)"
+                    ></autocomplete>
+                </div>
+
+                <ng-container *ngIf="!consultaAgendaPaciente">
+                    <div class="col">
+                        <entrada 
+                            nome="Celular" 
+                            tipo="celular" 
+                            [bloqueado]="paciente"
+                            [valor]="novoAtendimento['telefone'] ? novoAtendimento['telefone'] : '' " 
+                            (getValor)="($event) ? novoAtendimento['telefone'] = $event.valor : null"
+                        >   
+                        </entrada>
+                    </div>
+                </ng-container>
+            </div>
+
+            <div 
+                *ngIf="!consultaAgendaPaciente && novoAtendimento['nome'] && !paciente"
+                [ngInit]="limpaOperadora.bind(this)"
+                [ngExit]="limpaOperadora.bind(this)"
+                class="row"
+            >
+                <ng-template 
+                    [ngTemplateOutlet]="campoOperadora"
+                ></ng-template>
+            </div>
+
+            <div class="row" *ngIf="!consultaAgendaPaciente">
+                <div [ngClass]=" (recorrencia['repetir'] == 'true') ? 'col-sm-12 col-md-12' : 'col-sm-8 col-md-8' ">
+                    <recorrencia
+                        [(obj)]='recorrencia'
+                        [habilitaDiaTodo]='false'
+                        [habilitaRecorrencia]='false'
+                        [habilitaTipoFrequencia]='true'
+                        (setObjRecorrencia)="setObjRecorrencia($event)"
+                        [onDiaTodoChange]="fnOnDiaTodoChange.bind(this)"
+                    ></recorrencia>
+                </div>
+
+                <div class="col-sm-4 col-md-4" *ngIf="(recorrencia['repetir'] == 'true' || recorrencia['repetir'] == true) && !consultaAgendaPaciente">
+                    <label>Qtd. Sessões</label>
+                    <input type="number" min="2" name="qtdSessoes" class="form-control" [(ngModel)]="qtdSessoes" >
+                </div>
+
+                <ng-template 
+                    [ngTemplateOutlet]="campoValorConsulta"
+                    [ngTemplateOutletContext]="{
+                        idOperadora: planoSelecionado?.operadora?.id || novoAtendimento?.operadora?.id   
+                    }"
+                ></ng-template>
+
+            </div>
+
+            <paciente
+                *ngIf="paciente"
+                [foto]="false"
+                [plano]="true"
+                [contato]="true"
+                [pacienteId]="paciente.id"
+                (atualizaDados)="getDados($event)"
+            ></paciente>
+
+            <ng-template #campoSimplesBene>
+                <entrada [bloqueado]="true" semTitulo="true" [valor]="initialValuePaciente"></entrada>
+            </ng-template>
+        </div>
+
+        <div class="col-sm-12 col-md-12" *ngIf="consultaAgendaPaciente && agendasFuturasPaciente.length">
+            <moldura titulo="Próximas Consultas" oculto="true">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>
+                            <th>Dia</th>
+                            <th>Prestador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr 
+                            *ngFor="let agenda of agendasFuturasPaciente" 
+                            [ngClass]="{'active': agenda.especialidade && prestadorAgendaEspecialidade && prestadorAgendaEspecialidade.item.id == agenda.especialidade.id}"
+                        >
+                            <td>
+                                <botao 
+                                    nome="Cancelar" 
+                                    classe="form-control btn btn-danger"
+                                    (click)="cancelarAtendimento(agenda, alteraStatusAgendamentoModal, botoesModalAlteraStatusAgendamento)"
+                                ></botao>
+                            </td>
+                            <td>{{agenda.agendamento}}</td>
+                            <td>{{(agenda.prestador) ? agenda.prestador.nome : ''}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </moldura>
+        </div>
+
+        <div class="col-sm-12 col-md-12" *ngIf="consultaAgendaPaciente && paciente">
+            <tabela
+                *ngIf="agendaHistoricoPaciente.length"
+                [titulo]="'Histórico de Consultas'"
+                [colunas]="agendaTabela['colunasTabela']"
+                [linhas]="agendaTabela['dados']"
+                [ordenacao]="agendaTabela['ordenacao']"
+                [registros]="agendaTabela.qtdItensTotal"
+                [qtdItensTotal]="agendaTabela.qtdItensTotal"
+                [itensPorPagina]="15"
+                [atualizaDados]="getAgendaHistorico.bind(this)"
+                [scrollPagination]="false"
+                [mostraPesquisar]="false"
+                [mostraFiltrar]="false"
+                [ordenar]="false"
+            >
+            </tabela>
+
+            <div class="row" *ngIf="!agendaHistoricoPaciente.length">
+                <div class="mx-auto">
+                    <botao nome="Histórico" (click)="getAgendaHistorico()"></botao>
+                </div>
+            </div>
+        </div>
+
+        <ng-container *ngIf="!consultaAgendaPaciente">
+            <ng-template
+                *ngIf="novoAtendimento?.operadora?.id == 2"
+                [ngTemplateOutlet]="campoValorConsulta"
+                [ngTemplateOutletContext]="{
+                    idOperadora: novoAtendimento?.operadora?.id   
+                }"
+            ></ng-template>
+
+            <div class="col-sm-12 col-md-12">
+                <label>Observação</label>
+                <textarea
+                    name="Observacao" 
+                    class="form-control" 
+                    placeholder="Observação"
+                    [(ngModel)]="novoAtendimento['observacao']"
+                ></textarea>
+            </div>
+        </ng-container>
+
+    </div>
+
+    <div class="card-body historico_agendamento" *ngIf="acaoAgendamento == 'VISUALIZAR' && atendimentoSelecionado">
+        <moldura
+            titulo="Histórico Atendimento"
+            [oculto]="true"
+        >
+            <logAtendimento
+                [atendimentoId]="atendimentoSelecionado" 
+                [mostraBotaoVoltar]="false"
+                (refresh)="getRefreshLogAtendimento($event)">
+            </logAtendimento>
+        </moldura>
+    </div>
+</ng-template>
+
+<ng-template #bodyModalAgendamentosRecorrentes let-c="close" let-d="dismiss">
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th>Horário</th>
+                <th class="status"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngFor="let horario of agendamentosEmSerie">
+                <td>{{horario.agendamento}}</td>
+                <td>{{horario.status}}</td>
+            </tr>
+        </tbody>
+    </table>
+</ng-template>
+
+<ng-template #footerModalAgendamentosRecorrentes let-c="close" let-d="dismiss">
+    <botao 
+        nome="Agendar" 
+        classe="btn-primary" 
+        (click)="agendarEmSerie()"
+    ></botao>
+</ng-template>
+
+
+<!-- #################################### Remover Bloqueio modal ####################################### -->
+<ng-template #removerBloqueioBotoesModal let-c="close" let-d="dismiss">
+    <botao 
+        nome="{{bloqueioAParaRemover.tipo == 'DISPONIVEL' ? 'Bloquear' : 'Desbloquear'}}" 
+        classe="btn-primary" 
+        (click)="removerBloqueio()"
+    ></botao>
+
+    <!--botao 
+        *ngIf="bloqueioAParaRemover && bloqueioAParaRemover.repetir"
+        nome="Remover Todos" 
+        classe="btn-primary" 
+        (click)="removerBloqueio(true)"
+    ></botao-->
+</ng-template>
+
+<ng-template #removerBloqueioContentModal let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col">
+            <p *ngIf="bloqueioAParaRemover && bloqueioAParaRemover.tipo == 'DISPONIVEL'">Deseja bloquear o horario?</p>
+            <p *ngIf="bloqueioAParaRemover && bloqueioAParaRemover.tipo == 'BLOQUEADO'">Deseja desbloquear o horario?</p>
+        </div>
+    </div>
+</ng-template>
+
+
+<!-- cadastroPacienteModal botoesCadastroPaciente -->
+<ng-template #cadastroPacienteModal>
+
+    <div class="row">
+        <div class="col-md-9">
+            <autocomplete
+                *ngIf="!idPacienteSelecionado"
+                titulo="Selecionar paciente para o atendimento"
+                [placeholder]="'Digite para buscar Paciente'"
+                [minimo]="3"
+                [valor]="objPacientes"
+                [camposFiltro]="['nome', 'cpf']"
+                [valorSelecionado]="valorPacienteSelecionado"
+                [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                (fnOnSelected)="setPacienteAtendimento($event, true)"
+                (change)="debounce.next($event)"
+            ></autocomplete>
+        </div>
+        <div *ngIf="!idPacienteSelecionado" class="col-md-3">
+            <botao nome="Criar novo Paciente" [botao_lateral]="true" (click)="init=true"></botao>
+        </div>
+    </div>
+
+    <paciente
+        *ngIf="init || idPacienteSelecionado"
+        [salva]="true"
+        [dados]="true"
+        [plano]="true"
+        [contato]="true"
+        [responsavel]="true"
+        [validaCadastroBasico]="validaCadastroBasico"
+        [pacienteId]="idPacienteSelecionado"
+        [novoPaciente]="!idPacienteSelecionado"
+        (atualizaDados)="setDados($event)"
+    ></paciente>
+</ng-template>
+
+<ng-template #bodyModalLogAtendimento>
+    <logAtendimento
+        [atendimentoId]="atendimentoSelecionado" 
+        [mostraBotaoVoltar]="false"
+        (refresh)="getRefreshLogAtendimento($event)">
+    </logAtendimento>
+</ng-template>
+
+<ng-template #botoesModalLogAtendimento>
+
+</ng-template>
+
+<ng-template #campoOperadora let-bloqueado="bloqueado">
+    <!-- NAO VALIDA CADASTRO BASICO PARA TIPO DE ATENDIMENTO Entrevista CPT -->
+    <ng-container
+        *ngIf="tipoConsulta != 158"
+    >
+        <div 
+            class="col-sm-8 col-md-8"
+        >
+            <entrada
+                nome="Operadora"
+                tipo="seleciona"
+                [opcoes]="operadoras"
+                [bloqueado]="bloqueado"
+                [valor]="novoAtendimento?.operadora?.id || novoAtendimento?.pacientePlano?.operadora?.id"
+                (getValor)="$event && $event.valor ? novoAtendimento['operadora'] = { id: $event.valor } : novoAtendimento['operadora'] = undefined"
+            ></entrada>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template 
+    #campoValorConsulta
+    let-idOperadora="idOperadora"
+>
+    <div class="col-sm-4 col-md-4" *ngIf="idOperadora == 2">
+        <entrada
+            nome="Valor Consulta"
+            expressaoRegular="^[\d]+([\,|\.]?[\d]{1,2})?$"
+            (getValor)="($event) ? novoAtendimento['valor'] = $event.valor : null"
+            [valor]="novoAtendimento['valor'] ? novoAtendimento['valor'] : '0,00'"
+        ></entrada>
+    </div>
+</ng-template>

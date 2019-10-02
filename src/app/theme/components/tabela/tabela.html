@@ -1,0 +1,124 @@
+<moldura 
+	titulo="{{titulo}}" 
+	[registros]="registros" 
+	[pesquisar]="pesquisar.bind(this)" 
+	[filtrar]="filtrar.bind(this)" 
+	[elementoAcoes]="elementoAcoesMoldura"
+	[elementoAcoesTitulo]="elementoAcoesMolduraTitulo"
+	[labelRegistros]="labelRegistros"
+	[mostraPesquisar]="mostraPesquisar" 
+	[limparFiltros]="limparFiltros" 
+	[mostraFiltrar]="mostraFiltrar" 
+	[mostraInfo]="mostraInfo"
+>
+	<div class="card-detalhe">
+		<ng-content select=".card-detalhe"></ng-content>
+	</div>
+
+	<div class="acoes">
+		<ng-content select=".tabela-acoes"></ng-content>
+	</div>
+
+	<div class="moldura-filtro">
+		<ng-content select=".filtro"></ng-content>
+	</div>
+
+	<div class="moldura-info">
+		<ng-content select=".info"></ng-content>
+	</div>
+
+	<div class="filtro-acoes">
+		<ng-content select=".filtro-acoes"></ng-content>
+	</div>
+
+	<div>
+		<table class="table table-striped {{className}}">
+			<thead class="thead-dark">
+				<tr>
+					<ng-container *ngFor="let col of colunas">
+
+						<th *ngIf="ordenar && validaColunaOculta(col)" class="{{col.headClasse}}" (click)="ordenaTable(col)" [ngClass]="{'hidden': col.oculto}">
+							<ng-template #labelSimples>
+								<b>
+									<span [ngClass]="{'pointer': col.ordem}">{{col.titulo}}</span>
+								</b>
+							</ng-template>
+
+							<icone 
+								*ngIf="(col.titulo == '' && (col.icone && (col.icone.icn || col.icone.fnIcn)) ); else labelSimples" 
+								tamanho="pequeno-16" 
+								classe="{{ (col.ordem) ? 'pointer' : '' }}"
+								nome="{{col.icone.fnIcn ? col.icone.fnIcn() : col.icone.icn}}"
+								title="{{formataTitulo(col.icone.legenda, linha)}}"
+							></icone>
+
+							<ordenacao *ngIf="col.ordem" [ordem]="col.ordem" [ordenacao]="ordenacao"></ordenacao>
+
+						</th>
+
+						<th *ngIf="!ordenar" class="cursorDefault">
+							<b>{{col.titulo}}</b>
+						</th>
+
+					</ng-container>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr *ngFor="let linha of linhas" (click)="clickLinha($event, linha)">
+					<ng-container *ngFor="let col of colunas">
+						<td *ngIf="validaColunaOculta(col)" class="{{col.classe}} {{headClasse(col, linha)}}" [attr.data-name]="validaPosicaoObj(col, linha)" [ngClass]="{'hidden': col.oculto, 'cursorDefault': !ordenar}">
+                            {{ (!col.botao && !col.ocultaLabel) ? validaPosicaoObj(col, linha) : '' }}
+							<icone 
+								*ngIf="!col.botao && col.icone && (col.icone.seCondicao ? col.icone.seCondicao(linha) : true)" 
+								(click)="clickIcone($event, col.icone.click, linha)"
+								classe="{{col.icone.classe}}" 
+								nome="{{col.icone.fnIcn ? col.icone.fnIcn(linha) : col.icone.icn}}"
+								tamanho="medio"
+								title="{{formataTitulo(col.icone.legenda, linha)}}"
+							></icone>
+
+							<input-checkbox 
+								*ngIf="( col.checkbox && col.checkbox.fnCheckbox && col.checkbox.click )" 
+								classe="check_principal"
+								[estado]="validaEstado(col.checkbox.fnCheckbox, linha)"
+								(trocaEstado)="trocaEstado($event, col.checkbox.click, linha)"
+							></input-checkbox>
+
+							<botao
+								*ngIf="(col.botao && (col.botao.butt));"
+								(click)="clickBotao($event, col.botao.click, linha)"
+								nome="{{validaPosicaoObj(col, linha) ? validaPosicaoObj(col, linha) : '-'}}"
+								icone="{{col.icone.fnIcn ? col.icone.fnIcn(linha) : col.icone.icn}}"
+								classe="{{col.botao.butt}}"
+								tamanho="medio"
+                            ></botao>
+
+                            <entrada
+                                *ngIf="col.select && !!validaPosicaoObj(col.select, linha).length"
+                                (click)="clickIcone($event, col.select.click, linha)"
+                                [valor]="validaPosicaoObj(col.select, linha)[0].id"
+                                [opcoes]="validaPosicaoObj(col.select, linha)" 
+                                opcaoInicial="true"
+                                semTitulo="true"
+                                tipo="seleciona"
+                            ></entrada>
+						</td>
+                    </ng-container>
+				</tr>
+			</tbody>
+        </table>
+
+		<!-- <div [style]="height: {{tamanhoTela}}px">{{tamanhoTela}}</div> -->
+
+        <div>
+            <paginacao
+                (atualizaDados)="proximaPagina($event)"
+                qtdItensTotal="{{ordenacao.qtdItensTotal || qtdItensTotal || registros}}"
+                itensPorPagina="{{ordenacao.itensPorPagina}}"
+                paginaAtual="{{ordenacao.paginaAtual}}"
+                [scrollPagination]="scrollPagination"
+            ></paginacao>
+		</div>
+	</div>
+</moldura>

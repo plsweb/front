@@ -1,0 +1,7 @@
+<input #fileUpload ngFileSelect type="file" [options]="fileUploaderOptions" (onUpload)="_onFileUpload($event)" (beforeUpload)="beforeFileUpload($event)" hidden="true">
+<div class="input-group" [ngClass]="{uploading: uploadFileInProgress}">
+    <input *ngIf="habilitaInput" #inputText type="text" [value]="defaultValue" class="form-control" readonly>
+    <span class="input-group-btn">
+      <button class="btn btn-pimary botaoUpload" type="button" (click)="bringFileSelector();">Procurar</button>
+  </span>
+</div>

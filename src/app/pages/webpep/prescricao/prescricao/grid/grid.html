@@ -1,0 +1,88 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <ng-template [ngTemplateOutlet]="tmplBasePagina"></ng-template>
+    </div>
+</div>
+
+
+<!-- 
+#############################################################################################
+                                        Base Pagina
+#############################################################################################
+-->
+<ng-template #tmplBasePagina let-c="close" let-d="dismiss">
+	<!--div class="card-acoes">
+		<i class="material-icons acao salvar" (click)="abreModalRelatorioFiltro('Salvar')">save</i>
+	</div-->
+	
+	<!-- <ng-template [ngTemplateOutlet]="tmplFiltro"></ng-template> -->
+	<ng-template [ngTemplateOutlet]="tmplPrescricao"></ng-template>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplFiltro let-c="close" let-d="dismiss">
+	<div class="row">
+		<div class="col">
+			<moldura titulo="Pesquisar Paciente" oculto="true">
+
+				<ng-template [ngTemplateOutlet]="adicionarPacienteLista"></ng-template>
+
+				<div class="row">
+					<div class="col-md-3">
+						<botao nome="Pesquisar" (click)="filtrarPrescricao()"></botao>
+					</div>
+				</div>
+				
+			</moldura>
+		</div>
+	</div>
+</ng-template>
+
+
+
+<!-- 
+#############################################################################################
+                                        Filtro
+#############################################################################################
+-->
+<ng-template #tmplAddPrescricao let-c="close" let-d="dismiss">
+	<div class="row" style="float: left;margin-right: 20px;">
+		<div class="col">
+			<button class="btn btn-primary" (click)="adicionarPrescricao()" >Adicionar</button>
+		</div>
+	</div>
+</ng-template>
+
+
+<!-- 
+#############################################################################################
+                                        Tabela
+#############################################################################################
+-->
+<ng-template #tmplPrescricao let-c="close" let-d="dismiss">
+	
+	<tabela
+		[titulo]="'Itens de Prescrição'"
+		[colunas]="variaveisDeAmbiente['colunasTabela']"
+		[linhas]="variaveisDeAmbiente['prescricoes']"
+		[ordenacao]="variaveisDeAmbiente['ordenacao']"
+		[atualizaDados]="iniciaTabela.bind(this)"
+		[elementoAcoesMoldura]="tmplAddPrescricao"
+		[limparFiltros]="limparFiltros.bind(this)"
+		[linhaClick]="abrePrescricao.bind(this)"
+		[mostraFiltrar]="false"
+		[registros]="variaveisDeAmbiente['tabela']['total']"
+	>
+
+		<form class="filtro">
+			<div class="row">
+			</div>
+		</form>
+
+	</tabela>
+</ng-template>

@@ -1,0 +1,51 @@
+<moldura 
+    titulo="Unidades de Atendimento" 
+    [registros]="qtdItensTotal" 
+    [pesquisar]="pesquisar.bind(this)"
+>
+    <div class="row">
+        <div class="col col-sm-2">
+            <botao nome="Adicionar" (click)="adicionar()"></botao>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>CODIGO</th>
+                        <th>DESCRIÇÃO</th>
+                        <th>CODIGO VISUAL</th>
+                        <th>CADASTRO BÁSICO</th>
+                        <th>IGNORA FERIADOS</th>
+                        <th>TEMPO LIMITE</th>
+                        <th>CODIGO ESTOQUE</th>
+                        <th>VINCULA GUIA</th>
+                    </tr>
+                    <tr *ngFor="let unidade of unidadesAtendimentoFiltro" (click)="atualizar(unidade.id)">
+                        <td>{{unidade.id}}</td>
+                        <td>{{unidade.descricao}}</td>
+                        <td>{{unidade.codigoVisual ? unidade.codigoVisual : "NÃO POSSUI"}}</td>
+                        <td>{{unidade.obrigaCadastroBasico ? "SIM" : "NÃO"}}</td>
+                        <td>{{unidade.ignoraFeriados ? "SIM" : "NÃO"}}</td>
+                        <td>{{unidade.tempoLimite + ' MINUTOS'}}</td>
+                        <td>{{unidade.estoqueCodigo ? unidade.estoqueCodigo : "NÃO POSSUI"}}</td>
+                        <td>{{unidade.vinculaGuia ? "SIM" : "NÃO"}}</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <paginacao
+            (atualizaDados)="buscaUnidadesAtendimento($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+            scrollPagination="true"
+        ></paginacao>
+    </div>
+
+</moldura>

@@ -1,0 +1,367 @@
+<!-- <moldura [titulo]="(( idTratamento ) ? 'Editar' : 'Novo') + ' Tratamento'"> -->
+
+<div baCardBlur class="animated fadeIn card" zoom-in>
+
+    <div class="card-header abas clearfix">
+        <div class="cabecalho">
+            <h3>{{ (( idTratamento ) ? 'Editar' : 'Novo') + ' Tratamento' }}</h3>
+        </div>
+        <div *ngIf="idTratamento; else novoTratamento" class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div (click)="navegar('evolucoes')" [ngClass]="{ativo: atual === 'evolucoes'}">Evolução</div>
+            <div (click)="navegar('documentos')" [ngClass]="{ativo: atual === 'documentos'}">Documentos</div>
+            <div (click)="navegar('guias')" [ngClass]="{ativo: atual === 'guias'}">Guias</div>
+            <div (click)="navegar('prescricoes')" [ngClass]="{ativo: atual === 'prescricoes'}">Prescrições</div>
+            <div (click)="navegar('profissionais')" [ngClass]="{ativo: atual === 'profissionais'}">Profissionais</div>
+            <div (click)="navegar('historico_agendamento')" [ngClass]="{ativo: atual === 'historico_agendamento'}">Agenda</div>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <div *ngIf="atual === 'geral'">
+            <div class="row">
+
+                <!-- <moldura> -->
+
+                    <!-- <div class="row"> -->
+
+                        <div class="col-md-4">
+
+                            <autocomplete
+                                titulo="Paciente"
+                                [placeholder]="'Digite para buscar Pacientes'"
+                                [minimo]="3"
+                                [valor]="objPacientes"
+                                [camposFiltro]="['nome', 'cpf']"
+                                [valorSelecionado]="valorPacienteSelecionado"
+                                [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                                (fnOnSelected)="getPaciente($event)"
+                            ></autocomplete>
+                                    
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Unidade" tipo="seleciona" [opcoes]="tiposTratamento" [valor]="(novoTratamento['tipo']) ? novoTratamento['tipo']['id'] : '0'" (getValor)="($event) ? objParamTratamento['tipo'] = { id : $event.valor } : objParamTratamento['tipo'] = undefined"></entrada>
+                        </div>
+
+                        <div *ngIf="validaCid()" class="col-md-4">
+                            <entrada 
+                                nome="CID" 
+                                tipo="tabela" 
+                                tabela="CID" 
+                                [valor]="valorCidSelecionado"
+                                [tabelaCampos]=' { "filtro":"CIDDESCRICAO,CIDCODIGO","filtroAdicional":"CIDCODIGO" } ' 
+                                [retornarObjetoFull]="true"
+                            ></entrada>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <entrada nome="Início do tratamento" [incluirMascara]="true" tipo="data" [valor]="novoTratamento['inicio']" (getValor)="($event) ? objParamTratamento['inicio'] = $event.valor : null"></entrada>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Fim do tratamento" [incluirMascara]="true" tipo="data" [valor]="novoTratamento['fim']" (getValor)="($event) ? objParamTratamento['fim'] = $event.valor : null"></entrada>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Caráter" [valor]="novoTratamento['carater']" (getValor)="($event) ? objParamTratamento['carater'] = $event.valor : null"></entrada>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <entrada nome="Tipo" tipo="seleciona" [opcoes]="tiposTratamento" [valor]="novoTratamento['tipo']" (getValor)="($event && $event.valor) ? objParamTratamento['tipo'] = { id : $event.valor } : objParamTratamento['tipo'] = undefined"></entrada>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Encerramento" tipoRetorno="number" tipo="seleciona" [opcoes]="tiposEncerramento" [valor]="(novoTratamento['encerramento']) ? novoTratamento['encerramento']['id'] : '0'" (getValor)="($event && $event.valor) ? objParamTratamento['encerramento'] = { id : $event.valor } : objParamTratamento['encerramento'] = undefined"></entrada>
+                        </div>
+                        
+                         <div class="col-md-4">
+                            <entrada nome="Precisão de Alta" [valor]="novoTratamento['precisaoAlta']" (getValor)="($event && $event.valor) ? objParamTratamento['precisaoAlta'] = { id : $event.valor } : objParamTratamento['precisaoAlta'] = undefined"></entrada>
+                        </div>
+
+                        <div class="col-md-12">
+                            <entrada nome="Observação" tipo="area" [valor]="novoTratamento['observacao']"></entrada>
+                        </div>
+
+                    <!-- </div> -->
+
+                <!-- </moldura> -->
+                
+            </div>
+
+            <div class="row">
+
+                <botao nome="Salvar"    [ngClass]="'col-md-3'" (click)="salvarTratamento()"></botao>
+                <botao nome="Voltar"    [ngClass]="'col-md-3'" (click)="voltar()" classe="btn-default"></botao>
+
+            </div>
+        </div>
+
+        <div *ngIf="atual === 'evolucoes'">
+            <table *ngIf="evolucoes" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>FORMULÁRIO</th>
+                        <th>RESPONSÁVEL</th>
+                        <th>DATA</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <ng-container *ngFor="let evolucao of evolucoes">
+    
+                        <tr (click)="abrirFormulario(evolucao.id)" class="link">
+                            <td>
+                                <icone nome="print" title="Imprimir evolução" style="cursor: pointer !important;" (click)="imprimir(evolucao.id)"></icone>
+                            </td>
+                            <td>{{evolucao.formulario.titulo}}</td>
+                            <td>{{evolucao.usuario ? evolucao.usuario.nome : evolucao.atendimento && evolucao.atendimento.prestador
+                                ? evolucao.atendimento.prestador.nome : "" | uppercase}}</td>
+                            <td>{{evolucao.data}}</td>
+                        </tr>
+                        <tr *ngIf="evolucao.id == idFormAberto && paciente">
+                            <td colspan="4" class="formulario">
+                                <paciente-formulario [id]="evolucao.id" [botaoSalvarFormulario]="true" [semBotoes]="true" [bloqueiaRequisicoes]="visualizacao" [pacienteId]="paciente.id"
+                                    [atendimento]="atendimento"></paciente-formulario>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>    
+            </table>
+        </div>
+
+        <div *ngIf="atual === 'documentos'">
+            <table *ngIf="documentos" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>DOCUMENTO</th>
+                        <th>RESPONSÁVEL</th>
+                        <th>DATA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let documento of documentos">
+    
+                        <tr (click)="abrirDocumento(documento.id)" class="link">
+                            <td>
+                                <icone nome="print" title="Imprimir Documento" style="cursor: pointer !important;" (click)="imprimir(documento.id)"></icone>
+                            </td>
+                            <td>{{documento.formulario.titulo}}</td>
+                            <td>{{documento.usuario ? documento.usuario.nome : documento.atendimento && documento.atendimento.prestador
+                                ? documento.atendimento.prestador.nome : "" | uppercase}}</td>
+                            <td>{{documento.data}}</td>
+                        </tr>
+                        <tr *ngIf="documento.id == idFormAberto && paciente">
+                            <ng-container *ngIf="documentoSelecionado; else loadingDocumento">
+                                <td colspan="4" class="formulario documentos">
+                                    <paciente-formulario [id]="documentoSelecionado.id" [semBotoes]="true" [tipoDocumento]="true" [componentePronto]="true" [formularioId]="documentoSelecionado.formulario.id" [modelo]="documentoSelecionado.modelo" [bloqueiaRequisicoes]="visualizacao" [pacienteId]="paciente.id"
+                                        [atendimento]="atendimento"></paciente-formulario>
+                                </td>
+                            </ng-container>
+    
+                            <ng-template #loadingDocumento>
+                                <td colspan="4" class="formulario loading" >
+                                    <icone tamanho="grande" nome="cached" [loading]="true" ></icone>
+                                </td>
+                            </ng-template>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="atual === 'guias'">
+    
+                <div *ngIf="guias && guias.length > 0" class="grid_guias">
+                    <div *ngFor="let guia of guias" class="guias animated fadeIn card link" zoom-in id="{{guia.id}}" style="cursor: pointer !important;">
+                        <div class="card-header clearfix" (click)="abrirAbaExame(guia.id)">
+                            <div class="titulo link">
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th class="status"></th>
+                                            <th>GUIA</th>
+                                            <th>SOLICITANTE</th>
+                                            <th>EXECUTANTE</th>
+                                            <th>ESPECIALIDADE</th>
+                                            <th>DATA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="status {{guia.guia.status === 'AUTORIZADA' ? 'verde' : 'cinza'}}"></td>
+                                            <td>{{guia.guia.impresso}}</td>
+                                            <td>{{guia.guia.solicitanteNome}}</td>
+                                            <td>{{guia.guia.prestador.nome}}</td>
+                                            <td>{{(guia.guia.especialidade) ? guia.guia.especialidade.descricao : ''}}</td>
+                                            <td>{{guia.guia.digitacao}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="fa {{idAbaAberta === guia.id ? 'fa-angle-up' : 'fa-angle-down'}} seta-dropdown"></div>
+                        </div>
+                        <div class="card-body" [hidden]="idAbaAberta !== guia.id">
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="status"></th>
+                                        <th>PROCEDIMENTO</th>
+                                        <th>DESCRIÇÃO</th>
+                                        <th>QTD AUTORIZADA</th>
+                                        <th>QTD SOLICITADA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of guia.guia.itens">
+                                        <td class="status {{item.status == '0' ? 'vermelho' : 'verde'}}"></td>
+                                        <td>{{item.procedimento.codigo}}</td>
+                                        <td>{{item.procedimento.descricao}}</td>
+                                        <td>{{item.quantidadeAutorizada}}</td>
+                                        <td>{{item.quantidadeSolicitada}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+    
+    
+                        </div>
+                    </div>
+                </div>
+    
+                <paginacao (atualizaDados)="buscaGuiasPaginado($event)" qtdItensTotal="{{qtdItensTotal}}" itensPorPagina="{{itensPorPagina}}"
+                    paginaAtual="{{paginaAtual}}"></paginacao>
+    
+            </div>
+
+        <div *ngIf="atual === 'prescricoes'">
+
+                <moldura
+                    titulo=" "
+                    [registros]="totalPrescricoes"
+                    [elementoAcoes]="tmplAddPrescricoes"
+                >
+    
+                    <table *ngIf="prescricoes" class="table table-striped no-hover prescricoes">
+                        
+                        <thead class="thead-dark">
+                            <tr>
+                                <!-- <th></th> -->
+                                <th>RESPONSÁVEL</th>
+                                <th>DATA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let prescricao of prescricoes; let pos = index">
+    
+                                <tr (click)="abrirAbaPrescricao(prescricao.id)" class="link">
+                                    <!-- <td>
+                                        <icone nome="print" title="Imprimir prescrição" style="cursor: pointer !important;" (click)="imprimirPrescricao(prescricao.id)"></icone>
+                                    </td> -->
+                                    <td>{{prescricao.usuario.nome}}</td>
+                                    <td>{{prescricao.data}}</td>
+                                </tr>
+                                <tr [hidden]="!(prescricao.id == idAbaPrescricao && paciente)" class="ativo {{ validaClasse(pos) ? 'even' : 'odd' }} ">
+                                    <td colspan="3" class="formulario">
+                                        <ng-container *ngIf="prescricao.id == idAbaPrescricao">
+                                            <gridPrescricoes
+                                                [idItemPrescricao]="prescricao.id" 
+                                                [idPaciente]="paciente.id" 
+                                                [mostraModelo]="false"
+                                            ></gridPrescricoes>
+                                        </ng-container>
+                                    </td>
+                                </tr>
+    
+                            </ng-container>
+                        </tbody>
+    
+                    </table>
+    
+                </moldura>
+    
+        </div>
+
+        <div *ngIf="atual === 'profissionais'">
+    
+                <moldura 
+                    *ngIf="profissionaisPaciente.length"
+                >
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th></th>
+                                <th>NOME</th>
+                                <th>ESPECIALIDADE</th>
+                                <th>VIGÊNCIA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let profissional of profissionaisPaciente" class="link">
+                                <td title="Desativar profissional">
+                                    <icone *ngIf="!profissional.fim" nome="block" tamanho="medio" (click)="desativarProfissional(profissional)"></icone>
+                                </td>
+                                <td>{{ profissional.usuario.nome }}</td>
+                                <td>{{ profissional.especialidade.descricao }}</td>
+                                <td>{{ mostraVigencia(profissional) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </moldura>
+        </div>
+
+        <div *ngIf="atual === 'historico_agendamento'">
+                <div class="row" *ngIf="atendimentosPaciente.length; else naoTemAtendimentos">
+    
+                    <table *ngIf="atendimentosPaciente" class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th>STATUS</th>
+                                <th>ESPECIALIDADE</th>
+                                <th>PRESTADOR</th>
+                                <th>AGENDAMENTO</th>
+                                <th>USUÁRIO</th>
+                                <th>OBSERVAÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let atendimento of atendimentosPaciente" class="link">
+                                <td class="status"></td>
+                                <td>{{ atendimento.status }}</td>
+                                <td>{{ atendimento.especialidade ? atendimento.especialidade.descricao : ((atendimento.configuraHorario.agendamentoColetivo) ? atendimento.configuraHorario.agendamentoColetivo.especialidade.descricao : '') }}</td>
+                                <td>{{ atendimento.usuario ? atendimento.usuario.nome : '' }}</td>
+                                <td>{{ atendimento.agendamento }}</td>
+                                <td>{{ (atendimento.UsuarioAgendamento) ? atendimento.UsuarioAgendamento.nome : ''}}</td>
+                                <td>{{ atendimento.observacao }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+    
+                    <paginacao (atualizaDados)="buscarProximasConsultasPaginado($event)" qtdItensTotal="{{qtdItensTotalHist}}" itensPorPagina="{{itensPorPaginaHist}}"
+                        paginaAtual="{{paginaAtualHist}}"></paginacao>
+    
+                </div>
+                <ng-template #naoTemAtendimentos>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Paciente sem histórico de Agendamentos.</h3>
+                        </div>
+                    </div>
+                </ng-template>
+        </div>
+
+
+    </div>
+
+</div>
+<!-- </moldura> -->
+
+
+<ng-template #novoTratamento>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+        </div>
+</ng-template>

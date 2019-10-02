@@ -1,0 +1,163 @@
+<tabela
+    [titulo]="'Auditoria prévia'"
+    [colunas]="colunasTabela"
+    [atualizaDados]="atualizaDados.bind(this)"
+    [limparFiltros]="limparFiltros.bind(this)"
+    [linhaClick]="atualizar.bind(this)"
+    [registros]="ordenacao.qtdItensTotal"
+    [ordenacao]="ordenacao"
+    [linhas]="guias"
+>
+    <form class="filtro container">
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-lg-4">
+                <entrada 
+                    nome="Guia" 
+                    [valor]="(filtro && filtro['impresso']) ? filtro['impresso'].valor : ''"
+                    (getValor)="getValor($event, 'impresso')" 
+                ></entrada>
+            </div>
+
+            <div class="col-md-6 col-sm-6 col-lg-6">
+                <entrada 
+                    nome="Tipo"
+                    tipo="multiselect"
+                    [noLabels]="false"
+                    posicaoIconeObjeto=""
+                    [objMultiselect]="['codigo', 'nome']"
+                    [itemList]="tiposMovimentos"
+                    [selectedItems]="filtro['tipo'] ? filtro['tipo'].valor : []"
+                    (getValor)="getValor($event, 'tipo')"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6 col-md-6 col-lg-6">
+                <label>Data Inicial</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getValor.bind(this, 'dataInicio')"
+                    (setInstancia)="getDataInicioInstancia($event)"
+                    [(datas)]='dataInicio'
+                ></datepicker>
+            </div>
+
+            <div class="col-sm-6 col-md-6 col-lg-6">
+                <label>Data Final</label>
+                <datepicker
+                    [inputForm]='true'
+                    [semData]='true'
+                    [fnOnChange]="getValor.bind(this, 'dataFim')"
+                    (setInstancia)="getDataFimInstancia($event)"
+                    [(datas)]='dataFim'
+                ></datepicker>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Beneficiário" 
+                    [valor]="(filtro && filtro['nome']) ? filtro['nome'].valor : ''"
+                    (getValor)="getValor($event, 'nome')" 
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <entrada 
+                    nome="Solicitante" 
+                    [valor]="(filtro && filtro['solicitante']) ? filtro['solicitante'].valor : ''"
+                    (getValor)="getValor($event, 'solicitante')" 
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada 
+                    nome="Local" 
+                    tipo="multiselect" 
+                    [noLabels]="true"
+                    posicaoIconeObjeto="icone" 
+                    [objMultiselect]="['id', 'id']" 
+                    [itemList]="icones" 
+                    [selectedItems]="filtro['local'] ? filtro['local'].valor : []" 
+                    (getValor)="getValor($event, 'local')"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada
+                    nome="Caráter"
+                    tipo="multiselect"
+                    [noLabels]="false"
+                    posicaoIconeObjeto=""
+                    [objMultiselect]="['codigo', 'nome']"
+                    [itemList]="guiasAdmissoes"
+                    [selectedItems]="filtro['admissao'] ? filtro['admissao'].valor : []"
+                    (getValor)="getValor($event, 'admissao')"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada 
+                    nome="Classificação" 
+                    tipo="multiselect" 
+                    [noLabels]="false"
+                    [searchFilter]="true"
+                    posicaoIconeObjeto=""
+                    [objMultiselect]="['id', 'nome']"
+                    [itemList]="classificacoes"
+                    [selectedItems]="filtro['classificacao.descricao'] ? filtro['classificacao.descricao'].valor : []"
+                    (getValor)="getValor($event, 'classificacao.descricao')"
+                ></entrada>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada 
+                    nome="Nível" 
+                    tipo="multiselect" 
+                    [noLabels]="false"
+                    posicaoIconeObjeto=""
+                    [objMultiselect]="['codigo', 'nome']"
+                    [itemList]="opcoesNivel"
+                    [selectedItems]="filtro['nivelAuditoria'] ? filtro['nivelAuditoria'].valor : ['MEDICO','ENFERMEIRO']"
+                    (getValor)="getValor($event, 'nivelAuditoria')"
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada 
+                    nome="Chat" 
+                    tipo="seleciona" 
+                    mostraOpcaoEmBranco="true"
+                    opcaoZeroLabel="Todos"
+                    [opcoes]="opcoesChatFiltro" 
+                    [multiple]="true"
+                    [valor]="(filtro && filtro['chat']) ? filtro['chat'].valor : true"
+                    (getValor)="getValor($event, 'chat')" 
+                ></entrada>
+            </div>
+
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                <entrada 
+                    nome="Status" 
+                    tipo="multiselect" 
+                    [noLabels]="false"
+                    [searchFilter]="true"
+                    posicaoIconeObjeto=""
+                    [objMultiselect]="['id', 'descricao']"
+                    [itemList]="opcoesStatus" 
+                    [selectedItems]="filtro['status.id'] ? filtro['status.id'].valor : [7]"
+                    (getValor)="getValor($event, 'status.id')"
+                ></entrada>
+            </div>
+        </div>
+    </form>
+</tabela>

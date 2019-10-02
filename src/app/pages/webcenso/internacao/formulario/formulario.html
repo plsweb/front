@@ -1,0 +1,18 @@
+<moldura titulo="Internação">
+    <form (ngSubmit)="submit()">
+        <entrada nome="Prestador" [valor]="prestadorValor" tipo="seleciona" [opcoes]="hospitais" (getValor)="getPrestador($event)"></entrada>
+        <entrada nome="Beneficiário" mascara="9 999 999999999999 9" [valor]="pacienteValor" (getValor)="getPaciente($event)"></entrada>
+        <entrada nome="Entrada" [valor]="entradaValor" (getValor)="getEntrada($event)" incluirMascara="true"></entrada>
+        <entrada nome="Saida" [valor]="saidaValor" (getValor)="getSaida($event)" incluirMascara="true"></entrada>
+        <entrada nome="Tipo" [valor]="tipoInternacaoValor" tipo="seleciona" [opcoes]="tipoInternacoes" (getValor)="getTipoInternacao($event)"></entrada>
+        <entrada nome="Caráter" [valor]="caraterValor" tipo="seleciona" [opcoes]="tipoCarateres" (getValor)="getCarater($event)"></entrada>
+        <entrada nome="Motivo Encerramento" [valor]="encerramentoValor" tipo="seleciona" [opcoes]="tipoEncerramento" (getValor)="getEncerramento($event)"></entrada>
+        <entrada nome="Justificativa" [valor]="justificativaValor" (getValor)="getJustificativa($event)"></entrada>
+        <entrada nome="Leito" [valor]="leitoValor" tipo="seleciona" [opcoes]="leitoDisponivel" (getValor)="getLeito($event)"></entrada>
+        <div class="row">
+            <div class="col-sm-2">
+                <botao nome="Salvar" submit="true"></botao>
+            </div>
+        </div>
+    </form>
+</moldura>

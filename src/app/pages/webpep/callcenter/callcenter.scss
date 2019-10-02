@@ -1,0 +1,68 @@
+.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+.card-header {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}
+
+td.coluna_acoes {
+    display: initial;
+    text-align: -webkit-right;
+}
+
+th.coluna_acoes{
+    width: 95px !important;
+}
+
+:host /deep/ td.coluna_acoes botao button {
+    padding: 0;
+    width: 30px !important;
+    background: transparent !important;
+    border: none;
+}
+
+.hide{
+    display: none;
+}
+
+div#edit-desc,
+td.edit {
+    padding: 0;
+}
+
+:host /deep/ tabela {
+
+    td.status-tabela[data-name]{
+        border-left-width: 10px;
+        border-left-style: solid;
+    }
+
+    td.status-tabela[data-name="PENDENTE"] {
+        border-left-color: gray;
+    }
+
+    td.status-tabela[data-name="PAUSADO"] {
+        border-left-color: yellow;
+    }
+
+    td.status-tabela[data-name="EMATENDIMENTO"] {
+        border-left-color: orange;
+    }
+
+    td.status-tabela[data-name="CONCLUIDO"] {
+        border-left-color: green;
+    }
+
+}

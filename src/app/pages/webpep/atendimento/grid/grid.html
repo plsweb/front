@@ -1,0 +1,392 @@
+<div style="display:flex;">
+        <div class="mini-calendario-container hidden-sm-down">
+    
+            <div class="mini-calendario">
+                <div class="calendar-grid calendar-head">
+    
+                    <div class="col text-center">
+                        <h4 class="mesVisaoMiniCalendario"> {{ formataVisaoData(diaAtualMiniCalendario, 'MMM YYYY') }} </h4>
+                    </div>
+    
+                    <div class="col text-right">
+                        <icone nome="keyboard_arrow_left" tamanho="grande" [ngClass]="'pointer'" (click)="trocaMiniCalendarioMes('subtract')"></icone>
+                        <icone nome="keyboard_arrow_right" tamanho="grande" [ngClass]="'pointer'" (click)="trocaMiniCalendarioMes('add')"></icone>
+                    </div>
+                </div>
+    
+                <div class="calendar-grid calendar-head">
+                    <div class="col" *ngFor="let diaSemana of diasDaSemana;trackBy: trackByFn">
+                        {{(diaSemana.diaDaSemana) ? diaSemana.diaDaSemana[0] : ''}}
+                    </div>
+                </div>
+                <div class="calendar-grid" *ngFor="let miniSemana of miniCalendarioDias;trackBy: trackByFn">
+    
+                    <div 
+                        id="{{dia.id}}" 
+                        class="col dia unselectable" 
+                        drag-multipla-selecao="true"
+                        (mouseover)='miniDiaMouseOver($event, dia)' 
+                        (mouseup)='miniDiaMouseUp($event, dia)'
+                        (mousedown)='miniDiaMouseDown($event, dia, false)' 
+                        *ngFor="let dia of miniSemana;trackBy: trackByFn"
+                        [ngClass]="{'old': dataForaDoMes(dia.data), 'ativo': eDataAtual(dia.data)}"
+                    >
+                        {{dia.data.getDate()}}
+                    </div>
+                </div>
+            </div>
+    
+            <ul class="legenda" *ngIf="!configurarAgendaComponent">
+                <li title="{{legenda.titulo}}" *ngFor="let legenda of legendas;trackBy: trackByFn">
+                    <input-checkbox classe="{{legenda.classe}}" legenda="{{legenda.titulo}}" [estado]="(legenda) ? legenda.estado : false" (trocaEstado)="trocaEstadoCheckbox($event, legenda)"></input-checkbox>
+                </li>
+            </ul>
+    
+            <div *ngIf="configurarAgendaComponent">
+                <botao nome="Configurar Agenda" (click)="abreModalConfigurarAgenda(configurarAgenda, configurarAgendaBotoes)"></botao>
+            </div>
+    
+        </div>
+    
+        <div class="grid-calendario">
+    
+            <div class="animated fadeIn card" zoom-in>
+                <div class="card-header">
+                    Atendimentos
+                </div>
+                <div class="card-body calendario-agenda">
+    
+                    <div class="calendar-header">
+                        <icone nome="keyboard_arrow_left"  #botao_anterior [ngClass]="'pointer'" tamanho="grande" (click)="dataAnterior(tipoCalendario, null)"></icone>
+                        <icone nome="keyboard_arrow_right" #botao_posterior [ngClass]="'pointer'" tamanho="grande" (click)="dataPosterior(tipoCalendario, null)"></icone>
+                        <label class="mesAtualVisao">{{ periodoMesAno }}  </label>
+    
+                        <ng-container *ngIf="atendimentos; else carregandoAtendimento"></ng-container>
+    
+                        <div class="col text-right">
+                            <select class="btn" (change)="trocaTipoCalendario($event.target.value)" [(ngModel)]="tipoCalendario">
+                                <option value="day">Dia</option>
+                                <option value="week">Semana</option>
+                                <option value="month">Mês</option>
+                            </select>
+                        </div>
+                    </div>
+    
+                    <div class="visao-mes" *ngIf="tipoCalendario == 'month'; else calendarioBloco">
+                        <div class="calendar-grid calendar-head">
+                            <div class="col" *ngFor="let diaSemana of diasDaSemana;trackBy: trackByFn">{{diaSemana.diaDaSemana}}</div>
+                        </div>
+                        <div class="calendar-grid" *ngFor="let semana of dias;trackBy: trackByFn">
+                            <div *ngFor="let dia of semana;trackBy: trackByFn" id="{{dia.id}}" class="col dia" [ngClass]="{'old': dataForaDoMes(dia.data)}">
+                                {{dia.data.getDate()}}
+    
+                                <div id="{{dia.id}}" *ngFor="let atendimento of buscarAtendimento(dia.data);trackBy: trackByFn">
+                                    <div class="agendamento atendimento {{atendimento.status}} " *ngIf="atendimento.agrupado && mostraAtendimento(atendimento.status); else atendimentosBloco"
+                                        (click)="miniDiaMouseDown($event, dia, true)" [title]="descricao(atendimento.status)">
+                                        <icone [nome]="icone(atendimento.status)" [tamanho]="'pequeno'"></icone>
+                                        <span> </span>
+                                        <div class='text-overflow'>{{atendimento.quantidade}} Atendimentos</div>
+                                    </div>
+    
+                                    <ng-template #atendimentosBloco>
+                                        <div 
+                                            class="agendamento atendimento {{atendimento.status}}" 
+                                            *ngIf="mostraAtendimento(atendimento.status);" 
+                                            (click)="abrir(atendimento.id, false)"
+                                            (contextmenu)="abreContextMenu($event, atendimento)"
+                                            [title]="descricao(atendimento.status)" 
+                                            draggable="false"
+                                        >
+                                            <icone [nome]="icone(atendimento.status)" [tamanho]="'pequeno'"></icone>
+                                            <span>
+                                                {{getHora(atendimento.agendamento, atendimento.chegada)}}
+                                            </span>
+                                            <div class='text-overflow'>{{atendimento.paciente ? atendimento.paciente.nome : atendimento.nome}}</div>
+                                        </div>
+                                    </ng-template>
+    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <ng-template #calendarioBloco>
+                        <div class="visao-customizada">
+                            <div class="calendar-grid calendar-head">
+                                <div class="col horario"></div>
+                                <div class="col" *ngFor="let dia of dias;trackBy: trackByFn">
+                                    <p>{{dia.diaDaSemana}}</p>
+                                    <h1>{{dia.diaDoMes}}</h1>
+    
+                                </div>
+                            </div>
+                            <div class="calendar-grid horario" *ngFor="let horario of horarios;trackBy: trackByFn">
+                                <div class="col horario">
+                                    {{horario.hora}}:00
+                                </div>
+    
+                                <div id="{{horario.id}}" *ngFor="let dia of dias;trackBy: trackByFn" class="col" data-drop-target="true">
+                                    <div id="{{dia.id}}" *ngFor="let atendimento of buscarAtendimento(dia.data, horario);trackBy: trackByFn" class="agendamento"
+                                        draggable="false">
+                                        <div 
+                                            class="atendimento {{atendimento.status}} " 
+                                            *ngIf="mostraAtendimento(atendimento.status);" 
+                                            (click)="abrir(atendimento, false)"
+                                            (contextmenu)="abreContextMenu($event, atendimento)"
+                                            [title]="mostraTitle(atendimento)"
+                                        >
+                                            <icone [nome]="icone(atendimento.status)" [tamanho]="'pequeno'"></icone>
+                                            <span>
+                                                {{getHora(atendimento.agendamento, atendimento.chegada)}}
+                                            </span>
+                                            
+                                            <div *ngIf="atendimento.paciente">
+                                                {{atendimento.paciente ? atendimento.paciente.nome : atendimento.nome}} <label *ngIf="dias.length == 1"> - {{atendimento.paciente.idade}} </label> <label class="chegada" *ngIf="atendimento.status == 'SALADEESPERA' && dias.length == 1 && atendimento.chegada"><b>CHEGOU:</b> {{atendimento.chegada}} </label>
+                                            </div>
+    
+                                            <div *ngIf="!atendimento.paciente && atendimento.nome">
+                                                {{atendimento.nome}} <label class="chegada" *ngIf="atendimento.status == 'SALADEESPERA' && dias.length == 1 && atendimento.chegada"><b>CHEGOU:</b> {{atendimento.chegada}} </label>
+                                            </div>
+    
+                                            <div class="icone" *ngIf="dias.length == 1">
+                                                <b *ngIf="atendimento && atendimento?.prestador">{{ (atendimento && atendimento?.prestador && atendimento?.prestador?.nome) 
+                                                                                                            ? atendimento?.prestador?.nome 
+                                                                                                            : 
+                                                                                                        (atendimento?.usuario && atendimento?.usuario?.nome 
+                                                                                                            ? atendimento?.usuario?.nome?.toUpperCase() 
+                                                                                                            : ''
+                                                                                                        ) }}
+                                                                                                    </b>
+                                                <b *ngIf="atendimento && !atendimento?.prestador && atendimento?.configuracoesHorario?.length && atendimento?.configuracoesHorario[0].configuraHorario?.usuarioPrestador">{{(atendimento && atendimento?.configuracoesHorario?.length && atendimento?.configuracoesHorario[0].configuraHorario?.usuarioPrestador) ? atendimento?.configuracoesHorario[0].configuraHorario?.usuarioPrestador.nome : (atendimento.usuario && atendimento.usuario.nome ? atendimento.usuario.nome.toUpperCase() : '') }}</b>
+                                                <ng-container *ngIf="atendimento?.configuracoesHorario?.length && atendimento?.configuracoesHorario[0].configuraHorario?.tipo == 'COLETIVA'">
+                                                    <b class="agenda_coletiva" *ngIf="atendimento?.configuracoesHorario?.length"> {{ atendimento?.configuracoesHorario[0].configuraHorario?.agendamentoColetivo ? atendimento?.configuracoesHorario[0].configuraHorario?.agendamentoColetivo.nome : ''  }} {{ atendimento?.configuracoesHorario[0].configuraHorario?.agendamentoColetivo && atendimento?.configuracoesHorario[0].configuraHorario?.agendamentoColetivo.especialidade ? ' - ' + atendimento?.configuracoesHorario[0].configuraHorario?.agendamentoColetivo.especialidade.descricao : '' }} </b>
+                                                </ng-container>
+    
+                                                <ng-container *ngIf="atendimento?.configuracoesHorario?.length && atendimento?.configuracoesHorario[0].configuraHorario?.tipo == 'COLETIVA' && atendimento?.fim">
+                                                    <b class="d-block mt-2" *ngIf="atendimento?.fim"> {{ atendimento?.usuario ? atendimento?.usuario?.nome : ''  }} </b>
+                                                </ng-container>
+    
+                                                <icone nome="visibility" (click)="abrir(atendimento, true, $event)" [tamanho]="'medio'"></icone>
+                                            </div>
+                                        </div>
+    
+                                        <ng-container>
+                                            <ul class="list-group menu-context" (mouseleave)="escondeContextMenu()">
+                                                <li class="list-group-item" (click)="abrir(atendimento, true)">Visualizar</li>
+                                                <li *ngIf="atendimento.status == 'PENDENTE'" class="list-group-item" (click)="atualizarStatusPaciente(atendimento, atendimento.status, 'CHEGOU')">Chegou</li>
+                                                <li *ngIf="atendimento.status == 'PENDENTE'" class="list-group-item" (click)="atualizarStatusPaciente(atendimento, atendimento.status, 'FALTA')">Faltou</li>
+                                            </ul>
+                                        </ng-container>
+    
+                                    </div>
+                                    <div class="atendimento PENDENTE" style="visibility: hidden;"> </div>
+                                </div>
+                            </div>
+    
+                        </div>
+                    </ng-template>
+    
+                </div>
+            </div>
+    
+        </div>
+    </div>
+    
+    
+    <ng-template #configurarAgendaBotoes let-c="close" let-d="dismiss">
+        <botao nome="Salvar" (click)="salvarConfiguracao()"></botao>
+    </ng-template>
+    
+    
+    <ng-template #configurarAgenda let-c="close" let-d="dismiss">
+    
+        <div class="agenda-sumario row configuracao-agenda text-left">
+            
+            <div class="col-sm-12 col-md-4">
+                <input type="date" name="inicio" class="form-control">
+            </div>
+    
+            <div class="col-sm-12 col-md-4">
+                <input type="date" name="fim" class="form-control">
+            </div>
+    
+            <div class="col-sm-12 col-md-4 text-right form-group">
+    
+                <select class="form-control" [(ngModel)]="tipoAtendimento">
+                    <option value="{{tipoAtendimento.id}}" *ngFor="let tipoAtendimento of unidadesAtendimentos">
+                        {{tipoAtendimento.descricao}}
+                    </option>
+                </select>
+            </div>
+    
+        </div>
+    
+        <div class="horarios row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <input type="time" class="form-control" name="novoInicio" #novoInicio>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <input type="time" class="form-control" name="novoFim" #novoFim>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <botao nome="Add" (click)="adicionarIntervalo(novoInicio, novoFim)"></botao>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="intervalos row">
+                    <div class="col-sm-12">
+                        <table class="table">
+                            <tr *ngFor="let intervalo of intervalos; let i = index">
+                                <td>
+                                    <icone nome="clear" (click)="removeIntervalo(i)"></icone>
+                                </td>
+                                <td>{{intervalo.inicio}}</td>
+                                <td>{{intervalo.fim}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="mais-opcoes row">
+    
+            <div class="col-sm-12 col-md-12 form-group">
+                <select class="form-control" [(ngModel)]="recorrencia">
+                    <option value="diario"> Diário </option>
+                    <option value="semanal"> Semanal </option>
+                    <!--option value="customizado"> Customizado </option-->
+                </select>
+            </div>
+    
+            <div class="col-sm-12 col-md-12" *ngIf="recorrencia == 'customizado' || recorrencia == 'semanal'">
+    
+                <ul class="pagination">
+                    <li class="page-item" *ngFor="let diaDaSemana of diasDaSemana" (click)="ativaDesativa(diaDaSemana);" [ngClass]="{'active': diaDaSemana.ativo}">
+                        <a class="page-link">
+                            {{diaDaSemana.dia}}
+                        </a>
+                    </li>
+                </ul>
+    
+            </div>
+        </div>
+    
+    </ng-template>
+    
+    
+    <!-- #########################################   Mudar Status Agendamento  ######################################### -->
+    <ng-template #cadastroPacienteModal>
+        <div class="row">
+            <div class="col-md-9">
+                <autocomplete
+                    *ngIf="!idPaciente"
+                    titulo="Selecionar paciente para o atendimento"
+                    [placeholder]="'Digite para buscar Paciente'"
+                    [minimo]="3"
+                    [valor]="objPacientes"
+                    [camposFiltro]="['nome', 'cpf']"
+                    [valorSelecionado]="valorPacienteSelecionado"
+                    [fnSearch]="fnCfgPacienteRemote.bind(this)"
+                    (fnOnSelected)="setPacienteAtendimento($event, true)"
+                ></autocomplete>
+            </div>
+            <div *ngIf="!idPaciente" class="col-md-3">
+                <botao nome="Criar novo Paciente" [botao_lateral]="true" (click)="init=true"></botao>
+            </div>
+        </div>
+    
+        <paciente
+            *ngIf="init || idPaciente"
+            [foto]="true"
+            [salva]="true"
+            [dados]="true"
+            [plano]="true"
+            [contato]="true"
+            [endereco]="true"
+            [responsavel]="true"
+            [novoPaciente]="true"
+            [pacienteId]="idPaciente"
+            (atualizaDados)="setPacienteAtendimento($event, true)"
+        ></paciente>
+    </ng-template>
+    
+    
+    <ng-template #pacienteChegouBotoes let-c="close" let-d="dismiss">
+        <botao nome="Confirmar" (click)="alterarStatusAgendamento()"></botao>
+    </ng-template>
+    
+    <ng-template #pacienteChegouBody>
+        <entrada 
+            *ngIf="!naoPossuiSenha"
+            nome="Insira o código do painel de senha" 
+            tipo="seleciona"
+            attrDsc="numero"
+            objId="numero"
+            [valor]="senhaPainel"
+            [opcoes]="senhasPainelDeSenha"
+            (getValor)="($event['valor']) ? senhaPainel = $event['valor'] : null"
+        ></entrada>
+    
+        <p *ngIf="naoPossuiSenha && !vinculaGuia">Deseja confirmar da chegada do paciente?</p>
+    
+        <ng-container *ngIf="vinculaGuia && tipoAtendimentoFatura">
+    
+            <div class="row">
+                <div class="col-sm-12">
+                    <entrada
+                        requerido="true"
+                        nome="Impresso da Guia"
+                        (getValor)="$event && $event.valor ? guiaVinculada = $event.valor : null"
+                    ></entrada>
+                </div>
+            </div>
+    
+            <span>Selecione os itens a faturar:</span>
+            <listaProcedimentos
+                [modoSelecao]="true"
+                [filtros]="{}"
+                [service]="atendimentoTipoTussService"
+                [codigo]="atendimento?.tipo?.id"
+                labelIdAdd="tipo"
+                labelIdList="atendimentoTipoId"
+                (setProcedimentoChecados)="atendimentoTipoTussFaturar = $event"
+                [paginacaoScroll]="false"
+            ></listaProcedimentos>
+    
+        </ng-container>
+    
+    </ng-template>
+    
+    <ng-template #pacienteFaltouBody>
+        <entrada 
+            nome="Selecione o tipo da falta" 
+            tipo="seleciona"
+            attrDsc="descricao"
+            objId="id"
+            [valor]="tipoFalta"
+            [opcoes]="tiposFalta"
+            (getValor)="($event['valor']) ? tipoFalta = $event['valor'] : null"
+        ></entrada>
+    
+        <textarea class="form-control" [(ngModel)]="motivoCancelamento"></textarea>
+    </ng-template>
+    
+    <ng-template #carregandoAtendimento>
+    
+        <icone 
+            tamanho="grande"
+            nome="cached"
+            classe="carregarAtendimento"
+            [loading]="true"
+        ></icone>
+    
+    </ng-template>

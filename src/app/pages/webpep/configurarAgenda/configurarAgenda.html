@@ -1,0 +1,641 @@
+<div style="display: flex;">
+    <!--  hidden-sm-down -->
+    <div class="mini-calendario-container">
+        <datepicker
+            habilitaMultiSelecao='true'
+            [(datas)]='datasSelecionadas'
+            [fnOnChange]="onDatePickerChange.bind(this)"
+            (setDatasSelecionadas)="setDatasSelecionadas($event)"
+        ></datepicker>
+
+        <div class="filtrosAgenda">
+            <entrada 
+                semTitulo="true" 
+                tipo="seleciona" 
+                objId="id" 
+                [valor]="unidadeAtendimento"
+                [opcoes]="unidadesAtendimento" 
+                (getValor)="getUnidadeAtendimento($event)"
+            ></entrada>
+
+            <treeview
+                [items]="usuarioEspecialidade"
+                [(value)]="prestadorSelecionado"
+                [fnOnSelect]="getPrestador.bind(this)"
+                (setInstanciaTreeview)="getInstanciaTreeview($event)"
+            ></treeview>
+        </div>
+    </div>
+    <div class="grid-calendario">
+        <div class="animated fadeIn">
+            <div class="card-body calendario-agenda">
+                <agenda
+                    (setInstanciaAgenda)="getInstanciaAgenda($event)"
+                    
+                    [(calendarioOpt)]='calendarioOpt'
+
+                    [(datas)]='datasSelecionadas'
+                    [habilitaSelecaoHorario]='true'
+                    [mostraMover]='true'
+                    [mostraEditar]='true'
+                    [mostraDeletar]='false'
+                    (setDatasSelecionadas)="setDatasSelecionadas($event)"
+
+                    [fnPegaHoraInicial]="fnPegaHoraInicial.bind(this)"
+                    [fnPegaHoraFinal]="fnPegaHoraFinal.bind(this)"
+                    
+                    [habilitaMoverAgenda]='false'
+                    [habilitaCriarHorario]='true'
+                    [fnInicializaAgendas]="fnInicializaAgendas.bind(this)"
+
+                    [fnInicializaBlocos]="fnInicializaBlocos.bind(this)"
+                    [onDrop]="fnDropBloco.bind(this, moverConfiguracao, botoesModalMoverConfiguracao)"
+
+                    [onCreateBloco]="fnOnCreateBloco.bind(this, configurarAgenda, botoesModalConfiguracao)"
+                    [onBlocoClick]="fnOnUpdateBloco.bind(this, configurarAgenda, botoesModalConfiguracao)"
+                    [onCreateAgenda]="fnOnCreateAgenda.bind(this, bloquearAgenda, botoesModalConfiguracao)"
+                    [onAgendaClick]="fnOnUpdateAgenda.bind(this, bloquearAgenda, botoesModalConfiguracao)"
+                ></agenda>
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+<!-- #########################################   Mudar Status Agendamento  ######################################### -->
+<ng-template #tipoDeBloqueioTmpl let-c="close" let-d="dismiss">
+    <div class="col-sm-9 col-md-9">
+        <div class="col-sm-12 col-md-12">
+            <div class="row">
+                <div class="col-sm-9 col-md-9 pl-0">
+                    <div class="form-group">
+                        <label>Tipo de bloqueio:</label>
+                        <select #selectElemBlock class="form-control" [(ngModel)]="novoBloqueio.item.id" required="true" (change)="getTiposBloqueio(selectElemBlock.value)">
+                            <option [value]="'semtipo'">Sem Tipo de Bloqueio</option>
+                            <option *ngFor="let tipo of tiposBloqueio" [value]="tipo.id">
+                                {{tipo.descricao}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <botaoSearchAcoes
+                        (setInstanciaBtnSearch)="instanciaBtnSearch=$event"
+                        [icone]="'search'"
+                        [service]="serviceTipoBloqueio"
+                        [fnService]="[ 'atendimentoBloqueio', 'atendimentoBloqueio']"
+                        [objParams]="true"
+                        [objetoUnico]="'like'"
+                        [params]="[ 'id', 'descricao', 'remunerado']"
+                        (onSelect)="refreshTiposBloqueio($event);novoBloqueio.setItem($event)"
+                    ></botaoSearchAcoes>
+                </div>
+            </div>
+        </div>
+
+        <ng-template #acoesTipoBloqueio let-item="item">
+            <td>
+                <botao icone="mode_edit" (click)="editarTipoBloqueio(item)"></botao>
+            </td>
+        </ng-template>
+        
+        <ng-template #btnAdicionarTipoBloqueio>
+            <botao nome="Adicionar" classe="form-control btn btn-primary" (click)="salvarTipoBloqueio()"></botao>
+        </ng-template>
+
+        <ng-template #bodyModalAdicionaBloqueio let-c="close" let-d="dismiss">
+
+            <div class="col-sm-12 col-md-12">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input 
+                        type="text" 
+                        name="descricao" 
+                        class="form-control" 
+                        placeholder="Informe a Descrição"
+                        [(ngModel)]="novoBloqueio.item.descricao"
+                    />
+                </div>
+            </div>
+        
+            <div class="col-sm-12 col-md-12">
+                <div class="form-group">
+                    <label>Remunerado</label>
+                    <select class="form-control" placeholder="Selecione" [(ngModel)]="novoBloqueio.item.remunerado">
+                        <option value="true">REMUNERADO</option>
+                        <option value="false">NÃO REMUNERADO</option>
+                    </select>
+                </div>
+            </div>
+        
+        </ng-template>
+        
+        <ng-template #modalAdicionaBloqueioBotoes let-c="close" let-d="dismiss">
+            <botao nome="Salvar" classe="btn-primary" (click)="novoBloqueio.salvarBloqueio(novoBloqueio, serviceTipoBloqueio)"></botao>
+        </ng-template>
+    </div>
+</ng-template>
+
+
+<!-- #########################################   BLOCO TEMPLATE PARA CAMPOS   ###################################### -->
+<ng-template #blocoCamposHoraData let-c="close" let-d="dismiss">
+
+    <div class="col">
+        <div class="form-group">
+            <label>Data de Inicio</label>
+            <input type="date" name="inicio" class="form-control" [(ngModel)]="novoHorario.dataInicio">
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label>Hora de Inicio</label>
+            <input 
+                type="time" 
+                class="form-control" 
+                name="novoInicio"
+                step="{{tempoAtendimento * 60}}"
+                disabled="{{recorrencia.diaTodo}}"
+                [(ngModel)]="novoHorario.horaInicio" 
+            />
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-group">
+            <label>Hora de Término</label>
+            <input 
+                type="time" 
+                class="form-control" 
+                name="novoFim"
+                step="{{tempoAtendimento * 60}}"
+                disabled="{{recorrencia.diaTodo}}"
+                [(ngModel)]="novoHorario.horaFim" 
+            />
+        </div>
+    </div>
+
+    <div *ngIf="recorrencia['repetir'] == 'true' || recorrencia['repetir'] == true" class="col">
+        <div class="form-group">
+            <label>Encerramento</label>
+            <input type="date" name="fim" class="form-control" [(ngModel)]="novoHorario.dataFim">
+        </div>
+    </div>
+
+</ng-template>
+
+
+<!-- #########################################   Mudar Status Agendamento  ######################################### -->
+<ng-template #botoesModalAlteraStatusAgendamento let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" (click)="alterarStatusAgendamento()"></botao>
+</ng-template>
+
+<ng-template #alteraStatusAgendamentoModal let-c="close" let-d="dismiss">
+    <div *ngIf="acaoAgendamento == 'DESMARCADO'">Deseja realmente cancelar o Agendamento?</div>
+    <div *ngIf="acaoAgendamento == 'SALADEESPERA'">Deseja notificar chegada do Paciente?</div>
+</ng-template>
+
+
+<!-- #########################################   Excluir Configuração  ######################################### -->
+<ng-template #botoesModalExcluirConfiguracao let-c="close" let-d="dismiss">
+    <botao nome="Excluir esta" classe="btn-danger" *ngIf="!(novoHorario.recorrencia && novoHorario.tipo == 'BLOQUEADO')" (click)="excluirConfiguracao(false)"></botao>
+    <botao nome="Excluir a partir desta data" classe="btn-danger" *ngIf="!(novoHorario.recorrencia && novoHorario.tipo == 'BLOQUEADO')" (click)="excluirApartirDesta()"></botao>
+    <!--botao nome="Excluir todas" classe="btn-danger" *ngIf="novoHorario.recorrencia && novoHorario.tipo == 'DISPONIVEL'" (click)="excluirConfiguracao(true)"></botao-->
+
+    <botao nome="Excluir este" classe="btn-danger" *ngIf="novoHorario.recorrencia && novoHorario.tipo == 'BLOQUEADO'" (click)="excluirBloqueio(novoHorario)"></botao>
+    <botao nome="Excluir todos" classe="btn-danger" *ngIf="novoHorario.recorrencia && novoHorario.tipo == 'BLOQUEADO'" (click)="excluirConfiguracao(true)"></botao>
+</ng-template>
+
+<ng-template #excluirConfiguracaoModal let-c="close" let-d="dismiss">
+    <div *ngIf="!recorrencia || !recorrencia.repetir">Deseja realmente excluir esta Configuração?</div>
+    <div *ngIf="novoHorario.recorrencia && novoHorario.tipo == 'DISPONIVEL'">
+        
+        <div *ngIf="temAgendamento" class="alert alert-danger" role="alert">
+            <p>A configuração selecionada é um evento recorrente.</p>
+            <p>Excluí-la implicará no cancelamento de todos os agendamentos referente à esta</p>
+        </div>
+
+        <p>Deseja prosseguir?</p>
+    </div>
+    <div *ngIf="recorrencia && recorrencia.repetir && novoHorario.tipo == 'BLOQUEADO'">
+        <p>O bloqueio selecionado é um evento recorrente.</p>
+        <p>Excluir este bloqueio removerá todos os eventos referente à essa configuração</p>
+        <p>Deseja prosseguir?</p>
+    </div>
+</ng-template>
+
+
+<!-- #########################################   Mover Configuração  ######################################### -->
+<ng-template #botoesModalMoverConfiguracao let-c="close" let-d="dismiss">
+    <botao nome="Mover esta" (click)="moverDataConfiguracao(false)"></botao>
+    <botao nome="Mover todas" *ngIf="novoHorario.repetir" (click)="moverDataConfiguracao(true)"></botao>
+</ng-template>
+
+<ng-template #moverConfiguracao let-c="close" let-d="dismiss">
+    <div *ngIf="!novoHorario.repetir">Deseja realmente mover esta Configuração?</div>
+    <div *ngIf="novoHorario.repetir">
+        <p>A configuração selecionada é um evento recorrente.</p>
+        <p>Move-la implicará no cancelamento de todos os agendamentos que não se encaixe nesta nova configuração</p>
+        <p>Deseja prosseguir?</p>
+    </div>
+</ng-template>
+
+
+<!-- #########################################   Criar Configuração  ######################################### -->
+<ng-template #botoesModalConfiguracao let-c="close" let-d="dismiss">
+    <botao nome="Excluir" classe="btn-danger" (click)="abreModalExcluir(excluirConfiguracaoModal, botoesModalExcluirConfiguracao)" *ngIf="novoHorario.id"></botao>
+    <botao 
+        nome="Salvar" 
+        [desabilitado]="loadingConfiguracao" 
+        (click)="salvaConfiguracao()" 
+        *ngIf="!novoHorario.id"
+    ></botao>
+    <botao 
+        nome="Editar" 
+        (click)="atualizaConfiguracao(novoHorario)" 
+        *ngIf="novoHorario.id"
+    ></botao>
+
+</ng-template>
+
+<ng-template #configurarAgenda let-c="close" let-d="dismiss">
+
+    <div class="agenda-sumario row configuracao-agenda text-left">
+        
+        <div *ngIf="prestador['userName'] != 'AgendamentoColetivo'; else campoColetiva" class="col-sm-3 col-md-3">
+            <entrada 
+                nome="Tipo de Agenda"
+                tipo="seleciona"
+                objId="id"
+                [valor]="novoHorario.tipo"
+                [opcoes]="tiposAtendimento"
+                (change)="validaTipoBloco(null)"
+                (getValor)="getTipo($event)"
+            ></entrada>
+        </div>
+
+        <ng-template #campoColetiva>
+            <div class="col-sm-3 col-md-3">
+                <entrada 
+                    nome="Tipo de Agenda"
+                    [bloqueado]="true"
+                    [valor]="'COLETIVA'"
+                ></entrada>
+            </div>
+        </ng-template>
+        <ng-template *ngIf="novoHorario.tipo == 'BLOQUEADO'" [ngTemplateOutlet]="tipoDeBloqueioTmpl"></ng-template>
+        <div *ngIf="novoHorario.tipo == 'DISPONIVEL' || novoHorario.tipo == 'COLETIVA'" class="col-sm-9 col-md-9">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Tipo de consulta:</label>
+                        <select #selectElem class="form-control" [(ngModel)]="novoAtendimento.item.id" (change)="getTiposConsulta(selectElem.value)">
+                            <option [value]="'semtipo'">Sem Tipo de Consulta</option>
+                            <option *ngFor="let tipo of tiposConsulta" [value]="tipo.id">
+                                {{tipo.descricao}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-1 col-md-1">
+                    <botaoSearchAcoes
+                        (setInstanciaBtnSearch)="instanciaBtnSearch=$event"
+                        [icone]="'search'"
+                        [service]="serviceTipoAtendimento"
+                        [fnService]="[ 'atendimentoTipo', 'atendimentoTipo']"
+                        [params]="[ 'id', 'descricao', 'tempo']"
+                        [objParams]="true"
+                        [objetoUnico]="'like'"
+                        (onSelect)="refreshTiposConsulta($event);novoAtendimento.setItem($event)"
+                    ></botaoSearchAcoes>
+                </div>
+            </div>
+
+        </div>    
+
+        <div *ngIf="novoHorario.tipo == 'COLETIVA' || tipoConfiguracao == 'COLETIVA'">
+
+            <div class="col">
+                <entrada 
+                    nome="Quantidade de Profissionais" 
+                    tipo="numero" 
+                    [valor]="novoHorario.maxConcorrente" 
+                    (getValor)="novoHorario.maxConcorrente = $event.valor"
+                ></entrada>
+            </div>
+
+        </div>
+
+        <div *ngIf="novoHorario.tipo == 'DISPONIVEL'" class="col-sm-12 col-md-12">
+            <entrada 
+                nome="Consultório de Atendimento" 
+                tipo="seleciona"
+                objId="id"
+                [valor]="novoHorario.guiche"
+                [opcoes]="guichesAtendimento"
+                (getValor)="($event.valor) ? novoHorario.guiche = $event.valor : null"
+            ></entrada>
+        </div>
+
+    </div>
+
+    <div class="agenda-sumario row configuracao-agenda text-left">
+        <ng-template [ngTemplateOutlet]="blocoCamposHoraData"></ng-template>
+    </div>
+
+    <div class="mais-opcoes row">
+        <div class="col">
+            <recorrencia
+                [(obj)]='recorrencia'
+                (setObjRecorrencia)="setObjRecorrencia($event)"
+                [onDiaTodoChange]="fnOnDiaTodoChange.bind(this)"
+            ></recorrencia>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>Observação</label>
+            <textarea class="form-control" required="true" [(ngModel)]="novoHorario.observacao"></textarea>
+        </div>
+    </div>
+
+    <!-- <ng-container *ngIf="novoHorario.id">    
+        <div class="mt-4" *ngIf="novoHorario.configuraHorarioTuss; else carregandoProcedimentos">
+
+            <moldura titulo="Procedimentos" [podeOcultar]="true" [oculto]="true">
+                <moldura titulo="Adicionar Novo" [podeOcultar]="true" [oculto]="true">
+                    <ng-template 
+                        [ngTemplateOutlet]="adicionarProcedimento"
+                        [ngTemplateOutletContext]="{
+                            procedimento: objConfiguraHorarioTuss,
+                            novo: true
+                        }"
+                    ></ng-template>
+                </moldura>
+
+                <div class="card-body">
+
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th>PROCEDIMENTO</th>
+                                <th>OPERADORA</th>
+                                <th>QUANTIDADE</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let procedimento of novoHorario.configuraHorarioTuss">
+                                <td class="col-md-2 d-flex">
+                                    <botao 
+                                        icone="edit"
+                                        classe="transparente"
+                                        tamanho="pequeno-16"
+                                        (click)="abreModalProcedimento(procedimento)"
+                                    ></botao>
+                                    <botao 
+                                        icone="delete"
+                                        classe="transparente"
+                                        tamanho="pequeno-16"
+                                        (click)="removeProcedimento(procedimento)"
+                                    ></botao>
+                                </td>
+                                <td>{{procedimento?.procedimento?.descricao}}</td>
+                                <td>{{procedimento?.operadora?.nome}}</td>
+                                <td>{{procedimento?.quantidade}}</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </moldura>
+
+        </div>
+    </ng-container> -->
+
+</ng-template>
+
+<ng-template #bloquearAgenda let-c="close" let-d="dismiss">
+
+    <div class="row">
+        <ng-template [ngTemplateOutlet]="tipoDeBloqueioTmpl"></ng-template>
+    </div>
+
+    <div class="agenda-sumario row configuracao-agenda text-left">
+        <ng-template [ngTemplateOutlet]="blocoCamposHoraData"></ng-template>
+    </div>
+
+    <div class="mais-opcoes row">
+        <div class="col">
+            <recorrencia
+                [(obj)]='recorrencia'
+                [bloqueiaRecorrenciaForaDaConfiguracao]="true"
+                (setObjRecorrencia)="setObjRecorrencia($event)"
+                (setRecorrenciaInstancia)="getInstanciaRecorrencia($event)"
+                [onDiaTodoChange]="fnOnDiaTodoChange.bind(this)"
+            ></recorrencia>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>Observação</label>
+            <textarea class="form-control" required="true" [(ngModel)]="novoHorario.observacao"></textarea>
+        </div>
+    </div>
+</ng-template>
+
+
+<!-- ######################### CRIA TIPO ATENDIMENTO ################################ -->
+<ng-template #acoesTipoAtendimento let-item="item">
+    <td>
+        <botao icone="mode_edit" (click)="editarTipoAtendimento(item)"></botao>
+    </td>
+</ng-template>
+
+<ng-template #btnAdicionarTipoAtendimento>
+    <botao nome="Adicionar" classe="form-control btn btn-primary" (click)="salvarTipoAtendimento()"></botao>
+</ng-template>
+
+<ng-template #bodyModalAdicionaTipoAtendimento let-c="close" let-d="dismiss">
+
+        <input type="hidden" name="id" [(ngModel)]="novoAtendimento.item.id">
+
+        <div class="row">
+
+            <div class="col-sm-8 col-md-8">
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input 
+                        type="text" 
+                        name="descricao" 
+                        class="form-control" 
+                        placeholder="Informe a Descrição"
+                        [(ngModel)]="novoAtendimento.item.descricao"
+                    />
+                </div>
+            </div>
+    
+            <div class="col-sm-4 col-md-4">
+                <div class="form-group">
+                    <label>Tempo Duração</label>
+                    <input 
+                        type="number" 
+                        name="tempo" 
+                        class="form-control" 
+                        placeholder="Duração (minutos)"
+                        [(ngModel)]="novoAtendimento.item.tempo"/>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-12" style="margin-bottom: 25px;">
+                <div class="form-group">
+                    <label>Telefone Obrigatório?</label>
+                    <input-checkbox 
+                        classe="check_principal"
+                        [estado]="novoAtendimento.item.obrigaTelefone"
+                        (trocaEstado)="novoAtendimento.item.obrigaTelefone = $event"
+                    ></input-checkbox>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-12">
+                <colorPicker
+                    [(default)]='this.novoAtendimento.item.cor'
+                    (setObjColorPicker)="setObjColorPicker($event)"
+                    [onColorChange]="trocaCor.bind(this)"
+                ></colorPicker>
+            </div>
+
+        </div>
+
+</ng-template>
+
+<ng-template #modalAdicionaTipoAtendimentoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="novoAtendimento.salvarAtendimento(novoAtendimento, serviceTipoAtendimento)"></botao>
+</ng-template>
+
+
+<!-- ############################  ADICIONAR TIPO AGENDA COLETIVA ########################## -->
+
+<ng-template #acoesAgendaColetiva let-item="item">
+    <td>
+        <botao icone="mode_edit" (click)="salvarTipoAgendaColetiva(item)"></botao>
+    </td>
+</ng-template>
+
+<ng-template #btnAdicionarAgendaColetiva>
+    <botao nome="Adicionar" classe="form-control btn btn-primary" (click)="salvarTipoAgendaColetiva(null)"></botao>
+</ng-template>
+
+<ng-template #bodyModalAdicionaTipoAgendamentoColetivo let-c="close" let-d="dismiss">
+
+    <input type="hidden" name="id" [(ngModel)]="novoAgendamentoColetivo.item.id">
+
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group">
+            <label>Nome</label>
+            <input 
+                type="text" 
+                name="descricao"
+                class="form-control"
+                placeholder="Informe a Descrição"
+                [(ngModel)]="novoAgendamentoColetivo.item.descricao"
+            />
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group">
+            <label>Tempo Duração</label>
+            <input 
+                type="number" 
+                name="tempo" 
+                class="form-control" 
+                placeholder="Duração (minutos)"
+                [(ngModel)]="novoAgendamentoColetivo.item.tempo"/>
+        </div>
+    </div>
+
+    <!-- <div class="col-sm-12 col-md-12">
+        <colorPicker
+            [(default)]='this.novoAtendimento.item.cor'
+            (setObjColorPicker)="setObjColorPicker($event)"
+            [onColorChange]="trocaCor.bind(this)"
+        ></colorPicker>
+    </div> -->
+
+</ng-template>
+
+<ng-template #modalAdicionaTipoAgendamentoColetivoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="novoAgendamentoColetivo.salvarAgendaColetiva(novoAgendamentoColetivo, serviceAgendaColetiva)"></botao>
+</ng-template>
+
+<ng-template #modalEditaProcedimento let-objProcedimento="objProcedimento">
+    <ng-template 
+        [ngTemplateOutlet]="adicionarProcedimento"
+        [ngTemplateOutletContext]="{
+            procedimento: objProcedimento
+        }"
+    ></ng-template>
+</ng-template>
+
+<ng-template #modalEditaProcedimentoBotoes let-objProcedimento="objProcedimento">
+    <botao nome="Salvar" (click)="salvarProcedimento(objProcedimento)"></botao>
+</ng-template>
+
+<ng-template 
+    #adicionarProcedimento 
+    let-procedimento="procedimento"
+    let-novo="novo"
+>
+    <div class="row">
+
+        <div class="col-md-6">
+            <autocomplete
+                titulo="Procedimento *" 
+                [placeholder]="'Procedimentos'" 
+                [minimo]="3" 
+                [valor]="objProcedimentos"
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="valorProcedimentoSelecionado" 
+                [fnSearch]="fnCfgProcedimentoRemote.bind(this)"
+                (fnOnSelected)="fnSetProcedimento($event, procedimento)"
+            ></autocomplete>
+        </div>
+
+        <div 
+            class="col-md-3"
+        >
+            <entrada
+                nome="Operadora *"
+                tipo="seleciona"
+                [opcoes]="operadoras"
+                [valor]="procedimento?.operadora?.id"
+                (getValor)="setOperadora($event, procedimento)"
+            ></entrada>
+        </div>
+
+        <div class="col-md-3">
+            <entrada 
+                nome="Quantidade *"
+                class="entrada qnts"
+                tipo="numero"
+                [valor]="procedimento?.quantidade"
+                (getValor)="$event && $event.valor ? procedimento['quantidade'] = $event.valor : procedimento['quantidade'] = undefined"
+            ></entrada>
+        </div>
+
+        <div *ngIf="novo" class="col-md-2">
+            <botao nome="Adicionar" (click)="salvarProcedimento(procedimento, true)"></botao>
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #carregandoProcedimentos>
+    <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando procedimentos...
+</ng-template>

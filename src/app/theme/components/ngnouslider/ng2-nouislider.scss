@@ -1,0 +1,48 @@
+@import "~nouislider/distribute/nouislider.min.css";
+
+:host /deep/ {
+	.noUi-target.noUi-horizontal {
+		height: 10px;
+		border-radius: 0;
+	}
+	
+	.noUi-connect {
+		background-color: #006a6a;
+	}
+	
+	.noUi-handle.noUi-handle-upper,
+	.noUi-handle.noUi-handle-lower {
+		width: 20px;
+		height: 20px;
+		border-radius: 10px;
+	}
+
+	.noUi-horizontal .noUi-active .noUi-tooltip {
+		display: block;
+	}	
+
+	.noUi-horizontal .noUi-tooltip {
+		bottom: -130%;
+		display: none;
+	}
+	
+	.event-label {
+		transition: all 0.25s;
+		color: white;
+	}
+
+	.noUi-handle:after, .noUi-handle:before {
+		content: "";
+		position: absolute;
+		background: #999;
+		display: block;
+		height: 10px;
+		width: 1px;
+		left: 7px;
+		top: 4px;
+	}
+
+	.noUi-handle:after {
+		left: 10px;
+	}
+}

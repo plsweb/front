@@ -1,0 +1,62 @@
+.status{
+    width: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.verde{
+    background-color:#006a6a;
+}
+
+.cinza{
+    background-color:#79787d;
+}
+
+table{
+    cursor: default;
+}
+
+.icone{
+    cursor: pointer !important;
+    font-size: 2px !important;
+}
+
+.cor {
+	width: 50px;
+	height: 50px;
+}
+
+.gray {
+    background-color: gray;
+}
+.green {
+    background-color: green;
+}
+.orange {
+    background-color: orange;
+}
+.red {
+    background-color: red;
+}
+
+// :host /deep/ datepicker .calendar-head{
+//     color: #fff !important;
+// }
+
+.dropdown-label {
+    color: #000 !important;
+}
+
+.card-body table{
+    margin-top: -17px;
+}
+
+.card-body{
+    padding: 0px !important;
+}
+
+.legenda_local{
+    left: 10px;
+    position: relative;
+    text-transform: capitalize;
+}

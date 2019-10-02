@@ -1,0 +1,75 @@
+<div class="animated fadeIn card">
+    <div class="card-header header_agenda">
+        <div class="row">
+            <div class="col">
+                <div class="label">
+                    Temas de Temas
+                </div>
+            </div>
+            <div class="col-sm-2 col-md-2 col-lg-2">
+                <button 
+                    type="button" 
+                    (click)="abrir(null)"
+                    class="btn btn-primary form-control"
+                >
+                    Adicionar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        
+        <moldura>
+            <input #searchTema type="text" name="searchTema" class="form-control" [placeholder]="'Digite para buscar Temas'">
+            <br>
+            <botao 
+                icone="search" 
+                tamanho="pequeno" 
+                (click)="filtrar(searchTema)"
+            ></botao>
+        </moldura>
+
+        <br clear="all">
+        <div>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>NOME</th>
+                        <th>ESPECIALIDADE</th>
+                        <th>COR</th>
+                    </tr>
+                    <tr *ngFor="let tema of temas" (click)="abrir(tema)" class="link">
+                        <td>{{tema.descricao}}</td>
+                        <td>{{tema.especialidade ? tema.especialidade.descricao : ''}}</td>
+                        <td>
+                            <span class="badge badge-secondary" [ngStyle]="{ 'background-color': tema.cor}">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+
+            <br class="all">
+
+            <div>
+                <paginacao
+                    (atualizaDados)="buscarPaginado($event)"
+                    qtdItensTotal="{{qtdItensTotal}}"
+                    paginaAtual="{{paginaAtual}}"
+                    itensPorPagina="{{itensPorPagina}}"
+                    scrollPagination="true"
+                ></paginacao>
+            </div>
+        </div>
+
+        <br clear="all">
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+            </div>
+        </div>
+
+    </div>
+
+</div>

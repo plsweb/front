@@ -1,0 +1,50 @@
+/*
+BAIXA(1),
+    MEDIA(2),
+    ALTA(3),
+    MAXIMA(4),
+    EXTREMA(5);
+
+*/
+
+:host /deep/ tabela {
+
+    td.status-tabela[data-name]{
+        border-left-width: 10px;
+        border-left-style: solid;
+    }
+
+    td.status-tabela[data-name="SIM"] {
+        border-left-color: #006a6a;
+    }
+
+    td.status-tabela[data-name=""] {
+        border-left-color: #79787d;
+    }
+
+}
+
+:host /deep/ icone {
+
+    .text-danger{
+        font-size: 25px !important;
+    }
+
+    .text-success{
+        font-size: 25px !important;
+    }
+
+}
+
+:host /deep/ tabela {
+
+    .table > tbody > tr > td:last-child{
+        display: table-cell !important;
+    }
+
+}
+
+entrada.entrada.qnts {
+    width: 100px;
+    display: -webkit-inline-box;
+}

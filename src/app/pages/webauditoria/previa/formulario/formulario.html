@@ -1,0 +1,458 @@
+<guia
+    [paramId]="paramId"
+></guia>
+
+<div *ngIf="false" baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <div class="row">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <b>Guia: </b>{{guia ? guia.impresso : ''}}
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <b>Autorização: </b>{{formataGuia(guia)}}
+                    </div>
+
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <b>Plano: </b>
+                        <span title="{{guia && guia.beneficiario && guia.beneficiario.plano ? guia.beneficiario.plano : ''}}">
+                            {{formataPlano(guia)}} 
+                        </span>
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <b>CPT: </b>
+                        <span *ngIf="guia">{{preexistenciasFiltrados && preexistenciasFiltrados.length ? 'Sim' : 'Não'}}</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <b>Beneficiário: </b>
+                        <span class="pointer" title="Abrir Detalhes do Beneficiário" (click)="direcionaBeneficiario(guia)">
+                            {{guia ? guia.beneficiario.codigo : ''}} - {{guia ? guia.beneficiario.nome : ''}}, {{guia ? guia.beneficiario.idade : ''}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form *ngIf="guia">
+            <div class="row">
+                <!--div class="col-sm-3">
+                    <entrada nome="Guia" [bloqueado]="true" [valor]="guia.impresso"></entrada>
+                </div-->
+
+                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                    <entrada nome="Tipo" [bloqueado]="true" [valor]="guia.tipo"></entrada>
+                </div>
+                <div class="col-sm-3">
+                    <entrada nome="Caráter" [bloqueado]="true" [valor]="guia.admissao"></entrada>
+                </div>
+
+                <div class="col-sm-3">
+                    <entrada 
+                        nome="Classificação" 
+                        [bloqueado]="true" 
+                        [valor]="(guia.classificacao) ? guia.classificacao.descricao : ''"
+                    ></entrada>
+                </div>
+
+                <div class="col-sm-3" title="{{formataDataInclusao(guia)}}">
+                    <entrada 
+                        nome="Data de Inclusão" 
+                        [bloqueado]="true" 
+                        [valor]="formataDataInclusao(guia, true)"
+                    ></entrada>
+                </div>
+
+                <!--div class="col-sm-3">
+                    <entrada nome="Tipo" [bloqueado]="true" [valor]="guia.tipo"></entrada>
+                </div-->
+
+                <!--div class="col-sm-3">
+                    <entrada nome="Validade Guia" [bloqueado]="true" [valor]="guia.validade"></entrada>
+                </div-->
+
+                <!--div class="col-sm-12">
+                    <entrada nome="Plano do Beneficiário" [bloqueado]="true" [valor]="guia.beneficiario.plano"></entrada>
+                </div-->
+
+                <div class="col-sm-6">
+                    <entrada nome="Solicitante" [bloqueado]="true" [valor]="guia.solicitanteNome"></entrada>
+                </div>
+
+                <ng-container *ngIf="guia.prestador">
+                    <div class="col-sm-6">
+                        <entrada nome="Prestador" [bloqueado]="true" [valor]="formataPrestador(guia)"></entrada>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="guia.operadora">
+                    <div class="col-sm-12">
+                        <entrada nome="Operadora" [bloqueado]="true" [valor]="guia.operadora.descricao"></entrada>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="guia.cid">
+                    <div class="col-sm-12">
+                        <entrada nome="CID" [bloqueado]="true" [valor]="guia.cid.codigo + ' - ' + guia.cid.descricao"></entrada>
+                    </div>
+                </ng-container>
+
+                <div class="col-sm-12">
+                    <entrada nome="Indicação" tipo="area" [bloqueado]="true" [valor]="guia.indicacaoClinica"></entrada>
+                </div>
+            </div>
+
+            <moldura titulo="Pré-existência" sub="false" [oculto]="true" *ngIf="this.preexistenciasFiltrados && this.preexistenciasFiltrados.length">
+                <table class="table table-striped no-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>CID</th>
+                            <th>DESCRIÇÃO</th>
+                            <th>DATA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let preexistencia of preexistenciasFiltrados">
+                            <td>{{preexistencia.cid ? preexistencia.cid.codigo : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.descricao : ''}}</td>
+                            <td>{{preexistencia.cid ? preexistencia.cid.data : ''}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </moldura>
+
+            <moldura *ngFor="let classe of classesItens" titulo="{{classe}}">
+                <div *ngFor="let item of retornaItensGuiaClasse(classe); let pos = index" class="exames animated" zoom-in id="{{item.id}}">
+                    <div class="titulo link">
+                        <div class="table-responsive">
+                            <table class="table no-hover" style="margin-bottom: 0 !important;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 35px !important;">
+                                            <input-checkbox 
+                                                [classe]="validaClasseCheckbox(item)" 
+                                                [estado]="item.naoAprovada == undefined" 
+                                                [disabled]="!item.auditoria"
+                                                (trocaEstado)="atualizaGlosa($event, item, item['posicao'])"
+                                            ></input-checkbox>
+                                        </td>
+
+                                        <td title="{{(item.descricao || item.procedimento.descricao)}}" class="nome_procedimento">
+                                            <icone nome="{{ validaItemOrigem(item.origem) ? 'schedule' : ''}}" tamanho="medio"></icone>
+                                            {{item.procedimento.codigo}} - {{(item.descricao || item.procedimento.descricao)}}
+                                        </td>
+
+                                        <td style="width: 85px !important;">
+                                            <entrada 
+                                                tipo="numero" 
+                                                nome="Qtd Autorizada"
+                                                [semTitulo]="true" 
+                                                [bloqueado]="!item.auditoria" 
+                                                mascara="999" 
+                                                [valor]="item.quantidadeAutorizada"
+                                                [maximo]="item.quantidadeAutorizada" 
+                                                (getValor)="setQuantidadeSolicitada($event, item.id, item['posicao'], item)"
+                                            ></entrada>
+                                        </td>
+
+                                        <td [ngClass]="{ 'autocomplete' : !validaRacDut(item) }">
+                                            <autocomplete 
+                                                [semTitulo]="true" 
+                                                [placeholder]="'Mensagem...'" 
+                                                [minimo]="5" 
+                                                [bloqueado]="!item.auditoria"
+                                                [valor]="objMensagemTISS" (onKeyUp)="getValor($event, item, item['posicao'])" 
+                                                [camposFiltro]="['codigo', 'descricao']"
+                                                [valorSelecionado]="setMsgTiss(item['posicao'])" 
+                                                [fnSearch]="fnCfgMensagemRemote.bind(this)"
+                                                (fnOnSelected)="setMensagem($event, item, item['posicao'])"></autocomplete>
+                                        </td>
+
+                                        <td style="width: 40px;">
+                                            <icone nome="date_range" title="Visualizar Histórico de Procedimento" (click)="visualizarHistorico(false, (item.procedimento ? item.procedimento.codigo : null))"></icone>
+
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.altoCusto" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.altoCusto" class="sinalizacao alto verde col-md-3" (mouseover)="mostraDesc($event, item, 'altoCusto')"
+                                                    (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">P</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">Procedimento de Alto Custo</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.dut" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.dut" class="sinalizacao dut verde col-md-3" (mouseover)="mostraDesc($event, item, 'dut')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">D</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.dut}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td *ngIf="item.procedimento.rac" style="width: 20px !important; display: table-cell;">
+                                            <div class="parent-sinalizacao">
+                                                <div *ngIf="item.procedimento.rac" class="sinalizacao rac verde col-md-3" (mouseover)="mostraDesc($event, item, 'rac')" (mouseleave)="escondeContextMenu()">
+                                                    <label class="sigla">R</label>
+                                                    <ul class="list-group desc-item">
+                                                        <li class="list-group-item">{{item.procedimento.rac}}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div *ngIf="item.criticas.length" class="card-body">
+                            <table class="table linha_critica no-hover">
+                                <thead class="thead-dark">
+                                </thead>
+                                <tbody>
+                                    <tr class="criticas" *ngFor="let critica of item.criticas">
+                                        <td title="{{ validaItemCritica(critica) ? 'Item em Carência' : '' }}" [ngClass]="{ 'carencia' : validaItemCritica(critica) }"> 
+                                            <span>{{critica.descricao}}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </moldura>
+
+            <moldura titulo="HISTÓRICO" sub="false" oculto="false" podeOcultar="true" *ngIf="id">
+                <mensagens [guiaId]="id" [mostraBotaoVoltar]="false" [historico]="true" (refresh)="getRefreshHistorico($event)"></mensagens>
+                <br>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-right-zero">
+                        <input id="chatMsg" name="chatMsg" class="form-control" placeholder="Mensagem" [(ngModel)]="chatMsgHistorico">
+                        <inputAnexo name="chat_mensagem" [arquivo]="arquivo" [nomeArquivo]="nomeArquivo" (onFileUploadCompleted)="uploadArquivo.bind(this)($event)"></inputAnexo>
+                        <icone class="send_icone" nome="send" tamanho="grande" (click)="enviaMensagem(false)"></icone>
+                    </div>
+                </div>
+
+                <!--
+                tabela
+                    [titulo]="'Mensagens'"
+                    [colunas]="colunasTabela"
+                    [linhas]="mensagens"
+                    [atualizaDados]="atualizaDados.bind(this)"
+                    [registros]="qtdItensTotal"
+                    [mostraPesquisar]="false"
+                    [mostraFiltrar]="false"
+                >
+                </tabela
+                -->
+            </moldura>
+
+            <moldura titulo="Chat" sub="false" oculto="false" podeOcultar="true" *ngIf="id">
+                <mensagens [guiaId]="id" [mostraBotaoVoltar]="false" [historico]="false" (refresh)="getRefresh($event)"></mensagens>
+                <br>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-right-zero">
+                        <input id="chatMsg" name="chatMsg" class="form-control" placeholder="Mensagem" [(ngModel)]="chatMsg">
+                        <inputAnexo name="chat_mensagem" [arquivo]="arquivo" [nomeArquivo]="nomeArquivo" (onFileUploadCompleted)="uploadArquivo.bind(this)($event)"></inputAnexo>
+                        <icone class="send_icone" nome="send" tamanho="grande" (click)="enviaMensagem(true)"></icone>
+                    </div>
+                </div>
+
+                <!--
+                tabela
+                    [titulo]="'Mensagens'"
+                    [colunas]="colunasTabela"
+                    [linhas]="mensagens"
+                    [atualizaDados]="atualizaDados.bind(this)"
+                    [registros]="qtdItensTotal"
+                    [mostraPesquisar]="false"
+                    [mostraFiltrar]="false"
+                ></tabela
+                -->
+            </moldura>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <botao nome="Finalizar" (click)="submit()"></botao>
+                </div>
+
+                <div class="col-md-2">
+                    <botao nome="Delegar" classe="btn-info" (click)="mediar()"></botao>
+                </div>
+
+                <div class="col-md-2">
+                    <botao nome="Parecer" classe="btn-default" (click)="parecer()"></botao>
+                </div>
+
+                <div class="col-md-2">
+                    <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- #################################### Mediar ################################################## -->
+<ng-template #bodyModalMediar let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col">
+            <entrada 
+                nome="Status" 
+                tipo="seleciona"
+                objId="id"
+                [opcoes]="guiaLogStatus" 
+                (getValor)="( $event['valor'] ) ? guiaLogStatusSelecionado = $event.valor : null"
+            ></entrada>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <entrada 
+                nome="Status" 
+                tipo="area"
+                (getValor)="( $event['valor'] ) ? mediarObs = $event.valor : null"
+            ></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesMediar let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="salvarHistorico()"></botao>
+</ng-template>
+
+
+<!-- ############################## Parecer ##################################################### -->
+<ng-template #bodyModalParecer let-c="close" let-d="dismiss">
+    <!-- <div class="row" *ngIf="idPaciente || ( atendimento.editar === true && !somenteLeitura )">
+        <div class="col-sm-5">
+            <entrada nome="Documentos" semTitulo="true" tipo="seleciona" [attrDsc]="'titulo'" [valor]="documentoIdValor" [opcoes]="formularioDocumentos" (getValor)="getDocumento($event)"></entrada>
+        </div>
+        <div class="col-sm-2">
+            <botao (click)="novoDocumento()" nome="Adicionar"></botao>
+        </div>
+    </div> -->
+    <div class="row">
+        <div class="col">
+            <entrada 
+                *ngIf="documento?.modelo; else carregando"
+                tipo="edicao"
+                [valor]="documento?.modelo"
+                [fnOnChange]="alteraModelo.bind(this, documento)"
+                (getValor)="textoModelo = $event.valor"
+            ></entrada>
+        </div>
+
+        <ng-template #carregando>
+            <icone tamanho="grande" nome="cached" [loading]="true" ></icone> Carregando documento...
+        </ng-template>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesParecer let-c="close" let-d="dismiss">
+    <botao nome="Salvar" (click)="alteraModelo(documento, textoModelo)"></botao>
+    <!-- <botao nome="Visualizar" classe="btn-info" (click)="imprimirDocumento(documento?.id)"></botao> -->
+</ng-template>
+
+
+<!-- ############################################################################# -->
+<ng-template #bodyAuditarTodosItens let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col">
+            <h3>Deseja auditar todos os itens desta guia?</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <autocomplete 
+                [semTitulo]="true" 
+                [placeholder]="'Mensagem única auditoria'" 
+                [minimo]="5"
+                (onKeyUp)="( $event ) ? mensagemUnica = $event.descricao : mensagemUnica = ''" 
+                [camposFiltro]="['codigo', 'descricao']"
+                [valorSelecionado]="mensagemUnica" 
+                [valor]="objMensagemTISS"
+                [fnSearch]="fnCfgMensagemRemote.bind(this)"
+                (fnOnSelected)="($event) ? mensagemUnica = $event.descricao : mensagemUnica = ''"
+            ></autocomplete>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #botoesAuditarTodosItens>
+    <botao nome="Auditar todos" (click)="auditaTodos()"></botao>
+</ng-template>
+
+
+<!-- ############################################################################# -->
+<ng-template #bodyHistoricoExames>
+    <div *ngIf="guiaHistorico && guiaHistorico.length > 0" class="grid_guias">
+        <div class="guias animated fadeIn card link" zoom-in id="{{guia.id}}" style="cursor: pointer !important;">
+            <div class="clearfix">
+                <div class="titulo link">
+                    <table class="table table-striped not-margin">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="status"></th>
+                                <th>GUIA</th>
+                                <th>PROCEDIMENTO</th>
+                                <th>DATA</th>
+                                <th>QTD</th>
+                                <!-- <th>QTD REALIZADA</th> -->
+                                <th>OBSERVAÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let guia of guiaHistorico; let pos = index">
+                                <tr (click)="abrirFormulario(guia.guia.id)" title="{{guia.guia.status}}" class="link {{ (pos % 2 == 0) ? 'even' : 'odd' }}">
+                                    <td class="status {{validaClasse(guia.guia.status)}}"></td>
+                                    <td>{{guia.impresso}}</td>
+                                    <td>{{guia.procedimentoCodigo + ' - ' + guia.procedimentoDescricao}}</td>
+                                    <td>{{guia.guiaDigitacao ? momentjs(guia.guiaDigitacao, formatosDeDatas.dataHoraSegundoFormato ).format(formatosDeDatas.dataFormato) : '' }}</td>
+                                    <td>{{guia.quantidadeSolicitada}}/{{guia.quantidadeRealizada}}</td>
+                                    <!-- <td>{{guia.quantidadeRealizada}}</td> -->
+                                    <td>{{guia.mensagem}}</td>
+                                    <!-- 1 autorizado -->
+                                    <!-- 0 negado -->
+                                </tr>
+                                <tr *ngIf="guia.guia.id == idGuiaAberto" class="link {{ (pos % 2 == 0) ? 'even' : 'odd' }}">
+                                    <td colspan="100%">
+                                        <guia
+                                            [paramId]="guia.guia.id"
+                                            [botoes]="false"
+                                        ></guia>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <paginacao 
+                (atualizaDados)="visualizarHistorico($event)" 
+                qtdItensTotal="{{qtdItensTotalGuiaHistorico}}" 
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtualGuiaHistorico}}"
+                [scrollPagination]="true"
+            ></paginacao>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,51 @@
+<moldura titulo="Agendamento de exames">
+    <moldura>
+        <entrada nome="Protocolo" class="entrada tamanho90" (getValor)="getProtocolo($event)" semTitulo="true"></entrada>
+        <botao icone="search" (click)="buscarProcedimentos()"></botao>
+        <br clear="all" />
+        <div *ngIf="guia">
+            <b>{{guia.beneficiario.nome}}</b> - {{guia.beneficiario.idade}}
+            <br>
+            {{guia.beneficiario.endereco}}
+        </div>
+    </moldura>
+
+    <br clear="all">
+
+    <div *ngIf="lista">
+        <div class="botoes">
+            <botao nome="Agendar"  (click)="agendarProcedimento()" ></botao>
+            <!-- <botao nome="Imprimir" (click)="imprimirProcedimento()"></botao>-->
+        </div>
+
+        <table class="table table-striped" *ngFor="let proc of lista">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="td17">PROCEDIMENTO</th>
+                    <th class="td76">DESCRIÇÃO</th>
+                    <th class="td7">QNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="td17">{{proc.codigo}}</td>
+                    <td class="td76">{{proc.descricao}}</td>
+                    <td class="td7">{{proc.quantidade}}</td>
+                    <td colspan="3" class="td100">
+                        <ul>
+                            <li *ngFor="let prest of proc.prestador">
+                                <entrada *ngIf="!prest.atendimento" class="checkbox" tipo="checkbox" semTitulo="true" tema="checkbox" nome="{{prest.prestador.codigo}} - {{prest.prestador.nome}}" id="{{proc.codigo}}-{{prest.prestador.codigo}}" valor="{{prest.prestador.codigo}}" (getValor)="getCheck(prest.prestador, proc)"></entrada>
+                                <h5 *ngIf="prest.atendimento">{{prest.prestador.codigo}} - {{prest.prestador.nome}}</h5>
+                                {{prest.prestador.endereco}} - {{prest.prestador.telefone}}<br />
+                                <div *ngIf="prest.atendimento">
+                                    <icone  nome="close" title="Cancelar Atendimento" (click)="cancelarAtendimento(prest.atendimento.id)"></icone>
+                                    <span>Agendado: {{prest.atendimento.agendamento}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</moldura>

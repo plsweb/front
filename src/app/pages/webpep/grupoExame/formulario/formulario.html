@@ -1,0 +1,104 @@
+<moldura titulo="Grupo de Exame">
+    <form (ngSubmit)="submit()">
+        <entrada nome="Descrição" [valor]="descricaoValor"  (getValor)="getDescricao($event)" requerido="required"></entrada>
+        <entrada nome="Exame Pai" [valor]="exameGrupoValor" (getValor)="getExamePai($event)"  tipo="seleciona" [opcoes]="examesGrupos" ></entrada>
+        <div class="row">
+            <div class="col-sm-4">
+                <botao nome="Salvar" submit="true" ></botao>
+                <botao nome="Voltar" submit="false" classe="btn-default" (click)="voltar()"></botao>
+            </div>
+        </div>
+    </form>
+    <br clear="all" />
+    <br clear="all" />
+    <div *ngIf="id">
+        <moldura titulo="Exames" sub="true">
+            <div class="row">
+                <div class="col-sm-7 col-md-7 inputs">
+
+                    <entradaBuscar 
+                        [inline]="true"
+                        [service]="serviceProced" 
+                        [fnService]="['getProcedimentosCodigo', 'procedimentoPaginado', 'procedimentoPaginadoFiltro']" 
+                        [params]="['codigo', 'descricao']"
+                        (getValor)="getProcedimento($event)"
+                        [placeholders]="['Código', 'Exame']"
+                    ></entradaBuscar>
+
+                </div>
+                <div class="col-sm-2 col-md-2" >
+                    <div>
+                        <!--input type="" name="" class="form-control" type="number" valor="1" min="1" (getValor)="getQuantidade($event)"-->
+                        <entrada 
+                            nome="Qnt" 
+                            class="entrada" 
+                            semTitulo="true" 
+                            tipo="numero" 
+                            valor="1" 
+                            minimo="1" 
+                            (getValor)="getQuantidade($event)"
+                        ></entrada>
+                        
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <botao class="bloco" (click)="adicionarItem()" nome="Adicionar"></botao>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>PROCEDIMENTO</th>
+                        <th>DESCRIÇÃO</th>
+                        <th>QUANTIDADE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let exame of examesGruposItens" class="link">
+                        <td><icone nome="close" tamanho="medio" class="acao" (click)="removerItem(exame.id)"></icone></td>
+                        <td>{{exame.procedimento.codigo}}</td>
+                        <td>{{exame.procedimento.descricao}}</td>
+                        <td>
+                            <div class="edit" *ngIf="exameEdita.id == exame.id">
+                                <entrada nome="Qnt" class="entrada qnts" semTitulo="true" tipo="numero" valor="{{exame.quantidade}}" minimo="1" id="qnt{{exame.id}}" (getValor)="valorQuantidade($event)"></entrada>
+                                <botao icone="save" tamanho="medio" (click)="salvarQuantidade(exame)"></botao>
+                                <botao icone="cancel" tamanho="medio" (click)="cancelQuantidade()"></botao>
+                            </div>
+                            <span *ngIf="exameEdita.id != exame.id" (click)="editaQuantidade(exame)">{{exame.quantidade}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </moldura>
+    </div>
+</moldura>
+
+<ng-template #bodyModal let-c="close" let-d="dismiss">
+    <div class="row">
+        <entrada class="col-md-10" nome="Descrição" tema="popup" (getValor)="getProcedimentoSearch($event)"></entrada>
+        <botao class="col-md-1 botaoSearch" icone="search" tamanho="medio" (click)="setTableProcedimentoSearch(descProcedimento)"></botao>
+    </div>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>PROCEDIMENTO</th>
+                <th>DESCRIÇÃO</th>
+            </tr>
+            <tr *ngFor="let procedimento of procedimentos" class="link" id="linha{{procedimento.id}}">
+                <td><icone nome="add_circle" class="acao" tamanho="medio" (click)=clickLinha(procedimento)></icone></td>
+                <td>{{procedimento.codigo}}</td>
+                <td>{{procedimento.descricao}}</td>
+            </tr>
+        </thead>
+    </table>
+    <div>
+        <paginacao
+            (atualizaDados)="buscaProcedimentoPaginado($event)"
+            qtdItensTotal="{{qtdItensTotal}}"
+            itensPorPagina="{{itensPorPagina}}"
+            paginaAtual="{{paginaAtual}}"
+        ></paginacao>
+    </div>
+</ng-template>

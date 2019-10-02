@@ -1,0 +1,32 @@
+.color {
+    height: 30px;
+    width: 30px;
+    display: -webkit-inline-box;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.color.cor_selecionada{
+    border: 2px solid black;
+}
+
+.colors {
+    margin-bottom: 15px;
+}
+
+.bloco-cor{
+    width: 30px;
+    height: 30px;
+    display: block;
+    border: 3px solid #ada8a8;
+    opacity: 0.85;
+
+    &:hover{
+        opacity: 1;
+    }
+}
+
+.centro {
+    display: -webkit-inline-box;
+    display: inline-block;
+}

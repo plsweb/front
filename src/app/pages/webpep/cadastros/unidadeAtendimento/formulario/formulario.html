@@ -1,0 +1,574 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-body">
+        <moldura [titulo]="(( idUnidade ) ? 'Editar' : 'Nova') + ' Unidade de Atendimento'">
+            <div class="row">
+
+                <div *ngIf="idUnidade" class="col-md-2">
+                    <entrada nome="Código Unidade" [valor]="novaUnidade['id']" [bloqueado]="true"></entrada>
+                </div>
+
+                <div class="{{ idUnidade ? 'col-md-6' : 'col-md-8'}}">
+                    <entrada nome="Descrição" [valor]="novaUnidade['descricao']" (getValor)="$event && $event.valor ? novaUnidade['descricao'] = $event.valor : null"></entrada>
+                </div>
+
+                <div class="col-md-2">
+                    <entrada
+                        nome="Código Visual"
+                        [tamanhoMaximo]="2"
+                        [valor]="novaUnidade['codigoVisual']"
+                        (getValor)="$event && $event.valor ? novaUnidade['codigoVisual'] = $event.valor : novaUnidade['codigoVisual'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-2">
+                    <entrada
+                        nome="Código Estoque"
+                        [tamanhoMaximo]="2"
+                        [valor]="novaUnidade['estoqueCodigo']"
+                        (getValor)="$event && $event.valor ? novaUnidade['estoqueCodigo'] = $event.valor : novaUnidade['estoqueCodigo'] = undefined"
+                    ></entrada>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md">
+                    <entrada
+                        nome="CNPJ"
+                        [bloqueado]="true"
+                        mascara="99.999.999/9999-99"
+                        [valor]="novaUnidade['cnpj']"
+                        (getValor)="$event && $event.valor ? novaUnidade['cnpj'] = $event.valor : novaUnidade['cnpj'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md">
+                    <entrada
+                        nome="Prestador Unimed"
+                        [bloqueado]="true"
+                        [valor]="novaUnidade['redeAtendimentoId']"
+                        (getValor)="$event && $event.valor ? novaUnidade['redeAtendimentoId'] = $event.valor : novaUnidade['redeAtendimentoId'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md">
+                    <entrada
+                        nome="Identificador Zenite"
+                        [bloqueado]="true"
+                        [valor]="novaUnidade['identificador']"
+                        (getValor)="$event && $event.valor ? novaUnidade['identificador'] = $event.valor : novaUnidade['identificador'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md">
+                    <entrada
+                        nome="Horas Solicitacões Estoque"
+                        tipo="number"
+                        [valor]="novaUnidade['horasSolicitacao']"
+                        (getValor)="$event && $event.valor ? novaUnidade['horasSolicitacao'] = $event.valor : novaUnidade['horasSolicitacao'] = undefined"
+                    ></entrada>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <entrada
+                        tipo="simnao"
+                        nome="Obriga Cadastro Básico"
+                        [valor]="novaUnidade['obrigaCadastroBasico']"
+                        (getValor)="novaUnidade['obrigaCadastroBasico'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-2">
+                    <entrada
+                        tipo="simnao"
+                        nome="Ignora Feriados"
+                        [valor]="novaUnidade['ignoraFeriados']"
+                        (getValor)="novaUnidade['ignoraFeriados'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-2">
+                    <entrada
+                        tipo="simnao"
+                        nome="Vincula Guia"
+                        [valor]="novaUnidade['vinculaGuia']"
+                        (getValor)="novaUnidade['vinculaGuia'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3">
+                    <entrada
+                        tipo="simnao"
+                        nome="Copiar Evolução"
+                        [valor]="novaUnidade['copiaEvolucao']"
+                        (getValor)="novaUnidade['copiaEvolucao'] = $event.valor"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-3">
+                    <entrada
+                        nome="Tempo Limite (Tolerância Atendimento)"
+                        [valor]="novaUnidade['tempoLimite']"
+                        (getValor)="$event ? novaUnidade['tempoLimite'] = $event.valor : novaUnidade['tempoLimite'] = undefined"
+                    ></entrada>    
+                </div>    
+
+                <!-- <div class="col-md-3">
+                    <entrada nome="Latitude" [valor]="novaUnidade['latitude']" (getValor)="$event ? novaUnidade['latitude'] = $event.valor : novaUnidade['latitude'] = undefined"></entrada>
+                </div>
+
+                <div class="col-md-3">
+                    <entrada nome="Longitude" [valor]="novaUnidade['longitude']" (getValor)="$event ? novaUnidade['longitude'] = $event.valor : novaUnidade['longitude'] = undefined"></entrada>
+                </div> -->                
+            </div>
+    
+            <div class="row">
+                <!-- <div class="col-md-3">
+                    <entrada nome="Campo de Busca" [valor]="novaUnidade['busca']" (getValor)="$event ? novaUnidade['busca'] = $event.valor : novaUnidade['busca'] = undefined"></entrada>
+                </div> -->
+
+                <div class="col-md-6">
+                    <entrada
+                        nome="Endereço"
+                        [valor]="novaUnidade['endereco']"
+                        (getValor)="$event ? novaUnidade['endereco'] = $event.valor : novaUnidade['endereco'] = undefined"
+                    ></entrada>
+                </div>
+
+                <div class="col-md-4">
+                    <autocomplete 
+                        [titulo]="'Cidade'" 
+                        [minimo]="3" 
+                        [valor]="objCidades" 
+                        [camposFiltro]="['nome']"
+                        [valorSelecionado]="cidadeSelecionada" 
+                        [placeholder]="'Digite para buscar Cidade'" 
+                        [fnSearch]="fnCfgCidadeRemote.bind(this)"
+                        (fnOnSelected)="getCidadeSelect($event)"
+                    ></autocomplete>
+                </div>
+
+            </div>
+        </moldura>
+
+        <ng-container *ngIf="idUnidade">
+            <moldura titulo="Profissionais" [oculto]="true">
+                    
+                <moldura oculto="true" titulo="Adicionar Usuario ao local">
+
+                    <div class="row">
+
+                        <div class="col-md-7">
+
+                            <div class="add_usuario">
+
+                                <autocomplete
+                                    [titulo]="'Profissional'"
+                                    [placeholder]="'Digite para buscar um Profissional'"
+                                    [minimo]="1"
+                                    [valor]="objProfissionais"
+                                    [camposFiltro]="['nome']"
+                                    [valorSelecionado]="profissionalSelecionado"
+                                    [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                                    (fnOnSelected)="getProfissional($event)"
+                                ></autocomplete>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <entrada
+                                nome="Capacidade"
+                                tipo="numero"
+                                (getValor)="objParamsAddProfissional['peso'] = $event.valor"
+                            ></entrada>
+                        </div>
+
+                        <div class="col-md-2 botao_lateral">
+                            <botao nome="Salvar Usuario" [botao_lateral]="true" (click)="adicionarProfissional()"></botao>
+                        </div>
+
+                    </div>
+
+                </moldura>
+
+                <moldura
+                    [mostraPesquisar]="true"
+                    [pesquisar]="pesquisarProfissional.bind(this)"
+                >
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>NOME</th>
+                                <th>USERNAME</th>
+                                <th style="width: 20%"></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let usuario of profissionais">
+                                <td>{{usuario.usuario.nome}}</td>
+                                <td>{{usuario.usuario.username}}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div
+                                            role="progressbar"
+                                            class="progress-bar"
+                                            [style.width.%]="((usuario.peso/2 || 0) / usuario.peso || 0) * 100"
+                                            [title]="(usuario.peso/2 || 0) + '/' + (usuario.peso || 0)"
+                                            [ngClass]="(usuario.peso || 0 > 66) ? 'bg-danger' : (usuario.peso || 0 > 33) ? 'bg-warning' : 'bg-success'"
+                                        >{{((usuario.peso/2 || 0) / usuario.peso || 0) * 100}}%</div>
+                                    </div>
+                                </td>
+                                <td class="coluna_acoes">
+                                    <botao icone="delete" (click)="removeItem(usuario.usuario.guid, usuario.usuario.nome, 'profissional')"></botao>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <paginacao
+                            (atualizaDados)="buscarProfissionais($event)"
+                            qtdItensTotal="{{qtdItensTotalProfissionais}}"
+                            itensPorPagina="{{itensPorPaginaProfissionais}}"
+                            paginaAtual="{{paginaAtualProfissionais}}"
+                        ></paginacao>
+                    </div>
+                    
+                </moldura>
+
+            </moldura>
+
+            <moldura *ngIf="novaUnidade['codigoVisual']" oculto="true" titulo="Consultórios">
+                <moldura oculto="true" titulo="Adicionar Consultório">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <entrada nome="Nome" (getValor)="getConsultorio($event)"></entrada>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Codigo Visual Usuário" tipo="seleciona" [opcoes]="opcoesCodigoVisualUsuario" (getValor)="$event && $event.valor ? objParamsAddLocal['usuarioVisual'] = $event.valor : objParamsAddLocal['usuarioVisual'] = undefined "></entrada>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada nome="Codigo Visual Consultório" tipo="seleciona" [opcoes]="opcoesCodigoVisual" (getValor)="$event && $event.valor ? objParamsAddLocal['idVisual'] = $event.valor : objParamsAddLocal['idVisual'] = undefined "></entrada>
+                        </div>
+        
+                        <div class="col-md-2 botao_lateral">
+                            <botao nome="Salvar Local" [botao_lateral]="true" (click)="salvarLocal()"></botao>
+                        </div>
+                    </div>
+                </moldura>
+
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>NOME</th>
+                            <th>USUARIO VISUAL</th>
+                            <th>ID VISUAL</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let local of locais">
+                            <td>{{local.descricao}}</td>
+                            <td>{{local.usuarioVisual}}</td>
+                            <td>{{local.idVisual}}</td>
+                            <td class="coluna_acoes">
+                                <botao icone="delete" (click)="removeItem(local.id, local.descricao, 'local')"></botao>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscarLocais($event)"
+                        qtdItensTotal="{{qtdItensTotalLocais}}"
+                        itensPorPagina="{{itensPorPaginaLocais}}"
+                        paginaAtual="{{paginaAtualLocais}}"
+                    ></paginacao>
+                </div>
+            </moldura>
+            
+            <moldura oculto="true" titulo="Responsáveis por Socorro">
+                <moldura titulo="Adicionar Papel" podeOcultar="true" oculto="true">
+                    <div class="row">
+                        <div class="col">
+                            <autocomplete
+                                [titulo]="'Papel'"
+                                [placeholder]="'Digite para buscar Papel'"
+                                [minimo]="3"
+                                [valor]="objPapeis"
+                                [camposFiltro]="['nome']"
+                                [valorSelecionado]="papelSelecionado"
+                                [fnSearch]="fnCfgPapelRemote.bind(this)"
+                                (fnOnSelected)="getPapel($event)"
+                            ></autocomplete>
+                        </div>
+
+                        <div class="col">
+                            <entrada nome="Recebe SMS?" tipo="simnao" (getValor)="objParamPanicoPapel['sms'] = $event.valor"></entrada>
+                        </div>
+
+                        <div class="col">
+                            <entrada nome="Recebe Alerta?" tipo="simnao" (getValor)="objParamPanicoPapel['alerta'] = $event.valor"></entrada>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-2 col-lg-2">
+                            <botao nome="Adicionar" [botao_lateral]="true" (click)="salvarPapelPermissao()"></botao>
+                        </div>
+                    </div>
+                </moldura>
+    
+                <moldura>
+                    <div class="row">
+                        <div class="col">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>PAPEL</th>
+                                        <th>RECEBE SMS</th>
+                                        <th>RECEBE ALERTA</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let permissao of papeisPanico">
+                                        <td> {{permissao.papel ? permissao.papel.nome : ''}} </td>
+                                        <td> {{permissao.sms ? 'SIM' : 'NÃO'}} </td>
+                                        <td> {{permissao.alerta ? 'SIM' : 'NÃO'}} </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </moldura>
+            </moldura>
+
+            <moldura oculto="true" titulo="Pontuações por Faixa Etária">
+
+                <moldura titulo="Adicionar Faixa" podeOcultar="true" oculto="true">
+        
+                    <div class="row">
+                        <div class="col">
+                            <entrada
+                                nome="Idade Início"
+                                tipo="numero"
+                                (getValor)="objParamAddPontuacao['idadeInicio'] = $event.valor"
+                            ></entrada>
+                        </div>
+                        <div class="col">
+                            <entrada
+                                nome="Idade Fim"
+                                tipo="numero"
+                                (getValor)="objParamAddPontuacao['idadeFim'] = $event.valor"
+                            ></entrada>
+                        </div>
+                        <div class="col">
+                            <entrada
+                                nome="Pontuação"
+                                tipo="numero"
+                                (getValor)="objParamAddPontuacao['valor'] = $event.valor"
+                            ></entrada>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-2 col-lg-2">
+                            <botao nome="Adicionar" [botao_lateral]="true" (click)="salvarPontuacaoUnidade()"></botao>
+                        </div>
+                    </div>
+                </moldura>
+    
+                <moldura>
+    
+                    <div class="row">
+    
+                        <div class="col">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>IDADE INICIO</th>
+                                        <th>IDADE FIM</th>
+                                        <th>PONTUAÇÃO</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let pontuacao of pontuacoesUnidade">
+                                        <td> {{pontuacao.idadeInicio.toString()    ? ( (pontuacao.idadeInicio == 1 || pontuacao.idadeInicio == 0) ? pontuacao.idadeInicio + ' Ano' : pontuacao.idadeInicio + ' Anos' ) : ''}} </td>
+                                        <td> {{pontuacao.idadeFim.toString()   ? ( (pontuacao.idadeFim == 1) ? pontuacao.idadeFim + ' Ano' : pontuacao.idadeFim + ' Anos' ) : ''}} </td>
+                                        <td> {{pontuacao.valor}} </td>
+                                        <td>
+                                            <botao icone="delete" classe="transparente" (click)="removeItem(pontuacao.id, 'Pontuacao', 'pontuacao')"></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div>
+                                <paginacao
+                                    (atualizaDados)="buscarPontuacoes($event)"
+                                    qtdItensTotal="{{qtdItensTotalPontuacao}}"
+                                    itensPorPagina="{{itensPorPaginaPontuacao}}"
+                                    paginaAtual="{{paginaAtualPontuacao}}"
+                                ></paginacao>
+                            </div>
+                        </div>
+                    </div>
+                </moldura>
+
+            </moldura>
+
+            <moldura oculto="true" titulo="Centro de Custo">
+                <moldura titulo="Adicionar Regras" podeOcultar="true" oculto="true">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col">
+                                    <autocomplete
+                                        [titulo]="'Centro de Custo'"
+                                        [placeholder]="'Digite para buscar Centro de Custo'"
+                                        [minimo]="3"
+                                        [valor]="objCentroCusto"
+                                        [camposFiltro]="['centroCusto', 'descricao']"
+                                        [fnSearch]="fnCfgCentroCustoRemote.bind(this)"
+                                        [valorSelecionado]="centroCustoSelecionado || ''"
+                                        (fnOnSelected)="getCentroCusto($event)"
+                                    ></autocomplete>
+                                </div>
+
+                                <botao (click)="adicionaCentroCusto()" icone="add" tamanho="pequeno-16" botao_lateral="true"></botao>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <autocomplete
+                                [titulo]="'Tipo Atendimento'"
+                                [placeholder]="'Digite para buscar um Tipo de Atendimento'"
+                                [minimo]="1"
+                                [valor]="objAtendimentoTipo"
+                                [camposFiltro]="['descricao']"
+                                [valorSelecionado]="atendimentoTipoSelecionado"
+                                [fnSearch]="fnCfgAtendimentoTipoRemote.bind(this)"
+                                (fnOnSelected)="getAtendimentoTipo($event)"
+                            ></autocomplete>
+                        </div>
+
+                        <div class="col-md-4">
+                            <entrada
+                                nome="Programa Saúde"
+                                tipo="seleciona"
+                                [opcoes]="programaSaude"
+                                (getValor)="$event && $event.valor != 0 ? objParamAddRegra['programaSaude'] = {id: $event.valor} : objParamAddRegra['programaSaude'] = null"
+                            ></entrada>
+                        </div>
+
+                        <div class="col-md-4 hidden">
+                            <!-- TODO Operadora fixa -->
+                            <entrada
+                                nome="Operadora"
+                                tipo="seleciona"
+                                [requerido]="true"
+                                [opcoes]="operadoras"
+                                [valor]="1"
+                                (getValor)="$event && $event.valor ? objParamAddRegra['operadora'] = {id: $event.valor} : objParamAddRegra['operadora'] = null"
+                            ></entrada>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-2 col-lg-2">
+                            <botao nome="Adicionar" [botao_lateral]="true" (click)="salvarRegrasUnidade()"></botao>
+                        </div>
+                    </div>
+                </moldura>
+    
+                <moldura>
+                    <div class="row">
+                        <div class="col">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>CODIGO</th>
+                                        <th>DESCRIÇÃO</th>
+                                        <th>TIPO</th>
+                                        <th>PROGRAMA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let regra of regrasUnidade; let pos = index">
+                                        <td>
+                                            <icone nome="expand_less" title="Subir Nivel" (click)="ordemRegra(regra?.id, regrasUnidade[pos-1]?.id)" [ngClass]="{'invisible' : 0 == pos}"></icone>
+                                            <icone nome="expand_more" title="Descer Nivel" (click)="ordemRegra(regrasUnidade[pos+1]?.id, regra?.id)" *ngIf="regrasUnidade.length-1 > pos"></icone>
+                                        </td>
+                                        <td>
+                                            <icone nome="delete" title="Excluir Regra" (click)="excluiRegra(regra?.id)"></icone>
+                                        </td>
+                                        <td>{{regra?.centroCusto?.centroCusto}}</td>
+                                        <td>{{regra?.centroCusto?.descricao}}</td>
+                                        <td>{{regra?.atendimentoTipo?.descricao}}</td>
+                                        <td>{{regra?.programaSaude?.descricao}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div>
+                                <paginacao
+                                    (atualizaDados)="buscarPontuacoes($event)"
+                                    qtdItensTotal="{{qtdItensTotalRegras}}"
+                                    itensPorPagina="{{itensPorPaginaRegras}}"
+                                    paginaAtual="{{paginaAtualRegras}}"
+                                ></paginacao>
+                            </div>
+                        </div>
+                    </div>
+                </moldura>
+            </moldura>
+        </ng-container>
+
+        <div class="row">
+            <div class="col-md-2 botao_lateral">
+                <botao nome="Salvar Unidade" (click)="salvarUnidade()"></botao>
+            </div>
+
+            <div class="col-md-2">
+                <botao nome="Voltar" classe="btn-default" (click)="voltar()"></botao>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #bodyModalCentrodeCusto let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col">
+            <entrada
+                nome="Descrição"
+                (getValor)="objParamAddCentroCusto['descricao'] = $event.valor"
+            ></entrada>
+        </div>
+
+        <div class="col">
+            <entrada
+                nome="Centro de Custo"
+                placeholder="00.00.00"
+                mascara="99.99.99"
+                expressaoRegular="^[\d]{2}\.[\d]{2}\.[\d]{2}$"
+                (getValor)="objParamAddCentroCusto['centroCusto'] = $event.valor"
+            ></entrada>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #modalCentrodeCustoBotoes let-c="close" let-d="dismiss">
+    <botao nome="Salvar" classe="btn-primary" (click)="salvarCentroCusto(objParamAddCentroCusto)"></botao>
+</ng-template>

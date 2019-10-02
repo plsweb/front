@@ -1,0 +1,368 @@
+<div baCardBlur class="animated fadeIn card" zoom-in>
+    <div class="card-header clearfix">
+        <div class="cabecalho">
+            <div class="dados">
+                <span *ngIf="!temaid">Novo Tema</span>
+                <span *ngIf="temaid">Editar Tema</span>
+            </div>
+            <div class="acoes">
+            </div>
+        </div>
+        <div class="navegacao">
+            <div (click)="navegar('geral')" [ngClass]="{ativo: atual === 'geral'}">Geral</div>
+            <div *ngIf="temaid" (click)="navegar('listaespera')" [ngClass]="{ativo: atual === 'listaespera'}">Lista de Espera</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div *ngIf="atual === 'geral'">
+            <moldura>
+                <div class="row">
+
+                    <div class="col-md-8">
+                        <entrada 
+                            nome="Descrição"
+                            requerido="true"
+                            [valor]="(descricao) ? descricao : ''" 
+                            (getValor)="getDescricao($event)" 
+                        ></entrada>
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <autocomplete
+                            [titulo]="'Especialidade'"
+                            [placeholder]="'Digite para buscar Especialidade'"
+                            [minimo]="3"
+                            requerido="true"
+                            [valor]="objEspecialidades"
+                            [camposFiltro]="['descricao']"
+                            [valorSelecionado]="especialidadeSelecionada"
+                            [fnSearch]="fnCfgEspecialidadeRemote.bind(this)"
+                            (fnOnSelected)="getEspecialidade($event)"
+                        ></autocomplete>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <p>Cor *</p>
+                        <colorPicker
+                            direcao="right"
+                            [(default)]='corSelecionada'
+                            (setObjColorPicker)="setObjColorPicker($event)"
+                            [onColorChange]="trocaCor.bind(this)"
+                        ></colorPicker>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-sm-12 col-md-12" style="margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label class="label_check">Envia SMS?</label>
+                            <input-checkbox 
+                                classe="check_principal"
+                                [estado]="enviaSms"
+                                (trocaEstado)="getEnviaSms($event)"
+                            ></input-checkbox>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-12">
+                        <div class="form-group">
+                            <label class="label_check">Mensagem para solicitar confirmação de agendamento</label>
+                            <textarea 
+                                class="form-control"
+                                [maxlength]="tamanhoMaximo"
+                                [placeholder]="'Mensagem de Confirmação de Horário'"
+                                [(ngModel)]="mensagemSms"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-12">
+                        <div class="form-group">
+                            <label class="label_check">Mensagem para agradecer confirmação</label>
+                            <textarea 
+                                class="form-control"
+                                [maxlength]="tamanhoMaximo"
+                                [placeholder]="'Mensagem Confirmando Horário'"
+                                [(ngModel)]="mensagemConfirmando"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-12">
+                        <label class="label_check">Mensagem para lembrar agendamento</label>
+                        <textarea 
+                            class="form-control"
+                            [maxlength]="tamanhoMaximo"
+                            [placeholder]="'Lembrete de Consulta'"
+                            [(ngModel)]="mensagemLembrando"
+                        ></textarea>
+                    </div>
+
+                </div>
+                    
+            </moldura>
+
+            <moldura *ngIf="temaid">
+
+                <div class="row">
+                    <div class="col">
+
+                        <autocomplete
+                            [titulo]="'Formulário'"                    
+                            [placeholder]="'Digite para buscar Formulários'"
+                            [minimo]="3"
+                            [valor]="objFormularios"
+                            [camposFiltro]="['descricao']"
+                            [valorSelecionado]="formularioSelecionado"
+                            [fnSearch]="fnCfgFormularioRemote.bind(this)"
+                            (fnOnSelected)="getFormulario($event)"
+                        ></autocomplete>
+
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-lg-2">
+                        <label>&nbsp;</label>
+                        <botao nome="Adicionar" (click)="adicionarFormulario()"></botao>
+                    </div>
+                </div>
+
+                <moldura 
+                    podeOcultar="true" 
+                    titulo="{{formSelecionado.form.descricao}}" 
+                    *ngFor="let formSelecionado of formsSelecionados" 
+                    [clear]="removeFormulario.bind(this, formSelecionado, index)" 
+                    [editar]="editaFormulario.bind(this, formSelecionado, index)" 
+                >
+                    <table class="table table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="col-checkbox">Indicador</th>
+                                <th class="col-checkbox">Obrigatória</th>
+                                <th>Tipo</th>
+                                <th>Pergunta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let pergunta of formSelecionado.perguntas" class="link">
+                                <td>
+                                    <input-checkbox 
+                                        [estado]="pergunta.indice" 
+                                        (trocaEstado)="trocaEstadoIndicador($event, pergunta)"
+                                    ></input-checkbox>
+                                </td>
+                                <td>
+                                    <input-checkbox 
+                                        [estado]="pergunta.obrigatorio" 
+                                        (trocaEstado)="trocaEstadoObrigatorio($event, pergunta)"
+                                    ></input-checkbox>
+                                </td>
+                                <td>{{pergunta.pergunta.tipo}}</td>
+                                <td>{{pergunta.pergunta.descricao}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </moldura>
+            </moldura>
+        </div>
+
+        <div *ngIf="atual === 'listaespera'" [ngInit]="buscarAtendimentoEsperaPaginado.bind(this)">
+            <moldura titulo="Adicionar à Lista" podeOcultar="true" oculto="true">
+                <div class="row">
+                    <div class="col-sm-10 col-md-10 col-lg-10">
+
+                        <entrada
+                            nome="Pacientes"
+                            tipo="TABELA"
+                            [tabela]="'PACIENTE'"
+                            [tabelaCampos]='{ "filtro":"NOME,CPF", "filtroAdicional":"CPF" }'
+                            [retornarObjetoFull]="true"
+                            (getValor)="getPaciente($event)"
+                        ></entrada>
+
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <entrada 
+                            nome="Prioridade" 
+                            tipo="seleciona"
+                            
+                            objId="codigo"
+                            [opcoes]="prioridades" 
+                            (getValor)="( $event['valor'] ) ? prioridadeSelecionada = $event.valor : null"
+                        ></entrada>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <label>Observação</label>
+                        <textarea
+                            name="Observacao" 
+                            class="form-control" 
+                            placeholder="Observação"
+                            [(ngModel)]="observacao"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        <botao nome="Adicionar" (click)="adicionarListaEspera()"></botao>
+                    </div>
+                </div>
+            </moldura>
+
+            <moldura
+                titulo="&nbsp;"
+                [pesquisar]="pesquisar.bind(this)"
+            >
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="status"></th>
+                            <th></th>
+                            <th>BENEFICIARIO</th>
+                            <th>INCLUSÃO</th>
+                            <th>OBSERVAÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let pacienteLista of listaEspera" class="link">
+                            <td class="status" [style.background]="setColorBackgroundStatus(pacienteLista.prioridade)" ></td>
+                            <td>
+                                <icone nome="group_work" tamanho="grande" (click)="abreModalAdicionarAoGrupo(pacienteLista)" ></icone>
+                                <icone nome="cancel" tamanho="grande" (click)="abreModalRemoverDaLista(pacienteLista)" ></icone>
+                            </td>
+                            <td>{{(pacienteLista && pacienteLista.paciente ? pacienteLista.paciente.nome : '')}}</td>
+                            <td>{{pacienteLista.inclusao}}</td>
+                            <td>{{pacienteLista.observacao}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br class="all">
+
+                <div>
+                    <paginacao
+                        (atualizaDados)="buscarAtendimentoEsperaPaginado($event)"
+                        qtdItensTotal="{{qtdItensTotal}}"
+                        paginaAtual="{{paginaAtual}}"
+                        itensPorPagina="{{itensPorPagina}}"
+                        scrollPagination="true"
+                    ></paginacao>
+                </div>
+            </moldura>
+
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-sm-6 botoes">
+                <div class="row">
+                    <div class="col">
+                        <botao nome="Salvar" (click)="salvar()"></botao>
+                    </div>
+                    <div *ngIf="temaid" class="col">
+                        <botao nome="Excluir" classe="btn-info" (click)="excluir()"></botao>
+                    </div>
+                    <div class="col">
+                        <botao nome="Voltar" (click)="voltar()" classe="btn-default"></botao>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #bodyModalAdicionarAoGrupo let-c="close" let-d="dismiss">
+
+    <p>Selecione um grupo para adicionaro beneficiário</p>
+
+    <div class="col-sm-12 col-md-12">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="col-checkbox"></th>
+                    <th>Nome</th>
+                    <th class="col-numero">Vagas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let grupo of gruposDisponiveis">
+                    <tr>
+                        <td>
+                            <input type="radio" name="grupo" [value]="grupo.id"  [(ngModel)]="grupoSelecionado">
+                        </td>
+                        <td>{{grupo.descricao}}</td>
+                        <td>{{grupo.vagasDisponiveis}}</td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                    </tr>
+                    <tr *ngIf="grupoSelecionado == grupo.id">
+                        <td colspan="3" class="no_padding">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <td *ngFor="let diaDaSemana of grupo.recorrencias">
+                                            {{momentjs().weekday(diaDaSemana.diaDaSemana).format(formatosDeDatas.diaDaSemana)}}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td *ngFor="let diaDaSemana of grupo.recorrencias">{{diaDaSemana.horaInicio}}</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesAdicionarAoGrupo let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="adicionarAoGrupo()"></botao>
+</ng-template>
+
+
+
+<ng-template #bodyModalRemoverDalistaDeEspera let-c="close" let-d="dismiss">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <p>
+                Você esta removendo o Beneficiário "{{pacienteSelecionado.paciente.nome}} - {{pacienteSelecionado.paciente.codigo}}"" da lista de espera.
+            </p>
+            <p>Por favor informe o motivo dessa exclusão</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            
+            <textarea
+                name="Motivo" 
+                class="form-control" 
+                placeholder="Motivo"
+                [(ngModel)]="observacao"
+            ></textarea>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #templateBotoesModalRemoverDalistaDeEspera let-c="close" let-d="dismiss">
+    <botao nome="Confirmar" classe="btn-primary" (click)="removerdaLista()"></botao>
+</ng-template>

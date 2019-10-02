@@ -1,0 +1,41 @@
+<div class="card-header clearfix">
+    <moldura
+        titulo="Material"
+        [registros]="qtdItensTotal"
+        [pesquisarKeydown]="pesquisar.bind(this)"
+    >
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">DESCRIÇÃO</th>
+                            <th scope="col">QUANTIDADE</th>
+                            <th scope="col">VALOR UNI.</th>
+                            <th scope="col">VALOR TOT.</th>
+                        </tr>
+                        <tr *ngFor="let material of materiais" (click)="validar(material)">
+                            <td>{{material.descricao}}</td>
+                            <td>{{material.quantidade}}</td>
+                            <td>{{material.valor | currency:'BRL':true:'1.2-2'}}</td>
+                            <td>{{material.quantidade * material.valor | currency:'BRL':true:'1.2-2'}}</td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <paginacao
+                (atualizaDados)="buscaPaginado($event)"
+                qtdItensTotal="{{qtdItensTotal}}"
+                itensPorPagina="{{itensPorPagina}}"
+                paginaAtual="{{paginaAtual}}"
+                scrollPagination="true"
+            ></paginacao>
+        </div>
+    </moldura>
+</div>
+
+<rodape></rodape>

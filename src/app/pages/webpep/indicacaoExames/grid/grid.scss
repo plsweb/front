@@ -1,0 +1,113 @@
+.status {
+    width: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.verde {
+    background-color: #006a6a;
+}
+
+.cinza {
+    background-color: #79787d;
+}
+
+.row {
+    margin-top: 15px;
+}
+
+table {
+    cursor: default;
+}
+
+.tamanho90 {
+    width: 90%;
+    float: left;
+    margin-right: 10px;
+    position: relative;
+}
+
+.tamanho90 input.form-control,
+input#Carteira,
+input#Nome {
+    height: 32px;
+}
+
+table {
+    margin-bottom: 25px;
+}
+
+table tbody,
+table thead {
+    width: 100%;
+}
+
+table tbody tr,
+table thead tr {
+    position: relative;
+    width: 100%;
+}
+
+table tbody tr td,
+table thead tr th {
+    float: left;
+    margin: 0;
+    position: relative;
+}
+
+table tbody th td.td7,
+table thead tr th.td7 {
+    text-align: center;
+    width: 7%;
+}
+
+table tbody tr td.td17,
+table thead tr th.td17 {
+    width: 17%;
+}
+
+table tbody tr td.td76,
+table thead tr th.td76 {
+    width: 76%;
+}
+
+table tbody tr td.td100,
+table thead tr th.td100 {
+    border-top: 1px solid;
+    width: 100%;
+}
+
+table tbody tr td.td100 ul {
+    list-style: none;
+    padding: 10px 10px 0 10px;
+    text-decoration: none;
+}
+
+table tbody tr td.td100 ul li {
+    margin-bottom: 10px;
+}
+
+h5 {
+    font-size: 16px;
+    margin-bottom: 0px;
+}
+
+span {
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.botoes {
+    height: 30px;
+    margin-bottom: 20px;
+    position: relative;
+    width: 100%;
+}
+
+.botoes botao {
+    float: left;
+    margin: 0 20px 0 0;
+    position: relative;
+    width: 150px;
+}

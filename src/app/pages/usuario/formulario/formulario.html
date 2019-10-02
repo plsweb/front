@@ -1,0 +1,321 @@
+<moldura *ngIf="usuario" titulo="Usuario">
+
+    <form (ngSubmit)="submit()">
+
+        <div class="row">
+            <div [ngClass]="(id) ? 'col-sm-12 col-md-8' : 'col-sm-12'">
+                <div class="row">
+
+                    <entrada 
+                        [ngClass]="'col-sm-12'" 
+                        *ngIf="usuario.usuarioTipo && usuario.usuarioTipo == 'JURIDICA'" 
+                        nome="Token" 
+                        [copyToClipboard]="true"
+                        [valor]="usuario.token" 
+                    ></entrada>
+
+                    <entrada [ngClass]="'col-sm-4'" nome="Usuário" [valor]="(usuario.userName) ? usuario.userName : ''" (getValor)="getUsername($event)" bloqueado="{{(usuario.userName) ? 'true' : 'false'}}"></entrada>
+                    <entrada [ngClass]="'col-sm-8'" nome="Nome" [valor]="(usuario.nome) ? usuario.nome : '' " (getValor)="getNome($event)"></entrada>
+
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-6'" nome="Nova Senha" tipo="senha" id="novasenha" (getValor)="getNovaSenha($event)"></entrada>
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-6'" nome="Confirmar Senha" tipo="senha" (getValor)="getConfirmacao($event)"></entrada>
+
+                    <entrada [ngClass]="'col-sm-6'" nome="Email" tipo="email" [valor]="(usuario.email) ? usuario.email : '' " (getValor)="getEmail($event)"></entrada>
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-3'" nome="Ativo" tipo="simnao" [valor]="(usuario.ativo != undefined) ? usuario.ativo : '0'" (getValor)="getAtivo($event)"></entrada>
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-3'" nome="Bloqueado" tipo="simnao" [valor]="(usuario.bloqueado != undefined) ? usuario.bloqueado : '0'" (getValor)="getBloqueado($event)"></entrada>
+
+                    <entrada [ngClass]="'col-sm-6'" nome="Celular" tipo="celular" [valor]="(usuario.celular) ? usuario.celular : '' " (getValor)="getCelular($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-6'" nome="Nascimento" tipo="data" [valor]="usuario.nascimento | slice:0:10" [incluirMascara]="true" (getValor)="getNascimento($event)"></entrada>
+
+                    <moldura [ngClass]="'col-sm-12'" titulo="Papéis" sub="true" oculto="true" *ngIf="usuario.papeis && !perfil">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Papéis</label>
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                        	<th></th>
+                                            <th>NOME</th>
+                                            <th>DESCRIÇÃO</th>
+                                        </tr>
+                                        <tr *ngFor="let papel of usuario.papeis">
+                                            <td class="acao"><icone nome="delete" class="acao" (click)=deletePapel(papel)></icone></td>
+                                            <td>{{papel.nome ? papel.nome : ""}}</td>
+                                            <td>{{papel.descricao ? papel.descricao : "" }}</td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="col-md-4 botao-centro">
+                                <botao nome="Adicionar Papel" (click)="adicionarPapel(bodyModalPapeis)" classe="btn-info center"></botao>
+                            </div>
+                        </div>
+                    </moldura>
+
+                    <moldura [ngClass]="'col-sm-12'" titulo="Especialidades" sub="true" oculto="true" *ngIf="usuario.especialidades && !perfil">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Especialidades</label>
+                                <table class="table table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>CODIGO</th>
+                                            <th>DESCRIÇÃO</th>
+                                            <th></th>
+                                        </tr>
+                                        <tr *ngFor="let especialidades of usuario.especialidades">
+                                            <td>{{especialidades.codigo}}</td>
+                                            <td>{{especialidades.descricao}}</td>
+                                            <td class="acao"><icone nome="delete" class="acao" (click)=deleteEspecialidades(especialidades)></icone></td>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="col-md-4 botao-centro">
+                                <botao nome="Adicionar Especialidade" (click)="adicionarEspecialidade(bodyModalEspecialidades)" classe="btn-info center"></botao>
+                            </div>
+                        </div>
+                    </moldura>
+
+                    <moldura [ngClass]="'col-sm-12'" titulo="Unidades de Atendimento" sub="true" oculto="true" *ngIf="usuario.especialidades && !perfil">
+                        <div class="row">
+                            <!-- <div class="col-md-12">
+                                <div class="unidadeAtendimento">
+                                    <div *ngFor="let unidade of unidadesAtendimento">
+                                        <input-checkbox
+                                            classe="check_todasSessoes"
+                                            [legenda]="unidade.descricao"
+                                            [estado]="validaCheck(unidade)" 
+                                            (trocaEstado)="salvarUnidadeAtendimento($event, unidade)"
+                                        ></input-checkbox>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                            <div class="col-7">
+                                <entrada
+                                    nome="Unidade Atendimento" 
+                                    tipo="seleciona"
+                                    [opcoes]="unidadesAtendimento"
+                                    (getValor)="$event ? unidadeSelecionada['unidadeAtendimento'] = { id: $event.valor } : unidadeSelecionada['unidadeAtendimento'] = undefined"
+                                ></entrada>
+                            </div>
+
+                            <div class="col-3">
+                                <entrada
+                                    nome="Pontuação"
+                                    tipo="numero"
+                                    (getValor)="unidadeSelecionada['peso'] = $event.valor"
+                                ></entrada>
+                            </div>
+
+                            <div class="col-2">
+                                <botao nome="Adicionar" [botao_lateral]="true" (click)="salvarUnidadeAtendimento()"></botao>
+                            </div>                        
+                        </div>
+
+                        <div class="row">
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>UNIDADE</th>
+                                        <th>PESO</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let unidade of usuario.unidadesAtendimento">
+                                        <td>{{unidade?.unidadeAtendimento.descricao}}</td>
+                                        <!-- <td>{{unidade?.peso}}</td> -->
+                                        <td class="edit" (click)="editaCampoItem( $event, 'peso', unidade.id, unidade['peso'])">
+                                            
+                                            <ng-container  *ngIf="campoEdita['peso']['id'] == unidade.id; else campoSimplesPeso">
+                                                <entrada 
+                                                    class="entrada qnts" 
+                                                    tipo="numero" 
+                                                    semTitulo="true" 
+                                                    [valor]="unidade.peso || 0" 
+                                                    [fnOnChange]="salvarCampoEditaUsuario.bind(this, 'peso')"
+                                                ></entrada>
+                                            </ng-container>
+
+                                            <ng-template #campoSimplesPeso>
+                                                <span>{{unidade?.peso}}</span>
+                                            </ng-template>
+
+                                        </td>
+                                        <td class="coluna_acoes">
+                                            <botao icone="delete" (click)="salvarUnidadeAtendimento(false, unidade)"></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </moldura>
+
+                    <moldura 
+                        [ngClass]="'col-sm-12'" 
+                        titulo="Dependentes" 
+                        sub="true" 
+                        oculto="true" 
+                        *ngIf="usuario.usuarios && !perfil"
+                    >
+                        <div class="row">
+
+                            <div class="col-md-7">
+    
+                                <div class="add_usuario">
+    
+                                    <autocomplete
+                                        [titulo]="'Dependente'"
+                                        [placeholder]="'Digite para buscar Dependente'"
+                                        [minimo]="1"
+                                        [valor]="objProfissionais"
+                                        [camposFiltro]="['nome']"
+                                        [valorSelecionado]="profissionalSelecionado"
+                                        [fnSearch]="fnCfgprofissionalRemote.bind(this)"
+                                        (fnOnSelected)="getProfissional($event)"
+                                    ></autocomplete>
+    
+                                </div>
+    
+                            </div>
+
+                            <div class="col">
+                                <div class="datahoje"style="left: 15px;">
+                                    <label *ngIf="!!!pos">É Dependente?</label>
+                                    <input-checkbox
+                                        classe="check_tipodata"
+                                        [estado]="objParamAddDependente['eDependente']" 
+                                        (trocaEstado)="objParamAddDependente['eDependente'] = $event"
+                                    ></input-checkbox>
+                                </div>
+                            </div>
+    
+                            <div class="col-md-2 botao_lateral">
+                                <botao nome="Salvar Usuario" [botao_lateral]="true" (click)="adicionarDependente(objParamAddDependente['eDependente'])"></botao>
+                            </div>
+    
+                        </div>
+
+                        <div class="row">
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>USUARIO</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let usuario of usuario.usuarios">
+                                        <td>{{usuario?.nome}}</td>
+                                        <td class="coluna_acoes">
+                                            <botao icone="delete" (click)="removerDependente(usuario)"></botao>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </moldura>
+
+                    <entrada [ngClass]="'col-sm-6'" nome="Conselho" tipo="seleciona" [opcoes]="conselhos" [valor]="usuario.conselho ? usuario.conselho.id : ''" (getValor)="getConselho($event)"></entrada>
+
+                    <entrada [ngClass]="'col-sm-6'" nome="Tipo Pessoa" objId="codigo" tipo="seleciona" [opcoes]="tiposPessoa" [valor]="usuario.usuarioTipo" (getValor)="getUsuarioTipo($event)"></entrada>
+
+                    <entrada [ngClass]="'col-sm-4'" nome="Registro" [valor]="usuario.conselhoRegistro" (getValor)="getRegistro($event)"></entrada>
+                    <entrada [ngClass]="'col-sm-2'" nome="UF" [valor]="usuario.conselhoUf" (getValor)="getUf($event)" [tamanhoMaximo]="'2'"></entrada>
+
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-6'" nome="Desejo receber mensagens do sistema por Email"   tipo="simnao" [valor]="(usuario.receberEmail != undefined) ? usuario.receberEmail : '0'" (getValor)="getReceberEmail($event)"></entrada>
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-6'" nome="Desejo receber mensagens do sistema por Celular" tipo="simnao" [valor]="(usuario.receberSms != undefined) ? usuario.receberSms : '0'" (getValor)="getReceberSms($event)"></entrada>
+                    <entrada *ngIf="!perfil" [ngClass]="'col-sm-4'" nome="Ordem da fila de atendimentos"                   tipo="seleciona" objId="codigo" [valor]="usuario.ordemFilaAtendimento" [opcoes]="ordensFilaAtendimento" (getValor)="getOrdemFila($event)"></entrada>
+
+                </div>
+
+            </div>
+
+            <div *ngIf="id" class="col-sm-12 col-md-4" style="text-align: center">
+                <div class="col-sm-12">
+                    <ba-card cardTitle="Foto" baCardClass="with-scroll">
+                        <ba-picture-uploader
+                            [ableTakePhoto]="true"
+                            [tipo]="'FOTO'"
+                            [picture]="imagem"
+                            (setImage)="getImagemCompleta($event)">
+                        </ba-picture-uploader>
+                    </ba-card>
+                </div>
+                <div class="col-sm-12">
+                    <ba-card cardTitle="Assinatura" baCardClass="with-scroll">
+                        <ba-picture-uploader
+                            [tipo]="'ASSINATURA'"
+                            [picture]="assinatura"
+                            (setImage)="getImagemCompleta($event)">
+                        </ba-picture-uploader>
+                    </ba-card>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-sm-8 botoes">
+            <botao nome="Gravar"   (click)="submit()"></botao>
+            <botao *ngIf="perfil"  nome="Alterar Senha" classe="btn-info" (click)="alterarSenha(bodyModalSenha, templateBotoesSenha)"></botao>
+            <botao nome="Voltar"   [btnVoltar]="true"    classe="btn-default"></botao>
+        </div>
+
+    </form>
+
+</moldura>
+
+<!-- MODAL PAPEIS-->
+<ng-template #bodyModalPapeis let-c="close" let-d="dismiss">
+    <entrada nome="Descrição" tema="popup" (getValor)="getPapel($event)"></entrada>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>NOME</th>
+                <th>DESCRIÇÃO</th>
+            </tr>
+            <tr *ngFor="let papel of papeis" class="link" id="linha{{papel.guid}}" (click)="clickLinha(papel)">
+                <td class="acao"><icone nome="add_circle" class="acao"></icone></td>
+                <td>{{papel.nome}}</td>
+                <td>{{papel.descricao}}</td>
+            </tr>
+        </thead>
+    </table>
+</ng-template>
+
+
+<!-- MODAL ALTERAR SENHA -->
+<ng-template #bodyModalSenha let-c="close" let-d="dismiss">
+    <entrada nome="Nova Senha" tipo="senha" id="novasenha" (getValor)="getNovaSenha($event)"></entrada>
+    <entrada nome="Confirmar Senha" tipo="senha" (getValor)="getConfirmacao($event)"></entrada>
+</ng-template>
+
+
+<ng-template #templateBotoesSenha let-c="close" let-d="dismiss">
+    <botao nome="Salvar Senha" (click)="salvarSenha()"></botao>
+</ng-template>
+
+
+<!-- MODAL ESPECIALIDADES-->
+<ng-template #bodyModalEspecialidades let-c="close" let-d="dismiss">
+    <entrada nome="Descrição" tema="popup" (getValor)="getEspecialidade($event)"></entrada>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>NOME</th>
+                <th>DESCRIÇÃO</th>
+            </tr>
+            <tr *ngFor="let especialidade of especialidades" class="link" id="linha{{especialidade.id}}">
+                <td class="acao"><icone nome="add_circle" class="acao" (click)=selecionaEspecialidade(especialidade)></icone></td>
+                <td>{{especialidade.codigo}}</td>
+                <td>{{especialidade.descricao}}</td>
+            </tr>
+        </thead>
+    </table>
+</ng-template>

@@ -1,0 +1,38 @@
+.navegacao div {
+    color: #a1a1e5;
+    cursor: pointer;
+    float: left;
+    margin-top: 10px;
+    padding: 0px 10px 10px 10px;
+}
+
+.card-header {
+    cursor: default;
+    padding-bottom: 0px;
+}
+
+.ativo {
+    border-bottom: 1px solid #eceeef;
+    color: #fff !important;
+    cursor: default !important;
+}
+
+.row.align-rigth{
+    float: right;
+}
+
+.row.pacientesCoacher {
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+
+:host /deep/ .acoes_paciente{
+
+    display: inline-flex;
+
+    botao{
+        margin-right: 20px;
+    }
+
+}

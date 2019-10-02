@@ -1,0 +1,88 @@
+<!--(focusout)="fechaDatePicker()" -->
+
+  <input 
+    type="text" 
+    name="datepicker-input" 
+    autocomplete="off"
+    class="form-control" 
+    [disabled]="disabled" 
+    placeholder="DD/MM/YYYY" 
+    value="{{ semData && !dataValor ? '' : (dataValor ? dataValor : diaAtual.format('DD/MM/YYYY')) }}"
+    (change)="valorDigitado($event)"
+    (click)="abreDatePicker()"
+    
+    *ngIf="inputForm"
+  />
+
+  <div class='datepicker' 
+    *ngIf="(inputForm && datepickerOpened) || (!inputForm)"
+    [ngClass]="{
+      'float': inputForm
+    }"
+  >
+    <div class="mini-calendario">
+      <div class="calendar-grid calendar-head">
+        <div class="col text-center">
+          <span class="mesVisaoMiniCalendario"> {{ periodoMesAno() }} </span>
+        </div>
+
+        <div class="col text-right">
+          <icone 
+            nome="keyboard_arrow_left"
+            [ngClass]="'pointer'" 
+            (click)="clicaAlterarMes('subtract')"
+          ></icone>
+          <icone 
+            nome="keyboard_arrow_right"
+            [ngClass]="'pointer'" 
+            (click)="clicaAlterarMes('add')"
+          ></icone>
+          <icone 
+            *ngIf="inputForm"
+            nome="close"
+            [ngClass]="'pointer'" 
+            (mousedown)="fechaDatePicker()"
+          ></icone>
+        </div>
+      </div>
+
+      <div class="calendar-grid calendar-head">
+        <div 
+          class="col" 
+          *ngFor="let diaSemana of diasDaSemana; trackBy: trackByFn"
+        >
+          {{diaSemana[0]}}
+        </div>
+      </div>
+      
+      <div class="calendar-grid" *ngFor="let semana of semanas; trackBy: trackByFn">
+
+        <div 
+          id="{{dia}}" 
+          class="col dia unselectable" 
+          drag-multipla-selecao="true"
+          
+          *ngFor="let dia of semana; trackBy: trackByFn" 
+
+          (mouseover)='mouseOver($event, dia)' 
+          (mouseup)='mouseUp($event, dia)'
+          (mousedown)='mouseDown($event, dia)' 
+          
+          [ngClass]="{
+            'old': verificaSeDataNoMesAtual(dia), 
+            'ativo': verificaSeDataEstaSelecionada(dia)
+          }"
+        >
+          {{dia.date()}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--datepicker
+      inputForm='true'
+      [(datas)]='dataTest'
+      [fnOnChange]="onDatePickerChangeDataTest.bind(this)"
+      (setDatasSelecionadas)="setDatasSelecionadasDataTest($event)"
+  > 
+  </datepicker-->

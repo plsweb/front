@@ -1,0 +1,68 @@
+<section class="cd-timeline js-cd-timeline">
+
+	<div class="row">
+
+		<div class="col-md-3">
+			<entrada nome="Visão" tipo="seleciona" [opcoes]="opcoesVisao" [valor]="tipoIntervaloBusca" (getValor)="setVisao($event)"></entrada>
+		</div>
+	
+	</div>
+	
+	<div class="row">
+			
+		<div class="col-md-3">
+			<entrada nome="Inicio Busca" tipo="data" [incluirMascara]="true" [valor]="momentjs( dataInicioBusca, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.dataFormato )" (change)="setDataInicioBusca($event)"></entrada>
+		</div>
+		
+		<div class="col-md-3">
+			<entrada nome="Fim Busca" tipo="data" [incluirMascara]="true" [valor]="momentjs( dataFimBusca, formatosDeDatas.dataHoraSegundoFormato).format(formatosDeDatas.dataFormato )" (change)="setDataFimBusca($event)"></entrada>
+		</div>
+	
+	</div>
+
+	<div *ngIf="itensTimeline.length; else naoHaItens" id="timeline" class="cd-timeline__container" style="width: 100% !important;" (scroll)="debounce.next($event)">
+
+		<div class="botao_subir_rolagem" (click)="subirRolagem()">
+			<icone nome="arrow_upward" tamanho="medio"></icone>
+		</div>
+		<div class="barra_timeline"></div>
+
+		<ng-container *ngFor="let item of itensTimeline">
+
+			<div style="cursor: pointer;"
+				class="cd-timeline__block js-cd-block {{item['idelemento']}}"
+				(click)="clickItemEvento(item, 'VISUALIZAR')" >
+
+				<div class="cd-timeline__img cd-timeline__img--picture js-cd-img" [ngStyle]="{ 'background-color': (item['cor']) ? item['cor'] : '#75ce66' }">
+					<icone *ngIf="item['img']" [nome]="item['img']" tamanho="grande" ></icone>
+				</div> <!-- cd-timeline__img -->
+
+				<div class="cd-timeline__content js-cd-content row {{ validaStatusItemEvento(item) }} ">
+					<div class="arrow_event {{ validaStatusItemEvento(item) }}"></div>
+					<div class="cabecalho_evento col-md-10">
+						<h2 class="titulo_evento">{{ item['titulo'] }}</h2> <!-- TITULO -->
+						<p class="observacao_evento">{{ item['observacao'] }}</p> <!-- OBSERVAÇÃO -->
+						<p class="nome_evento">{{ item['nome'] }}</p> <!-- OBSERVAÇÃO -->
+					</div>
+
+					<div class="acoes_evento col-md-2"></div>
+
+					<div class="data_evento">
+						<span class="cd-timeline__date">{{ item['data'] }}</span> <!-- DATA -->
+					</div>
+
+				</div> <!-- cd-timeline__content -->
+				
+			</div> <!-- cd-timeline__block -->
+
+		</ng-container>
+
+		<div class="botao_descer_rolagem" (click)="descerRolagem()">
+			<icone nome="arrow_downward" tamanho="medio"></icone>
+		</div>
+	</div>
+</section> <!-- cd-timeline -->
+
+<ng-template #naoHaItens>
+	<span>Não há itens nesse intervalo de data</span>
+</ng-template>

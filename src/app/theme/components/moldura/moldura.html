@@ -1,0 +1,137 @@
+<div hidden id="fundo" (click)="mostrarOcultarFiltros($event, '#filtro-campos')"></div>
+<div class="animated animated-no-animation-fill-mode fadeIn card" zoom-in>
+
+    <div *ngIf="titulo || pesquisar || pesquisarKeydown || podeOcultar || clear || editar" (click)="abrir()" class="card-header clearfix">
+
+        <div class="row">
+            <div class="col">
+
+                <ng-content select=".botoesLadoDireito"></ng-content>
+
+                <div class="titulo" *ngIf="titulo || somenteTitulo">
+                    <label [ngClass]="{'labelTitulo' : !sub, 'labelSubTitulo' : sub}">
+                        {{titulo}}<small *ngIf="selecionado && selecionado != ''">: {{selecionado}}</small>
+                    </label>
+                    <h6 *ngIf="registros">{{formatRegistros()}} {{ labelRegistros }}</h6>
+                </div>
+
+                <ng-template [ngTemplateOutlet]="elementoAcoesTitulo"></ng-template>
+
+                <div [hidden]="oculto">
+                    <ng-content select=".card-tabs"></ng-content>
+                </div>
+            </div>
+
+            <div class="col" *ngIf="!somenteTitulo">
+
+                <ng-container *ngIf="!semDropdown">
+                    <div class="fa fa-angle-down" *ngIf="podeOcultar" [ngClass]="{'fa-angle-up': !oculto, 'fa-angle-down': oculto}"></div>
+                </ng-container>
+
+                <div class="editar" *ngIf="editar">
+                    <icone nome="mode_edit" tamanho="medio" (click)="editar()"></icone>
+                </div>
+
+                <div class="clear" *ngIf="clear">
+                    <icone nome="clear" tamanho="medio" (click)="clear()"></icone>
+                </div>
+
+                <div [hidden]="oculto">
+                    <ng-content select=".card-acoes"></ng-content>
+                </div>
+
+                <div class="pesquisar">
+
+                    <ng-template [ngTemplateOutlet]="elementoAcoes"></ng-template>
+                    
+                    <input 
+                        #searchInput id="searchInput" 
+                        [(ngModel)]="valorPesquisar" 
+                        type="text" 
+                        placeholder="Pesquisar" 
+                        *ngIf="(pesquisar || pesquisarKeydown) && mostraPesquisar"
+                        [formControl]="searchField"
+                    >
+
+                    <div class="dropdown">
+                        <icone *ngIf="(pesquisar || pesquisarKeydown) && mostraPesquisar" nome="search" tamanho="medio" (click)="pesquisaClick(searchField.value)"></icone>
+                    </div>
+
+                    <!-- <div customdropdown *ngIf="filtrar && mostraFiltrar" id="filtro-campos" class="dropdown">
+                        <div class="dropdown-toggle">
+                            <icone id="filter-icon" nome="filter_list" tamanho="medio" aria-expanded="true" 
+                            ></icone>
+                        </div> -->
+                        <!-- (click)="mostrarOcultarFiltros($event, '#filtro-campos')" -->
+                    <div dropdown *ngIf="filtrar && mostraFiltrar" id="filtro-campos" class="dropdown">
+                        <icone id="filter-icon" nome="filter_list" tamanho="medio" aria-expanded="true" (click)="mostrarOcultarFiltros($event, '#filtro-campos')"></icone>
+                        
+                        <div [hidden]="hide" (click)="clickTest($event)" id="filtro" class="dropdown-menu dropdown-menu-right" aria-labelledby="filter-icon">
+                            <div class="filtro-container">
+                                <ng-container *ngIf="!customFiltro">
+                                    <ng-content select=".moldura-filtro"></ng-content>
+                                </ng-container>
+
+                                <ng-container *ngIf="customFiltro">
+                                    <div class="moldura-filtro container">
+                                        <ng-template [ngTemplateOutlet]="customFiltro"></ng-template>
+                                    </div>
+                                </ng-container>
+
+                                <br>
+
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <botao 
+                                            nome="Filtrar" 
+                                            debounceClick 
+                                            [debounceTime]="500" 
+                                            (debounceClick)="filtrarClick(valorPesquisar)"
+                                        ></botao>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4 col-lg-4 filtro-acoes" *ngIf="limparFiltros">
+                                        <botao nome="Limpar" classe="btn-default" debounceClick [debounceTime]="200" (debounceClick)="limparFiltrosAcao(searchInput)"></botao>
+                                    </div>
+                                    <div class="col">
+                                        <ng-container *ngIf="!customAcoes">
+                                            <ng-content select=".filtro-acoes"></ng-content>
+                                        </ng-container>
+
+                                        <ng-container *ngIf="customAcoes">
+                                            <ng-template [ngTemplateOutlet]="customAcoes"></ng-template>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="dropdown" id="filtro-info" *ngIf="mostraInfo">
+                        <icone id="filter-icon" nome="info" tamanho="medio" data-toggle="dropdown" (click)="mostrarOcultarFiltros($event, '#filtro-info')"></icone>
+                        <div id="info" class="dropdown-menu dropdown-menu-right" aria-labelledby="filter-icon">
+                            <div class="filtro-container">
+                                <ng-content select=".moldura-info"></ng-content>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-12">
+                <ng-content select=".card-detalhe"></ng-content>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card-body" [hidden]="oculto">
+        <ng-content></ng-content>
+    </div>
+
+    <div [hidden]="oculto">
+        <ng-content select=".card-footer"></ng-content>
+    </div>
+</div>

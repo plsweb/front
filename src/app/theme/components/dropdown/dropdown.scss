@@ -1,0 +1,36 @@
+@import "../../../../styles";
+
+.right {
+    /* float: right !important; */
+    color: black !important;
+    position: absolute;
+    margin-top: -20px;
+    right: 15px;
+}
+
+.pointer {
+    cursor: pointer !important;
+}
+
+.opt {
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    width: 100%;
+    border: thin solid #ccc;
+}
+
+.none {
+    display: none !important;
+}
+
+.relative_div{
+    display: -webkit-box;
+}
+
+.relative_icone{
+    position: relative;
+    float: right;
+    margin-top: 0;
+    height: 25px;
+}

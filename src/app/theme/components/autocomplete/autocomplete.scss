@@ -1,0 +1,35 @@
+autocomplete {
+    .has-feedback {
+        position: relative;
+    }
+
+    .content-search {
+        position: absolute;
+        max-height: 200px;
+        padding: 10px;
+        border-left: 2px solid #3a3568;
+        border-right: 2px solid #3a3568;
+        border-bottom: 2px solid #3a3568;
+        overflow-y: scroll;
+        z-index: 99999999;
+        color: white;
+        background: #555086;
+
+        table {
+            .linha_autocomplete:hover {
+                background: #201048;
+            }
+
+            thead th {
+                text-transform: uppercase;
+                font-weight: 600;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            }
+
+            th, td {
+                padding: 8px;
+                white-space: nowrap;
+            }
+        }
+    }
+}
