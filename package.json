@@ -76,7 +76,7 @@
     "leaflet": "0.7.7",
     "leaflet-map": "0.2.1",
     "lodash": "^4.17.10",
-    "moment": "2.19.3",
+    "moment": "2.29.4",
     "ng2-ckeditor": "1.1.6",
     "ng2-completer": "^3.0.0-beta.1",
     "ng2-google-charts": "^3.4.0",
